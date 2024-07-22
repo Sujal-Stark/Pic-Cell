@@ -8,76 +8,17 @@ import shutil
 class OperatingSystem:
     def __init__(self,name) -> None:
         self.name = name
+        self.current_directory = "C:\\" #current directory can be accessed by methods and instance
     
-    #openDirectory
-    def openDirectory(self,address:str):
-        try:
-            os.chdir(address)
-        except OSError:
-            print("Unexpected error occurred")
-        finally:
-            return
-    
-    #delete a directory
-    def deleteDirectory(self,fileName):
-        try:
-            if os.path.exists(fileName):
-                shutil.rmtree(fileName)
-            else:
-                print("Directory not found🙄")
-                self.deleteDirectory()
-        except FileNotFoundError as o:
-            print(o)
-            self.deleteDirectory()
-        except PermissionError: print("Permission is denied by the authority")
-        finally: return True
-    #create a directory
-    def createDirectory(self,current_directory):
-        self.openDirectory(current_directory)
-        try:
-            os.mkdir(input("Enter File Name:\t"))
-        except FileExistsError as o:
-            print(o)
-            self.createDirectory()
-        finally: return True
-
-    #current directory contents
-    def dirlist(self):
-        self.directoryList =  os.listdir(os.getcwd())
-        return {i+1:self.directoryList[i] for i in range(len(self.directoryList))}
-    
-    #iterates and shows the directories in a given directory
-    def iterateDir(self):
-        while len(os.listdir(os.getcwd())) != 0:
-            currentDir = os.getcwd()
-            directoryDict = self.dirlist()
-            for i in directoryDict.keys():
-                print(f"{i}--->{directoryDict[i]}")
-            iter = int(input("Enter Directory NUmber: "))#takes the user input
-            if iter == 0:
-                if os.path.isdir(currentDir):
-                    self.current_directory = currentDir
-                break
-            elif iter == -1:
-                break
-            targetDirectory = directoryDict[iter]
-            currentDir += f"\\{targetDirectory}"
-            if os.path.isdir(currentDir):
-                self.openDirectory(currentDir)
-                self.current_directory = os.getcwd()
-            elif os.path.isfile(currentDir):
-                if os.path.splitext(currentDir)[1]=='.py':
-                    self.openTextFile(currentDir)
-                elif os.path.splitext(currentDir)[1] in ['.jfif','.jpeg','.png']:
-                    self.openImage(currentDir)
-                break
-        return
-    @classmethod
+    @classmethod # can open an image
     def openImage(cls,fileName : str):
-        iamge = Image.open(fileName)
-        iamge.show()
+        try:
+             with Image.open(fileName) as image:
+                image.show()
+        except OSError as o:
+            print(f"The file {fileName} can't be opened\n{o}")
     
-    @classmethod
+    @classmethod #can open a text file
     def openTextFile(fileName : str):
         print("\nOpening your file....\n")
         try:
@@ -86,33 +27,138 @@ class OperatingSystem:
         except FileNotFoundError as o:
             print(o)
     
-    def copy(self,directory:str):
-        self.openDirectory(input("Open a directory:\t"))
-        self.iterateDir() #by this method the desired directory can be reached
+    #openDirectory
+    def openDirectory(self,address:str):
+        try:
+            os.chdir(address)
+            self.current_directory = os.getcwd()
+        except OSError:
+            print("Unexpected error occurred")
+        finally:
+            return
+    
+    #delete a directory
+    def deleteDirectory(self,fileName):
+        print(fileName)
+        print(os.path.exists(fileName))
+        print(os.path.isdir(fileName))
+        try:
+            if os.path.exists(fileName):
+                shutil.rmtree(fileName)
+                return True
+            else:
+                print("Directory not found🙄")
+                return False
+        except OSError as o:
+            print(o)
+            return False
+    
+    #create a directory
+    def createDirectory(self,current_directory):
+        self.openDirectory(current_directory)
+        try:
+            os.mkdir(input("Enter File Name:\t"))
+            return True
+        except FileExistsError as o:
+            print(o)
+            self.createDirectory(current_directory)
+            return False
+        except OSError as o:
+            print(o)
+            return True
 
+    #current directory contents
+    def dirlist(self):
+        self.directoryList =  os.listdir(os.getcwd())
+        if len(self.directoryList) >0:
+            return {i+1:self.directoryList[i] for i in range(len(self.directoryList))}
+        else:
+            return None
+    
+    #iterates and shows the directories in a given directory
+    def iterateDir(self):
+
+        while len(os.listdir(os.getcwd())) != 0:
+
+            currentDir = self.current_directory #to be in the current directory if gives problem switch to os.getcwd()
+            directoryDict = self.dirlist() #retrun a dictionary of the directories
+
+            for i in directoryDict.keys(): #prints the name of all directory with index
+                print(f"{i}--->{directoryDict[i]}")
+
+            iter = int(input("Enter Directory NUmber: "))#takes the user input
+
+            if iter == 0: # set the the current directory to be the desired directory
+                if os.path.isdir(currentDir):
+                    self.current_directory = currentDir
+                break
+            elif iter == -1: # breaks the while loop
+                break
+            
+            #sets the current directory to be the desired directory
+            currentDir += f"\\{directoryDict[iter]}"
+            self.current_directory = currentDir
+            
+            #tries to open the selected file
+            if os.path.isdir(self.current_directory):
+                self.openDirectory(self.current_directory)
+            elif os.path.isfile(self.current_directory):
+                if os.path.splitext(self.current_directory)[1]=='.py':
+                    self.openTextFile(self.current_directory)
+                elif os.path.splitext(self.current_directory)[1] in ['.jfif','.jpeg','.png']:
+                    self.openImage(self.current_directory)
+                break
+        return
+    
+    #moves a directory
+    def move(self,directory:str):
+        self.copy(directory)
+        self.deleteDirectory(directory)
+        return
+    
+    #copy a file or directory
+    def copy(self,directory:str):
          #handles if the path is a file
         if os.path.isfile(directory):
-            try:
-                shutil.copy(directory,self.current_directory)
-            except FileNotFoundError:
-                return f"File {directory} is not found.."
-            except PermissionError:
-                return f"Permission Denied.."
-            except OSError as o:
-                return f"Os Error: {o}"
+            self.copyFile(directory)
 
         #hanles if the path is a directory
         elif os.path.isdir(directory):
-            try:
-                shutil.copytree(directory,input("target_directory"))
-            except PermissionError as o:
-                return f"Permission Denied {o}"
-            except OSError as o:
-                return f"Os Error: {o}"
+            self.copyDirectory(directory)
+        
+        #if not a directory nor a file
         else:
             print("d")
             return "unexpected error occurred"
         return
+    
+    #copy a directory to a different location
+    def copyDirectory(self,targetDiretory):
+        self.openDirectory(input("Open a directory:\t"))
+        self.iterateDir() #by this method the desired directory can be reached
+        nameList = targetDiretory.split("\\")
+        self.current_directory += f"\\{nameList[len(nameList)-1]}"#creates the new destination
+        try:
+            shutil.copytree(targetDiretory,self.current_directory)
+        except PermissionError as o:
+            return f"Permission Denied {o}"
+        except OSError as o:
+            return f"Os Error: {o}"
+    
+    #copy a file to a different location
+    def copyFile(self,targetFile):
+        self.openDirectory(input("Open a directory:\t"))
+        self.iterateDir() #by this method the desired directory can be reached
+        nameList = targetFile.split("\\")
+        self.current_directory += f"\\{nameList[len(nameList)-1]}"#creates the new destination
+        try:
+            shutil.copy(targetFile,self.current_directory)
+        except FileNotFoundError:
+            return f"File {targetFile} is not found.."
+        except PermissionError:
+            return f"Permission Denied.."
+        except OSError as o:
+            return f"Os Error: {o}"
     pass
 
 
@@ -136,12 +182,15 @@ def invalidInputError(list):
 if __name__=='__main__':
     myoperatingSystem = OperatingSystem("File Operator")
     print("Done")
-    print("List of operation\n1--->Open a directory\n2--->Ask all directory\n3--->iterate thorugh Directory\n4--->Create a directory\n5--->delete a directory\n6--->Copy a directory")
+    print("List of operation\n0---> Open current Directory\n1--->Open a directory\n2--->Ask all directory\n3--->iterate thorugh Directory\n4--->Create a directory\n5--->delete a directory\n6--->Copy a directory\n7--->move a directory")
     command = intValueError()
     while command != -1:
         
+        #Opens the current directory:
+        if command == 0:
+            myoperatingSystem.openDirectory(myoperatingSystem.current_directory)
         #Opens a directory
-        if command == 1:
+        elif command == 1:
             myoperatingSystem.openDirectory(input("Enter Address:\t"))
         
         #gives a list of directories
@@ -161,13 +210,24 @@ if __name__=='__main__':
         #delete a directory:
         elif command == 5:
             current_directory_list = myoperatingSystem.dirlist()
-            print(current_directory_list)
-            myoperatingSystem.deleteDirectory(current_directory_list[int(input("Give directory number:\t"))])
+            if current_directory_list != None:
+                print(current_directory_list)
+                myoperatingSystem.deleteDirectory(current_directory_list[int(input("Give directory number:\t"))])
+            else:
+                print("Can't delete a file being inside it😂")
         
         #copy a file/ folder from current directory to another
         elif command == 6:
             print(myoperatingSystem.copy(myoperatingSystem.current_directory))
 
+        elif command == 7:
+            current_directory_list = myoperatingSystem.dirlist()
+            if current_directory_list != None:#if the directory is not empty
+                print(current_directory_list)
+                myoperatingSystem.move(current_directory_list[int(input("Give directory number:\t"))])
+            else:#if the directory is empty
+                myoperatingSystem.move(myoperatingSystem.current_directory)
+        
         #if no command matches
         else:
             print("Invalid Input")
