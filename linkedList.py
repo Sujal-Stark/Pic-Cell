@@ -18,6 +18,7 @@ class LinkedList:
     def addDirectory(self,directoryPath):
         if self.head == None:
             self.head=Node(directoryPath)
+            self.head.previousNode = None
         temp=self.head
         if temp.directory == "":
             temp.directory=directoryPath
@@ -102,6 +103,13 @@ class LinkedList:
         else:
             None
 
+    #the last node of a list will be returned
+    def get_lastNode(self,llist):
+        copy_head = llist.head   #copying head node
+        while copy_head.nextNode != None:
+            copy_head = copy_head.nextNode
+        return copy_head
+    
     #returns a directory node of desire
     def getDirectoryNode(self,head:Node,curentDirectory:str):
         bufferHead = head
@@ -116,6 +124,15 @@ class LinkedList:
         while directoryNode.previousNode!=None:
             directoryNode=directoryNode.previousNode
         return directoryNode
+    
+    #gets the last node from a linked list and returns the linkedlist in reverse order
+    def reverse_traversal(self,llist):
+        directory_node = self.get_lastNode(llist) # retrieving the last node
+        directoryList = []
+        while directory_node!=None:
+            directoryList.append(directory_node.directory)
+            directory_node = directory_node.previousNode
+        return directoryList
 
 #handles int input error
 def intValueError(Query:str):
@@ -126,30 +143,47 @@ def intValueError(Query:str):
         intValueError(Query)
 
 if __name__ == '__main__':
-    print("Command List:\n-1 to Exit\n1--->add a directory\n2--->add a directory after some directory\n3--->Iterate\n4--->Directory List\n5--->Removes a Directory\n6--->Switch 2 Directory\n7--->get Desired DirectoryNode\n8--->Terminate List")
+    print("Command List:\n-1 to Exit\n1--->add a directory\n2--->add a directory after some directory\n3--->Iterate\n4--->Directory List\n5--->Removes a Directory\n6--->Switch 2 Directory\n7--->get Desired DirectoryNode\n8--->Terminate List\n9--->get the last directory node\n10--->traverse in reverse way")
     linkedList=LinkedList(Node(""))
     command = intValueError("command")
     while command != -1:
         if command == 1:
             linkedList.addDirectory(input("Enter Directory\t"))
+        
         elif command == 2:
             linkedList.addAfter(input("Current Directory:\t"),input("New Directory:\t"))
+        
         elif command == 3:
             #can iterate through sublists
             linkedList.iterate(linkedList.head)
+        
         elif command == 4:
             #always gives the list off all directories
             print(linkedList.directoryList())
+        
         elif command == 5:
             linkedList.head = linkedList.removeDirectory(linkedList.head,input("Enter Directory Name:\t"))
             linkedList.iterate(linkedList.head)
+        
         elif command == 6:
             linkedList.iterate(linkedList.switchDirectory(input("Enter Directory1 Name:\t"),input("Enter Directory2 Name:\t")))
+        
         elif command == 7:
             directoryNode = linkedList.getDirectoryNode(linkedList.head,input("Enter Directory:\t"))
             print(directoryNode.directory) if directoryNode != None else print("Directory Not found")
+        
         elif command == 8:
             print("List is terminated") if linkedList.terminateList() else print("Empty List was given")
+        
+        #getting the last directory node and printing the directory
+        elif command == 9:
+            print(linkedList.get_lastNode(linkedList).directory)
+
+        #printing a linkedlist in reverse order
+        elif command == 10:
+            directorylist = linkedList.reverse_traversal(linkedList)
+            for item in directorylist:
+                print(f"Current directory is:\t {item}")
         else:
             print("wrong Command")
         command = intValueError("Command")
