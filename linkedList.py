@@ -16,55 +16,65 @@ class LinkedList:
 
     #adds directory when ever new directory is searched
     def addDirectory(self,directoryPath):
+        #if there is no head node
         if self.head == None:
             self.head=Node(directoryPath)
             self.head.previousNode = None
         temp=self.head
+
+        #if head node exist
         if temp.directory == "":
             temp.directory=directoryPath
         else:
-            while temp.nextNode!=None:
+            while temp.nextNode!=None:#iterates to the last available node
                 temp=temp.nextNode
             newNode=Node(directoryPath)
             temp.nextNode=newNode
             newNode.previousNode=temp
-        return self.head
+        return self.head #returning the modified head node
     
     #Iterates Through all the directories
     def iterate(self,head:Node):
         temp=head
+        directory_list = []#stores all the direcotory
         while temp!=None:
-            print(temp.directory)
+            directory_list.append(temp.directory)
             temp=temp.nextNode
+        return directory_list
     
     #adds a directory after currently used directory
     def addAfter(self,currentDir,newDir):
         temp=self.head
+
+        # iterates to the directory after where new direcotory will be stored
         while temp!=None:
-            if temp.directory == currentDir:
+            if temp.directory == currentDir: # if head is current directory
                 newNode = Node(newDir)
                 newNode.nextNode=temp.nextNode
+                #iterates to search and add new direcotory
                 if temp.nextNode != None:
                     Node(newNode.nextNode).previousNode= newNode
                 temp.nextNode = newNode
                 newNode.previousNode=temp
                 break
             temp=temp.nextNode
+
         return self.head
     
     #returns a list containing all the directories visited
     def directoryList(self):
-        dList = []
-        bufferNode = self.head
-        if bufferNode == None :
+        dList = [] #where the directories will be stored
+        bufferNode = self.head 
+        if bufferNode == None :#if head is empty
             return
-        while bufferNode!=None:
+        while bufferNode!=None: #if head is not empty
             dList.append(bufferNode.directory)
             bufferNode = bufferNode.nextNode
         return dList
     
     #removes a directory
     def removeDirectory(self,head:Node,directory:str):
+        # if first directory is to be removed
         if head.directory == directory:
             if head.nextNode != None:
                 head = head.nextNode
@@ -76,26 +86,33 @@ class LinkedList:
             temp = head
             while temp != None:
                 if temp.directory == directory:
-                    if temp.nextNode != None:
+                    
+                    if temp.nextNode != None: # if any node in the middle is to be deleted
                         temp.previousNode.nextNode = temp.nextNode
                         temp.nextNode.previousNode = temp.previousNode
-                    else:
+                    
+                    else: # if the last node is to be deleted
                         temp.previousNode.nextNode = temp.nextNode
                     return head
                 temp = temp.nextNode
     
     #terminates the list
     def terminateList(self):
-        if self.head == None:
+        if self.head == None: #checks if a list is empty or not
             return False
         self.head=None
         return True
     
     #switch 2 directory
     def switchDirectory(self,currentDirectory1:str,currentDirectory2:str):
+        # get the directory in the nodes which to be swapped
         currentDirectory1_node = self.getDirectoryNode(self.head,currentDirectory1)
         currentDirectory2_node = self.getDirectoryNode(self.head,currentDirectory2)
+
+        # checks if both directory node exists
         if currentDirectory1_node != None and currentDirectory2_node != None:
+
+            # swapping algorithm
             bufferDirectoryName=currentDirectory1_node.directory
             currentDirectory1_node.directory=currentDirectory2_node.directory
             currentDirectory2_node.directory=bufferDirectoryName
@@ -106,20 +123,26 @@ class LinkedList:
     #the last node of a list will be returned
     def get_lastNode(self,llist):
         copy_head = llist.head   #copying head node
-        while copy_head.nextNode != None:
+        while copy_head.nextNode != None: #iters upto the last node
             copy_head = copy_head.nextNode
-        return copy_head
+        return copy_head #returns last node
     
     #returns a directory node of desire
     def getDirectoryNode(self,head:Node,curentDirectory:str):
         bufferHead = head
+
+        #iters until the target node is found
         while bufferHead != None:
-            if bufferHead.directory == curentDirectory:
+            if bufferHead.directory == curentDirectory: #if head is target
                 return bufferHead
+            
+            #if any other node is the target node
             else:
                 bufferHead = bufferHead.nextNode
             if bufferHead == None :
                 return None
+            
+    #iters to the head node
     def getFirstNode(self,directoryNode:Node):
         while directoryNode.previousNode!=None:
             directoryNode=directoryNode.previousNode
@@ -129,10 +152,13 @@ class LinkedList:
     def reverse_traversal(self,llist):
         directory_node = self.get_lastNode(llist) # retrieving the last node
         directoryList = []
+
+        #iters to store the node directory name
         while directory_node!=None:
             directoryList.append(directory_node.directory)
             directory_node = directory_node.previousNode
         return directoryList
+    
 
 #handles int input error
 def intValueError(Query:str):
