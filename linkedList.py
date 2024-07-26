@@ -75,7 +75,9 @@ class LinkedList:
     #removes a directory
     def removeDirectory(self,head:Node,directory:str):
         # if first directory is to be removed
-        if head.directory == directory:
+        splittedhead = head.directory.split("\\",20)
+        print(splittedhead)
+        if splittedhead[len(splittedhead)-1] == directory:
             if head.nextNode != None:
                 head = head.nextNode
                 head.previousNode = None
@@ -85,7 +87,9 @@ class LinkedList:
         else:
             temp = head
             while temp != None:
-                if temp.directory == directory:
+                splittedrest = temp.directory.split("\\",20)
+                print(splittedrest)
+                if splittedrest[len(splittedrest)-1] == directory:
                     
                     if temp.nextNode != None: # if any node in the middle is to be deleted
                         temp.previousNode.nextNode = temp.nextNode
@@ -95,7 +99,19 @@ class LinkedList:
                         temp.previousNode.nextNode = temp.nextNode
                     return head
                 temp = temp.nextNode
+        return head 
     
+    ##cheaks if a directory exists in the list or not
+    def direcoryExists(self,head:Node,directory:str):
+       temporary_head = head
+
+       while temporary_head != None:#while checks if the directory exists or not
+            if temporary_head.directory == directory:
+                return True
+            else:
+                temporary_head = temporary_head.nextNode
+            return False
+
     #terminates the list
     def terminateList(self):
         if self.head == None: #checks if a list is empty or not
@@ -121,8 +137,8 @@ class LinkedList:
             None
 
     #the last node of a list will be returned
-    def get_lastNode(self,llist):
-        copy_head = llist.head   #copying head node
+    def get_lastNode(self,head:Node)->Node:
+        copy_head = head   #copying head node
         while copy_head.nextNode != None: #iters upto the last node
             copy_head = copy_head.nextNode
         return copy_head #returns last node
@@ -169,7 +185,7 @@ def intValueError(Query:str):
         intValueError(Query)
 
 if __name__ == '__main__':
-    print("Command List:\n-1 to Exit\n1--->add a directory\n2--->add a directory after some directory\n3--->Iterate\n4--->Directory List\n5--->Removes a Directory\n6--->Switch 2 Directory\n7--->get Desired DirectoryNode\n8--->Terminate List\n9--->get the last directory node\n10--->traverse in reverse way")
+    print("Command List:\n-1 to Exit\n1--->add a directory\n2--->add a directory after some directory\n3--->Iterate\n4--->Directory List\n5--->Removes a Directory\n6--->Switch 2 Directory\n7--->get Desired DirectoryNode\n8--->Terminate List\n9--->get the last directory node\n10--->traverse in reverse way\n11--->Checks if a directory exists")
     linkedList=LinkedList(Node(""))
     command = intValueError("command")
     while command != -1:
@@ -210,6 +226,14 @@ if __name__ == '__main__':
             directorylist = linkedList.reverse_traversal(linkedList)
             for item in directorylist:
                 print(f"Current directory is:\t {item}")
+        
+        #checks if a directory exists in the list
+        elif command == 11:
+            if linkedList.direcoryExists(linkedList.head,input("Enter directory name:\t")):
+                print('The directory exists')
+            else:
+                print("The directory doesn't exists")
+
         else:
             print("wrong Command")
         command = intValueError("Command")

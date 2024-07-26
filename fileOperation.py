@@ -1,7 +1,7 @@
 #inbuild Modules
 import os
 from PIL import Image
-from linkedList import LinkedList
+from linkedList import LinkedList,Node
 import shutil
 
 #custom class for os management
@@ -9,6 +9,8 @@ class OperatingSystem:
     def __init__(self,name) -> None:
         self.name = name
         self.current_directory = "C:\\" #current directory can be accessed by methods and instance
+        linkedList = LinkedList(Node(self.current_directory)) #default linkedlist by management system
+        self.dir_linked_list = linkedList #self.dir_linked_list is system varaible which can accessed by other linked list and have same features
     
     @classmethod # can open an image
     def openImage(cls,fileName : str):
@@ -19,7 +21,7 @@ class OperatingSystem:
             print(f"The file {fileName} can't be opened\n{o}")
     
     @classmethod #can open a text file
-    def openTextFile(fileName : str):
+    def openTextFile(cls,fileName : str):
         print("\nOpening your file....\n")
         try:
             with open(fileName,'r') as file:
@@ -31,6 +33,7 @@ class OperatingSystem:
     def openDirectory(self,address:str):
         try:
             os.chdir(address)
+            self.dir_linked_list.addDirectory(address)#stored the newly Opened directory
             self.current_directory = os.getcwd()
         except OSError:
             print("Unexpected error occurred")
@@ -39,9 +42,9 @@ class OperatingSystem:
     
     #delete a directory
     def deleteDirectory(self,fileName):
-        print(fileName)
-        print(os.path.exists(fileName))
-        print(os.path.isdir(fileName))
+
+        #removes the file / directory from the linkedlist if exist in it
+        self.dir_linked_list.head = self.dir_linked_list.removeDirectory(self.dir_linked_list.head,fileName)
         try:
             if os.path.exists(fileName):
                 shutil.rmtree(fileName)
@@ -68,18 +71,22 @@ class OperatingSystem:
             return True
 
     #current directory contents
-    def dirlist(self):
+    def dirlist(self) -> dict:
         self.directoryList =  os.listdir(os.getcwd())
         if len(self.directoryList) >0:
             return {i+1:self.directoryList[i] for i in range(len(self.directoryList))}
         else:
-            return None
+            return {}
     
     #iterates and shows the directories in a given directory
     def iterateDir(self):
-
-        while len(os.listdir(os.getcwd())) != 0:
-
+        #if the directory is a folder
+        while os.path.isdir(os.getcwd()):
+            #cheaks if a directory is empty
+            if len(os.listdir(os.getcwd())) == 0:
+                return None
+            
+            #if a directory is not empty
             currentDir = self.current_directory #to be in the current directory if gives problem switch to os.getcwd()
             directoryDict = self.dirlist() #retrun a dictionary of the directories
 
@@ -95,17 +102,24 @@ class OperatingSystem:
             elif iter == -1: # breaks the while loop
                 break
             
-            #sets the current directory to be the desired directory
+            #sets thse current directory to be the desired directory
             currentDir += f"\\{directoryDict[iter]}"
             self.current_directory = currentDir
             
-            #tries to open the selected file
+            #tries to open the selected directory
             if os.path.isdir(self.current_directory):
                 self.openDirectory(self.current_directory)
+            
+            #if it is a file
             elif os.path.isfile(self.current_directory):
-                if os.path.splitext(self.current_directory)[1]=='.py':
+                print(currentDir)
+                print(os.path.splitext(currentDir))
+                if os.path.splitext(currentDir)[1] in ['.py','.txt']:#if it is a text file
+                    print("Done")
                     self.openTextFile(self.current_directory)
-                elif os.path.splitext(self.current_directory)[1] in ['.jfif','.jpeg','.png']:
+                
+                # if it is a image
+                elif os.path.splitext(currentDir)[1] in ['.jfif','.jpeg','.png']:
                     self.openImage(self.current_directory)
                 break
         return
@@ -159,6 +173,12 @@ class OperatingSystem:
             return f"Permission Denied.."
         except OSError as o:
             return f"Os Error: {o}"
+    
+    #back to previous Directory
+    def previousDirectory(self):
+        lastDirectoryNode = self.dir_linked_list.get_lastNode(self.dir_linked_list.head)
+        self.current_directory = lastDirectoryNode.previousNode.directory
+        os.chdir(self.current_directory)
     pass
 
 
@@ -182,16 +202,18 @@ def invalidInputError(list):
 if __name__=='__main__':
     myoperatingSystem = OperatingSystem("File Operator")
     print("Done")
-    print("List of operation\n0---> Open current Directory\n1--->Open a directory\n2--->Ask all directory\n3--->iterate thorugh Directory\n4--->Create a directory\n5--->delete a directory\n6--->Copy a directory\n7--->move a directory")
+    print("List of operation\n0---> Open current Directory\n1--->Open a directory\n2--->Ask all directory\n3--->iterate thorugh Directory\n4--->Create a directory\n5--->delete a directory\n6--->Copy a directory\n7--->move a directory\n8--->go to previous Directory")
     command = intValueError()
     while command != -1:
         
         #Opens the current directory:
         if command == 0:
             myoperatingSystem.openDirectory(myoperatingSystem.current_directory)
+        
         #Opens a directory
         elif command == 1:
             myoperatingSystem.openDirectory(input("Enter Address:\t"))
+            print(myoperatingSystem.dir_linked_list.directoryList())
         
         #gives a list of directories
         elif command == 2:
@@ -202,6 +224,7 @@ if __name__=='__main__':
         #iterates a through directories
         elif command == 3:
             myoperatingSystem.iterateDir()
+            print(myoperatingSystem.dir_linked_list.directoryList())
         
         #create a directory
         elif command == 4:
@@ -213,6 +236,7 @@ if __name__=='__main__':
             if current_directory_list != None:
                 print(current_directory_list)
                 myoperatingSystem.deleteDirectory(current_directory_list[int(input("Give directory number:\t"))])
+                print(myoperatingSystem.dir_linked_list.directoryList())
             else:
                 print("Can't delete a file being inside it😂")
         
@@ -228,6 +252,8 @@ if __name__=='__main__':
             else:#if the directory is empty
                 myoperatingSystem.move(myoperatingSystem.current_directory)
         
+        elif command == 8:
+            myoperatingSystem.previousDirectory()
         #if no command matches
         else:
             print("Invalid Input")
