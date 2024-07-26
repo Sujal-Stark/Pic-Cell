@@ -107,7 +107,7 @@ class LinkedList:
         #iterates to the directory and removes every directory after that
         while temporary_head != None:
             if temporary_head.directory == directoryName:
-                temporary_head.nextNode = None
+                temporary_head = None
             temporary_head= temporary_head.nextNode
         
         return self.head
