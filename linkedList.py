@@ -101,6 +101,16 @@ class LinkedList:
                 temp = temp.nextNode
         return head 
     
+    #delete after a specific directory:
+    def deleteAfter(self, directoryName:str)->Node:
+        temporary_head = self.head
+        #iterates to the directory and removes every directory after that
+        while temporary_head != None:
+            if temporary_head.directory == directoryName:
+                temporary_head.nextNode = None
+            temporary_head= temporary_head.nextNode
+        
+        return self.head
     ##cheaks if a directory exists in the list or not
     def direcoryExists(self,head:Node,directory:str):
        temporary_head = head
@@ -193,7 +203,7 @@ def intValueError(Query:str):
         intValueError(Query)
 
 if __name__ == '__main__':
-    print("Command List:\n-1 to Exit\n1--->add a directory\n2--->add a directory after some directory\n3--->Iterate\n4--->Directory List\n5--->Removes a Directory\n6--->Switch 2 Directory\n7--->get Desired DirectoryNode\n8--->Terminate List\n9--->get the last directory node\n10--->traverse in reverse way\n11--->Checks if a directory exists\n12->list length")
+    print("Command List:\n-1 to Exit\n1--->add a directory\n2--->add a directory after some directory\n3--->Iterate\n4--->Directory List\n5--->Removes a Directory\n6--->Switch 2 Directory\n7--->get Desired DirectoryNode\n8--->Terminate List\n9--->get the last directory node\n10--->traverse in reverse way\n11--->Checks if a directory exists\n12->list length\n13--->delete after a directory")
     linkedList=LinkedList(Node(""))
     command = intValueError("command")
     while command != -1:
@@ -245,6 +255,11 @@ if __name__ == '__main__':
         #list length
         elif command == 12:
             print(linkedList.listLength())
+
+        #delete after a directory
+        elif command == 13:
+            linkedList.head = linkedList.deleteAfter(input("Enter directory name:\t"))
+            print(linkedList.directoryList())
 
         else:
             print("wrong Command")
