@@ -175,6 +175,14 @@ class LinkedList:
             directory_node = directory_node.previousNode
         return directoryList
     
+    #returns the length of a linked list
+    def listLength(self)->int:
+        temporary_head = self.head
+        count = 0#measures the length
+        while temporary_head != None:
+            count += 1
+            temporary_head = temporary_head.nextNode
+        return count
 
 #handles int input error
 def intValueError(Query:str):
@@ -185,7 +193,7 @@ def intValueError(Query:str):
         intValueError(Query)
 
 if __name__ == '__main__':
-    print("Command List:\n-1 to Exit\n1--->add a directory\n2--->add a directory after some directory\n3--->Iterate\n4--->Directory List\n5--->Removes a Directory\n6--->Switch 2 Directory\n7--->get Desired DirectoryNode\n8--->Terminate List\n9--->get the last directory node\n10--->traverse in reverse way\n11--->Checks if a directory exists")
+    print("Command List:\n-1 to Exit\n1--->add a directory\n2--->add a directory after some directory\n3--->Iterate\n4--->Directory List\n5--->Removes a Directory\n6--->Switch 2 Directory\n7--->get Desired DirectoryNode\n8--->Terminate List\n9--->get the last directory node\n10--->traverse in reverse way\n11--->Checks if a directory exists\n12->list length")
     linkedList=LinkedList(Node(""))
     command = intValueError("command")
     while command != -1:
@@ -233,6 +241,10 @@ if __name__ == '__main__':
                 print('The directory exists')
             else:
                 print("The directory doesn't exists")
+
+        #list length
+        elif command == 12:
+            print(linkedList.listLength())
 
         else:
             print("wrong Command")
