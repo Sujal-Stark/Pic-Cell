@@ -179,6 +179,26 @@ class OperatingSystem:
         lastDirectoryNode = self.dir_linked_list.get_lastNode(self.dir_linked_list.head)
         self.current_directory = lastDirectoryNode.previousNode.directory
         os.chdir(self.current_directory)
+    
+    def goToDirectory(self):
+        iterated_length = self.dir_linked_list.listLength() #length of the linkedlist
+        temporary_head = self.dir_linked_list.head
+        iterated_dictionary = {} #dictionary to store previously iterated directory
+        for i in range(iterated_length):
+            iterated_dictionary[i] = temporary_head.directory
+            temporary_head = temporary_head.nextNode
+        
+        #viewing previous directories
+        print(iterated_dictionary)
+        
+        iter = int(input("Enter directory number:\t"))
+        #removinng everything from desired directory
+        self.dir_linked_list.head = self.dir_linked_list.deleteAfter(iterated_dictionary[iter])
+
+        #open the directory desired
+        self.openDirectory(iterated_dictionary[iter])
+        return
+
     pass
 
 
@@ -202,7 +222,7 @@ def invalidInputError(list):
 if __name__=='__main__':
     myoperatingSystem = OperatingSystem("File Operator")
     print("Done")
-    print("List of operation\n0---> Open current Directory\n1--->Open a directory\n2--->Ask all directory\n3--->iterate thorugh Directory\n4--->Create a directory\n5--->delete a directory\n6--->Copy a directory\n7--->move a directory\n8--->go to previous Directory")
+    print("List of operation\n0---> Open current Directory\n1--->Open a directory\n2--->Ask all directory\n3--->iterate thorugh Directory\n4--->Create a directory\n5--->delete a directory\n6--->Copy a directory\n7--->move a directory\n8--->go to previous Directory \n9--->go to directory")
     command = intValueError()
     while command != -1:
         
@@ -254,9 +274,14 @@ if __name__=='__main__':
         
         elif command == 8:
             myoperatingSystem.previousDirectory()
+
+        # go to directory
+        elif command == 9:
+            myoperatingSystem.goToDirectory()
+        
         #if no command matches
         else:
-            print("Invalid Input")
+            print("Invalid Input") 
         #takes new command for the further operation..
         command = intValueError()
     pass
