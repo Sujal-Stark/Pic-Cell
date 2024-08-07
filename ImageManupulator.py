@@ -1,8 +1,7 @@
 #this file is built to manupulate the different aspects of an image. The core idea is to make differnt image processing customise for user
 
 #used librarries
-from PIL import Image
-from threading import Thread
+from PIL import Image, ImageOps
 
 #classes
 class FrameAdjustment:
@@ -224,12 +223,69 @@ class FrameAdjustment:
         else:
             return "No similer option"
 
+    #rotate an image
+    def imageRotate(self) -> None:
+        flag = 1 # helps to re rotate everytime
+        image = self.image
+
+        #create message
+        self.user_message = {1:"continue",0:"Stop"}
+        self.getMessage()
+
+        while flag != 0:
+            #rotation process
+            image = self.image.rotate(float(input("Enter rotation angle:\t")),expand= True)
+            flag = int(input("Rotation flag status:\t"))
+        
+        self.image = image #rotation is finalized
+        return
+
+    #flip an image horizontally
+    def flip_horizontal(self) -> None:
+        flag = 1 #helps to flip multiple time
+        image = self.image
+
+        #create message
+        self.user_message = {1:"continue",0:"Stop"}
+        self.getMessage()
+
+        while flag != 0:
+            #flip process
+            image = ImageOps.mirror(self.image)
+            print("Flip Successful.....") #message to user
+            flag = int(input("Rotation flag status:\t")) #re assign user action request
+
+        self.image = image
+        return
+
+    #flips an image vertically
+    def flip_vertical(self) -> None:
+        flag = 1 #helps to flip multiple time
+        image = self.image
+
+        #create message
+        self.user_message = {1:"continue",0:"Stop"}
+        self.getMessage()
+
+        while flag != 0 :
+            image = ImageOps.flip(self.image)
+            print("Flip Successful.....") #message to user
+            flag = int(input("Rotation flag status:\t")) #re assign user action request
+        
+        self.image = image
+        return
+    
     pass
 
 if __name__ == '__main__':
+    #create an instance of frame adjutor
     frameAdjuster = FrameAdjustment(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
-    print("Command List:\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n-1--->To stop programme")
-    command = int(input("Enter command:\t"))
+
+    #command List
+    print("Command List:\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n-1--->To stop programme")
+
+    command = int(input("Enter command:\t")) # takes user command
+
     while(command != -1):
         #Open an image
         if command == 1:
@@ -253,7 +309,7 @@ if __name__ == '__main__':
         elif command == 4:
             frameAdjuster.resizeImage()
 
-        #resample a image
+        #resample an image
         elif command == 5:
             #store the result declaration
             result = frameAdjuster.changeResampleType()
@@ -261,6 +317,23 @@ if __name__ == '__main__':
                 print(print)
             else:#print if the process is successful
                 print("Operation successsful")
+        
+        #rotate an image
+        elif command == 6:
+            frameAdjuster.imageRotate()
+
+        # Horizontal Flip
+        elif command == 7:
+            frameAdjuster.flip_horizontal()
+        
+        # vertical Flip
+        elif command == 8:
+            frameAdjuster.flip_vertical()
+        
+        #no command found
+        else:
+            print("No command found")
+            command = int(input("Enter Command:\t"))
 
         #command for next operation
         command = int(input("Enter Command:\t"))
