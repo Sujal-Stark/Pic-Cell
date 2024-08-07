@@ -92,13 +92,6 @@ class FrameAdjustment:
         self.user_message = {0:"Stop",1:"Custom size", 2:"1:1",3:"4:3",4:"3:4",5:"16:9",6:"9:16"}
         self.getMessage()
 
-        #inbuilt sizes
-        _size16isto9 = self.__get16isto9()
-        _size9isto16 = self.__get9isto16()
-        _size1isto1 = self.__get1isto1()
-        _size4isto3 = self.__get4isto3()
-        _size3isto4 = self.__get3isto4()
-
         #user choice
         choice = int(input("Enter choice:\t"))
         while choice != 0:
@@ -114,26 +107,31 @@ class FrameAdjustment:
             
             #for 1 : 1 convention
             elif choice == 2:
+                _size1isto1 = self.__get1isto1()
                 width_reduction,height_reduction = _size1isto1
                 image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
 
             #for 4 : 3 convention
             elif choice == 3:
+                _size4isto3 = self.__get4isto3()
                 width_reduction,height_reduction = _size4isto3
                 image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
             
             # for 3 : 4 convention
             elif choice == 4:
+                _size3isto4 = self.__get3isto4()
                 width_reduction,height_reduction = _size3isto4
                 image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
 
             #for 16:9 convension
             elif choice == 5:
+                _size16isto9 = self.__get16isto9()
                 width_reduction, height_reduction = _size16isto9
                 image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
             
             #for 9 : 16 convention
             elif choice == 6:
+                _size9isto16 = self.__get9isto16()
                 width_reduction, height_reduction = _size9isto16
                 image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
             
@@ -155,13 +153,6 @@ class FrameAdjustment:
         self.user_message = {0:"Stop",1:"Custom size",2:"1:1",3:"4:3",4:"3:4",5:"16:9",6:"9:16"}
         self.getMessage()
         
-        #inbuilt sizes
-        _resize16isto9 = self.__get16isto9()
-        _resize9isto16 = self.__get9isto16()
-        _resize1isto1 = self.__get1isto1()
-        _resize4isto3 = self.__get4isto3()
-        _resize3isto4 = self.__get3isto4()
-
         #user choice
         resize_choice = int(input("Enter Choice:\t"))
 
@@ -172,26 +163,31 @@ class FrameAdjustment:
             
             #1:1 convention
             elif resize_choice == 2:
+                _resize1isto1 = self.__get1isto1()
                 reduced_width,reduced_height  = 2*(int(_resize1isto1[0])),2*(int(_resize1isto1[1]))
                 image = self.image.resize((width-reduced_width,height-reduced_height))
             
             # 4:3 convention
             elif resize_choice == 3:
+                _resize4isto3 = self.__get4isto3()
                 reduced_width,reduced_height = 2*(int(_resize4isto3[0])),2*(int(_resize4isto3[1]))
                 image = self.image.resize((width-reduced_width,height-reduced_height))
 
             # 3:4 convention
             elif resize_choice == 4:
+                _resize3isto4 = self.__get3isto4()
                 reduced_width,reduced_height = 2*(int(_resize3isto4[0])),2*(int(_resize3isto4[1]))
                 image = self.image.resize((width-reduced_width,height-reduced_height))
 
             # 16:9 convention
             elif resize_choice == 5:
+                _resize16isto9 = self.__get16isto9()
                 reduced_width,reduced_height = 2*(int(_resize16isto9[0])),2*(int(_resize16isto9[1]))
                 image = self.image.resize((width-reduced_width,height-reduced_height))
 
             # 9:16 convention
             elif resize_choice == 6:
+                _resize9isto16 = self.__get9isto16()
                 reduced_width,reduced_height = 2*(int(_resize9isto16[0])),2*(int(_resize9isto16[1]))
                 image = self.image.resize((width-reduced_width,height-reduced_height))
 
