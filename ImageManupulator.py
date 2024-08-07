@@ -25,6 +25,7 @@ class FrameAdjustment:
     #sends user message
     def getMessage(self)->None:
         print(self.user_message)
+        self.user_message=None
 
     #predefined reductions
     #16:9 convention
@@ -204,11 +205,34 @@ class FrameAdjustment:
         #finalizing cahnges
         self.image = image
         return
+    
+    # change resampling technique
+    def changeResampleType(self):
+        #create message
+        self.user_message = {0:"none",1:"nearest",2:"BILINEAR",3:"BICUBIC",4:"LANCZOS"}
+        self.getMessage()
+
+        #all possible resampling type is stored here
+        resampler = [Image.NEAREST, Image.BILINEAR, Image.BICUBIC, Image.LANCZOS]
+
+        #user choice
+        resample_choice = int(input("Enter choice:\t"))
+
+        #if user dont want change the resample type
+        if resample_choice == 0:
+            return "No change is made"
+        # user wants to resample
+        elif resample_choice <= 4 and resample_choice > 0:
+            self.image=self.image.resize((self.image.size[0],self.image.size[1]),resample= resampler[ resample_choice-1])
+        #if no choice matches
+        else:
+            return "No similer option"
+
     pass
 
 if __name__ == '__main__':
     frameAdjuster = FrameAdjustment(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
-    print("Command List:\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n-1--->To stop programme")
+    print("Command List:\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n-1--->To stop programme")
     command = int(input("Enter command:\t"))
     while(command != -1):
         #Open an image
@@ -232,6 +256,15 @@ if __name__ == '__main__':
         #resize an image
         elif command == 4:
             frameAdjuster.resizeImage()
+
+        #resample a image
+        elif command == 5:
+            #store the result declaration
+            result = frameAdjuster.changeResampleType()
+            if type(result) == str:#print if operaion fail or not initiated
+                print(print)
+            else:#print if the process is successful
+                print("Operation successsful")
 
         #command for next operation
         command = int(input("Enter Command:\t"))
