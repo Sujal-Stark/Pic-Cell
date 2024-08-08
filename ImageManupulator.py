@@ -26,6 +26,19 @@ class FrameAdjustment:
         print(self.user_message)
         self.user_message=None
 
+    # save the image with desired extension
+    def saveImage(self) -> bool:
+        #sending user message
+        self.user_message = {0:"Stop",1:'.png',2:'.jpeg',3:'.jpg',4:'.jfif'}
+        extensionList = ['.png','.jpeg','.jpg','.jfif']
+        self.getMessage()
+
+        #user choice
+        extension_choice = int(input("Choose extension:\t"))-1
+        new_name = input("Provide name:\t")
+        self.image.save(Rf"C:\Users\SUJAL KHAN\Downloads\{new_name}{extensionList[extension_choice]}")
+        return True
+
     #predefined reductions
     #16:9 convention
     def __get16isto9(self)->tuple:
@@ -126,7 +139,7 @@ class FrameAdjustment:
             elif choice == 5:
                 _size16isto9 = self.__get16isto9()
                 width_reduction, height_reduction = _size16isto9
-                image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
+                image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height -height_reduction))
             
             #for 9 : 16 convention
             elif choice == 6:
@@ -136,7 +149,8 @@ class FrameAdjustment:
             
             #if no choice works
             else:
-                choice = int(input("Enter choice:\t"))
+                print("Incorrect Choice")
+
             #choice for next resizement
             choice = int(input("Enter choice:\t"))
 
@@ -192,7 +206,7 @@ class FrameAdjustment:
 
             #for uncorrect choice
             else:
-                resize_choice = int(input("Enter Choice:\t"))
+                print("Incorrect choice")
             
             #choice for next resize
             resize_choice = int(input("Enter Choice:\t"))
@@ -278,15 +292,22 @@ class FrameAdjustment:
     pass
 
 if __name__ == '__main__':
-    #create an instance of frame adjutor
-    frameAdjuster = FrameAdjustment(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
+    #create an instance of frame adjustor
+    frameAdjuster = FrameAdjustment(R"C:\Users\SUJAL KHAN\Downloads\shreya kiss.jpg")
 
     #command List
-    print("Command List:\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
     while(command != -1):
+        # save an image
+        if command == 0:
+            if frameAdjuster.saveImage():
+                print("Saved Successfully!!")
+            else:
+                print("Error in saving")
+
         #Open an image
         if command == 1:
             if(frameAdjuster.showImage()):
@@ -333,7 +354,6 @@ if __name__ == '__main__':
         #no command found
         else:
             print("No command found")
-            command = int(input("Enter Command:\t"))
 
         #command for next operation
         command = int(input("Enter Command:\t"))
