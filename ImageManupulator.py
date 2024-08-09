@@ -411,6 +411,28 @@ class FilterImage:
         finally:
             return "Succeed"
     
+    #postarize filter
+    def postarizeimage(self):
+        #copying the image
+        image = self.image
+
+        #creates the filter 
+        try:
+            image = ImageOps.posterize(image=image.convert('RGB'),bits=2)
+            #sets the image variable
+            self.image = image
+
+        except IOError as ioError:
+            return f"Can't write the image file -> {ioError}"
+        except MemoryError as memoryError:
+            return f"Can't load image file in memory -> {memoryError}"
+        except NotImplementedError as notImplementedError:
+            return f"Can't Implement the effect -> {notImplementedError}"
+        except ValueError as valueError:
+            return f"Undefined value -> {valueError}"
+        finally:
+            return "Succeed"
+
     pass
 
 if __name__ == '__main__':
@@ -422,7 +444,7 @@ if __name__ == '__main__':
     filterImage = FilterImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->Colorise\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
@@ -562,10 +584,22 @@ if __name__ == '__main__':
                 filterImage.getImageObject(universal_image)
 
             print(filterImage.grayScaleimage())
-            filterImage.image.show()
 
             #reassign the universal image object
             universal_image = filterImage.provideImageObject()
+        
+        #postarise Image
+        elif command ==  11:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.postarizeimage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+            
         #no command found
         else:
             print("No command found")
