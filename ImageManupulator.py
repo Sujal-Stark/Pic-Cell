@@ -8,6 +8,7 @@ class FrameAdjustment:
     #creates a image object and makes it a class attribute
     def __init__(self,image_file) -> None:
         self.image = Image.open(image_file)
+        self.image.load() #loads the image in the memory
         self.user_message = None #any info regarding operation will send to main
         return
     
@@ -291,12 +292,73 @@ class FrameAdjustment:
     
     pass
 
+
+class FilterImage:
+    #constructor
+    def __init__(self,filepath) -> None:
+        self.image = Image.open(filepath) # returns the image as iamge_object
+        self.image.load()#loads the image in memory
+        self.user_message = None # collects generated message for user
+        return
+    
+    #sends user message
+    def getMessage(self)->None:
+        print(self.user_message)
+        self.user_message=None # sets user message to null for next message
+        return
+
+    #manupulates the contrast of the image    
+    def imageAutoContrast(self)->bool:
+        #creating user message
+        self.user_message = "0--->Stop\n1--->Continue\nMore cutOff is more contrast. Auto contrast grayscales your image"
+        self.getMessage()
+
+        #creating a copy image
+        image = self.image
+
+        #user choice
+        user_choice = int(input("Enter Choice:\t"))
+
+        if user_choice not in [0,1]:
+            # creates user message
+            self.user_message = "Invalid Choice"
+            self.getMessage()
+            user_choice = int(input("Enter Choice:\t"))
+
+        while user_choice != 0 :
+            try:
+                image = ImageOps.autocontrast(image.convert('L') ,cutoff= float(input("Enter Cutoff:\t")))
+            #handles different exception
+            except IOError:
+                print("Can't write this image File")
+            except ValueError:
+                print("Unsupported Cut off")
+            except MemoryError:
+                print("Memory is insufficient")
+            except NotImplementedError:
+                print("Operation Not applied")
+            finally:
+                user_choice = int(input("Enter Choice:\t"))
+                if user_choice not in [0,1]:
+                    # creates user message
+                    self.user_message = "Invalid Choice"
+                    self.getMessage()
+                    user_choice = int(input("Enter Choice:\t"))
+
+        else: # making the changes permanent
+            self.image = image
+
+            return True
+
+    pass
+
 if __name__ == '__main__':
-    #create an instance of frame adjustor
-    frameAdjuster = FrameAdjustment(R"C:\Users\SUJAL KHAN\Downloads\shreya kiss.jpg")
+    #create an instance of classes
+    frameAdjuster = FrameAdjustment(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
+    filterImage = FilterImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
@@ -351,6 +413,13 @@ if __name__ == '__main__':
         elif command == 8:
             frameAdjuster.flip_vertical()
         
+        #Set Auto Contrast
+        elif command == 9:
+            if (filterImage.imageAutoContrast()):
+                print("Operation completed")
+            else:
+                print("Operation Failure")
+
         #no command found
         else:
             print("No command found")
