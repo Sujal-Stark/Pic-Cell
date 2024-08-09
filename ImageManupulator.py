@@ -27,6 +27,22 @@ class FrameAdjustment:
         print(self.user_message)
         self.user_message=None
 
+    #interchanges the image with different classes
+    def getImageObject(self,image:Image.Image):
+        try:
+            #the instance variable is set to given image
+            self.image = image
+        except OSError as osError:
+            return f"Cant Open the image -> {osError}"
+        except MemoryError as memoryError:
+            return f"Can't load the image -> {memoryError}"
+        finally:
+            return "Succeed"
+    
+    #transmits an image
+    def provideImageObject(self) -> Image.Image:
+        return self.image
+
     # save the image with desired extension
     def saveImage(self) -> bool:
         #sending user message
@@ -307,6 +323,34 @@ class FilterImage:
         self.user_message=None # sets user message to null for next message
         return
 
+    #interchanges the image with different classes
+    def getImageObject(self,image:Image.Image):
+        try:
+            #the instance variable is set to given image
+            self.image = image
+        except OSError as osError:
+            return f"Cant Open the image -> {osError}"
+        except MemoryError as memoryError:
+            return f"Can't load the image -> {memoryError}"
+        finally:
+            return "Succeed"
+    
+    #transmits an image
+    def provideImageObject(self) -> Image.Image:
+        return self.image
+    
+    #takes user choice
+    def _makeChoice(self,choiceList:list)->int:
+        try:
+            user_choice = int(input("Enter choice:\t"))
+        except ValueError:
+            user_choice = 0
+        if  user_choice not in choiceList:
+            return 0
+        else:
+            print("Came func")
+            return user_choice
+
     #manupulates the contrast of the image    
     def imageAutoContrast(self)->bool:
         #creating user message
@@ -350,76 +394,178 @@ class FilterImage:
 
             return True
 
+    #gray scale image
+    def grayScaleimage(self):
+        # copying the image
+        image = self.image
+
+        #creates the grayscale image
+        try:
+            image = ImageOps.grayscale(image=image)
+            # resets the image
+            self.image = image
+        except IOError as ioError:
+            return f"Unable to Write the file -> {ioError}"
+        except NotImplementedError as notImplementedError:
+            return f"Unable to perform the action because -> {notImplementedError}"
+        finally:
+            return "Succeed"
+    
     pass
 
 if __name__ == '__main__':
+    #setting a universal imageOject as Null
+    universal_image = None
+
     #create an instance of classes
     frameAdjuster = FrameAdjustment(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
     filterImage = FilterImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->Colorise\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
     while(command != -1):
         # save an image
         if command == 0:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+            
+            #image operation
             if frameAdjuster.saveImage():
                 print("Saved Successfully!!")
             else:
                 print("Error in saving")
 
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+        
         #Open an image
-        if command == 1:
+        elif command == 1:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
             if(frameAdjuster.showImage()):
                 print("Image Opened SuccessFully")
             else:
                 print("Error Occurred")
-        
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
         #close an image
         elif command == 2:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
             if frameAdjuster.close():
                 print("The file is closed")
             else:
                 print("The file is in process")
-        
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
         #crop an image
         elif command == 3:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
             frameAdjuster.imageCrop()
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
 
         #resize an image
         elif command == 4:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
             frameAdjuster.resizeImage()
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
 
         #resample an image
         elif command == 5:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
             #store the result declaration
             result = frameAdjuster.changeResampleType()
             if type(result) == str:#print if operaion fail or not initiated
                 print(print)
             else:#print if the process is successful
                 print("Operation successsful")
-        
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
         #rotate an image
         elif command == 6:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
             frameAdjuster.imageRotate()
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
 
         # Horizontal Flip
         elif command == 7:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
             frameAdjuster.flip_horizontal()
-        
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
         # vertical Flip
         elif command == 8:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
             frameAdjuster.flip_vertical()
-        
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
         #Set Auto Contrast
         elif command == 9:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+
             if (filterImage.imageAutoContrast()):
                 print("Operation completed")
             else:
                 print("Operation Failure")
 
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+
+        #colorise image
+        elif command == 10:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+
+            print(filterImage.grayScaleimage())
+            filterImage.image.show()
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
         #no command found
         else:
             print("No command found")
