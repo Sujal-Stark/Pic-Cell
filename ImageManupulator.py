@@ -348,7 +348,6 @@ class FilterImage:
         if  user_choice not in choiceList:
             return 0
         else:
-            print("Came func")
             return user_choice
 
     #manupulates the contrast of the image    
@@ -432,6 +431,34 @@ class FilterImage:
             return f"Undefined value -> {valueError}"
         else:
             return "Succeed"
+    
+    # Gaussian Blur
+    def gaussianBlurImage(self):
+        #copying instance image
+        image = self.image
+
+        #create user message
+        self.user_message = 'take value from 0-100'
+        self.getMessage()
+
+        #user choice
+        blurStrength = (self._makeChoice(list(range(0,101)))/10)
+
+        #preocedure
+        try:
+            image = image.convert('RGB').filter(ImageFilter.GaussianBlur( radius= blurStrength)) #reduced by the factor 10
+            self.image = image
+        except IOError as ioError:
+            return f"Can't write the image file -> {ioError}"
+        except MemoryError as memoryError:
+            return f"Can't load image file in memory -> {memoryError}"
+        except NotImplementedError as notImplementedError:
+            return f"Can't Implement the effect -> {notImplementedError}"
+        except ValueError as valueError:
+            return f"Undefined value -> {valueError}"
+        else:
+            return "Succeed"    
+    
     pass
 
 if __name__ == '__main__':
@@ -443,7 +470,7 @@ if __name__ == '__main__':
     filterImage = FilterImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
@@ -599,6 +626,18 @@ if __name__ == '__main__':
             #reassign the universal image object
             universal_image = filterImage.provideImageObject()
         
+        #Gaussian Blur
+        elif command ==  12:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.gaussianBlurImage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+
         #no command found
         else:
             print("No command found")
