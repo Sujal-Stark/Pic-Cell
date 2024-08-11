@@ -1,7 +1,7 @@
 #this file is built to manupulate the different aspects of an image. The core idea is to make differnt image processing customise for user
 
 #used librarries
-from PIL import Image, ImageOps, ImageEnhance
+from PIL import Image, ImageOps, ImageFilter
 
 #classes
 class FrameAdjustment:
