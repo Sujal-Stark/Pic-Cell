@@ -466,7 +466,7 @@ class FilterImage:
         # creating user message
         self.user_message = "Input range from 0 to 10"
         self.getMessage()
-        
+
         #user choice
         userChoice = self._makeChoice(list(range(0,11)))
 
@@ -506,7 +506,63 @@ class FilterImage:
             return f"Undefined value -> {valueError}"
         else:
             return "Succeed"
+    
+    # add detail (constrast + Sharpness)
+    def addDetail(self):
+        # copying the instance image
+        image = self.image
         
+        #creating user message
+        self.user_message = "Add contrast + sharpness\nInput from 0 to 10"
+        self.getMessage()
+
+        #user input
+        strenghtChoice = self._makeChoice(list(range(0,11)))
+
+        #process
+        try:
+            for _ in range(strenghtChoice+1):
+                image = image.convert('RGB').filter(ImageFilter.DETAIL())
+            self.image = image
+        except IOError as ioError:
+            return f"Can't write the image file -> {ioError}"
+        except MemoryError as memoryError:
+            return f"Can't load image file in memory -> {memoryError}"
+        except NotImplementedError as notImplementedError:
+            return f"Can't Implement the effect -> {notImplementedError}"
+        except ValueError as valueError:
+            return f"Undefined value -> {valueError}"
+        else:
+            return "Succeed"
+    
+    #add Smoothness
+    def smoothenImage(self):
+        # copying the image instance
+        image = self.image
+
+        #creating user message
+        self.user_message = "Input from 0 to 11"
+        self.getMessage()
+
+        #user input
+        smoothingChoice = self._makeChoice(list(range(0,11)))
+
+        #process
+        try:
+            for _ in range(smoothingChoice+1):
+                image = image.convert('RGB').filter(ImageFilter.SMOOTH())
+            self.image = image
+        except IOError as ioError:
+            return f"Can't write the image file -> {ioError}"
+        except MemoryError as memoryError:
+            return f"Can't load image file in memory -> {memoryError}"
+        except NotImplementedError as notImplementedError:
+            return f"Can't Implement the effect -> {notImplementedError}"
+        except ValueError as valueError:
+            return f"Undefined value -> {valueError}"
+        else:
+            return "Succeed"
+    
     pass
 
 if __name__ == '__main__':
@@ -518,7 +574,7 @@ if __name__ == '__main__':
     filterImage = FilterImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
@@ -710,6 +766,30 @@ if __name__ == '__main__':
             #reassign the universal image object
             universal_image = filterImage.provideImageObject()
 
+        # Add detail
+        elif command ==  15:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.addDetail())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+        
+        # Add detail
+        elif command ==  16:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.smoothenImage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+        
         #no command found
         else:
             print("No command found")
