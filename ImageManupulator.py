@@ -438,7 +438,7 @@ class FilterImage:
         image = self.image
 
         #create user message
-        self.user_message = 'take value from 0-100'
+        self.user_message = "Take value from 0-100"
         self.getMessage()
 
         #user choice
@@ -458,7 +458,55 @@ class FilterImage:
             return f"Undefined value -> {valueError}"
         else:
             return "Succeed"    
-    
+
+    def sharpenImage(self):
+        # copying instance image 
+        image = self.image
+
+        # creating user message
+        self.user_message = "Input range from 0 to 10"
+        self.getMessage()
+        
+        #user choice
+        userChoice = self._makeChoice(list(range(0,11)))
+
+        #process
+        try:
+            for _ in range(userChoice+1):
+                image = image.convert('RGB').filter(ImageFilter.SHARPEN())
+            
+            self.image = image
+        except IOError as ioError:
+            return f"Can't write the image file -> {ioError}"
+        except MemoryError as memoryError:
+            return f"Can't load image file in memory -> {memoryError}"
+        except NotImplementedError as notImplementedError:
+            return f"Can't Implement the effect -> {notImplementedError}"
+        except ValueError as valueError:
+            return f"Undefined value -> {valueError}"
+        else:
+            return "Succeed"    
+
+    #contour an image
+    def contourImage(self):
+        #copying the image
+        image = self.image
+
+        #process
+        try:
+            image = image.convert('RGB').filter(ImageFilter.CONTOUR())
+            self.image = image
+        except IOError as ioError:
+            return f"Can't write the image file -> {ioError}"
+        except MemoryError as memoryError:
+            return f"Can't load image file in memory -> {memoryError}"
+        except NotImplementedError as notImplementedError:
+            return f"Can't Implement the effect -> {notImplementedError}"
+        except ValueError as valueError:
+            return f"Undefined value -> {valueError}"
+        else:
+            return "Succeed"
+        
     pass
 
 if __name__ == '__main__':
@@ -470,7 +518,7 @@ if __name__ == '__main__':
     filterImage = FilterImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
@@ -634,6 +682,30 @@ if __name__ == '__main__':
             
             # main effect
             print(filterImage.gaussianBlurImage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+
+        # Sharp Image
+        elif command ==  13:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.sharpenImage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+        
+        # contour Image
+        elif command ==  14:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.contourImage())
 
             #reassign the universal image object
             universal_image = filterImage.provideImageObject()
