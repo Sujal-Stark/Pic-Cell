@@ -1,7 +1,7 @@
 #this file is built to manupulate the different aspects of an image. The core idea is to make differnt image processing customise for user
 
 #used librarries
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageEnhance
 
 #classes
 class FrameAdjustment:
@@ -408,7 +408,7 @@ class FilterImage:
             return f"Unable to Write the file -> {ioError}"
         except NotImplementedError as notImplementedError:
             return f"Unable to perform the action because -> {notImplementedError}"
-        finally:
+        else:
             return "Succeed"
     
     #postarize filter
@@ -430,9 +430,8 @@ class FilterImage:
             return f"Can't Implement the effect -> {notImplementedError}"
         except ValueError as valueError:
             return f"Undefined value -> {valueError}"
-        finally:
+        else:
             return "Succeed"
-
     pass
 
 if __name__ == '__main__':
@@ -599,7 +598,7 @@ if __name__ == '__main__':
 
             #reassign the universal image object
             universal_image = filterImage.provideImageObject()
-            
+        
         #no command found
         else:
             print("No command found")
