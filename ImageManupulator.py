@@ -679,7 +679,16 @@ class FilterImage:
         else:
             return "Succeed"
     
-    pass
+    
+    #colors
+    class colorImage:
+        #constructor
+        def __init__(self,fileName : str) -> None:
+            self.image = Image.open(fileName)
+            self.user_message = None
+
+        
+        pass
 
 if __name__ == '__main__':
     #setting a universal imageOject as Null
