@@ -619,6 +619,34 @@ class FilterImage:
         else:
             return "Succeed"
     
+    #box blur effect
+    def boxBlurImage(self):
+        #creating copy of image
+        image = self.image
+
+        # creating user message
+        self.user_message = "Each Pixel has the avarage value of it's neighbouring pixel.\nInputs from 0 to 100"
+        self.getMessage()
+
+        #user choice
+        blurStrength = self._makeChoice(list(range(0,101)))/5
+
+        #process
+        try:
+            image =image.convert('RGB').filter(ImageFilter.BoxBlur(radius = blurStrength))
+            self.image = image
+        # excetion handleing
+        except IOError as ioError:
+            return f"Can't write the image file -> {ioError}"
+        except MemoryError as memoryError:
+            return f"Can't load image file in memory -> {memoryError}"
+        except NotImplementedError as notImplementedError:
+            return f"Can't Implement the effect -> {notImplementedError}"
+        except ValueError as valueError:
+            return f"Undefined value -> {valueError}"
+        else:
+            return "Succeed"
+
     pass
 
 if __name__ == '__main__':
@@ -630,7 +658,7 @@ if __name__ == '__main__':
     filterImage = FilterImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
@@ -870,6 +898,18 @@ if __name__ == '__main__':
             #reassign the universal image object
             universal_image = filterImage.provideImageObject()
         
+        # Box Blur
+        elif command ==  19:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.boxBlurImage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+
         #no command found
         else:
             print("No command found")
