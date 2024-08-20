@@ -1,0 +1,284 @@
+# custom made libraries
+from ImageframeAdjuster import FrameAdjustment
+from imageColorEnhancer import ColorImage
+from imageFiltering import FilterImage
+if __name__ == '__main__':
+    #setting a universal imageOject as Null
+    universal_image = None
+
+    #create an instance of classes
+    frameAdjuster = FrameAdjustment(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
+    filterImage = FilterImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
+
+    #command List
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n20--->Unsharp Mask\n-1--->To stop programme")
+
+    command = int(input("Enter command:\t")) # takes user command
+
+    while(command != -1):
+        # save an image
+        if command == 0:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+            
+            #image operation
+            if frameAdjuster.saveImage():
+                print("Saved Successfully!!")
+            else:
+                print("Error in saving")
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+        
+        #Open an image
+        elif command == 1:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
+            if(frameAdjuster.showImage()):
+                print("Image Opened SuccessFully")
+            else:
+                print("Error Occurred")
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
+        #close an image
+        elif command == 2:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
+            if frameAdjuster.close():
+                print("The file is closed")
+            else:
+                print("The file is in process")
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
+        #crop an image
+        elif command == 3:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
+            frameAdjuster.imageCrop()
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
+        #resize an image
+        elif command == 4:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
+            frameAdjuster.resizeImage()
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
+        #resample an image
+        elif command == 5:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
+            #store the result declaration
+            result = frameAdjuster.changeResampleType()
+            if type(result) == str:#print if operaion fail or not initiated
+                print(print)
+            else:#print if the process is successful
+                print("Operation successsful")
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
+        #rotate an image
+        elif command == 6:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
+            frameAdjuster.imageRotate()
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
+        # Horizontal Flip
+        elif command == 7:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
+            frameAdjuster.flip_horizontal()
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
+        # vertical Flip
+        elif command == 8:
+            # setting the instance variable
+            if universal_image != None:
+                frameAdjuster.getImageObject(universal_image)
+
+            frameAdjuster.flip_vertical()
+
+            #reassign the universal image object
+            universal_image = frameAdjuster.provideImageObject()
+
+        #Set Auto Contrast
+        elif command == 9:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+
+            if (filterImage.imageAutoContrast()):
+                print("Operation completed")
+            else:
+                print("Operation Failure")
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+
+        #colorise image
+        elif command == 10:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+
+            print(filterImage.grayScaleimage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+        
+        #postarise Image
+        elif command ==  11:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.postarizeimage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+        
+        #Gaussian Blur
+        elif command ==  12:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.gaussianBlurImage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+
+        # Sharp Image
+        elif command ==  13:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.sharpenImage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+        
+        # contour Image
+        elif command ==  14:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.contourImage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+
+        # Add detail
+        elif command ==  15:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.addDetail())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+        
+        # Add detail
+        elif command ==  16:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.smoothenImage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+        
+        # Add Emboss
+        elif command ==  17:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.addEmboss())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+        
+        # Edge enhancing
+        elif command ==  18:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.ImageEdgeEnhance())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+        
+        # Box Blur
+        elif command ==  19:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.boxBlurImage())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+
+        # Unsharp  Mask
+        elif command ==  20:
+            # setting the instance variable
+            if universal_image != None:
+                filterImage.getImageObject(universal_image)
+            
+            # main effect
+            print(filterImage.imageUnsharpMask())
+
+            #reassign the universal image object
+            universal_image = filterImage.provideImageObject()
+
+        #no command found
+        else:
+            print("No command found")
+
+        #command for next operation
+        command = int(input("Enter Command:\t"))
+        pass
