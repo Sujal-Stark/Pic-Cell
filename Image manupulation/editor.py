@@ -12,7 +12,7 @@ if __name__ == '__main__':
     coloringImage = ColorImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n20--->Unsharp Mask\n21--->Colorise\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n20--->Unsharp Mask\n21--->Colorise\n22--->Color Layer\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
@@ -283,7 +283,21 @@ if __name__ == '__main__':
                 coloringImage.getImageObject(universal_image)
             
             # main effect
-            print(coloringImage.changeColor(modeChoice=coloringImage._makeChoice([-1,-2]),colorChoice=coloringImage._makeChoice (range(1, 7))-1))
+            print("Modes:\n-1 -> Background, -2 -> Foreground\nChoice:\n0->None, 1-> Red,2 -> Green, 3 -> Blue, 4 -> Cyan, 5 -> Magenta, 6 -> Yellow, 7 -> Orange, 8 -> Purple, 9 -> Pink, 10 -> Brown, 11 -> Olive, 12 -> Navy Blue, 13 -> Teal, 14 -> Lavender, 15 -> Gold, 16 -> Silver")
+            print(coloringImage.changeColor(modeChoice=coloringImage._makeChoice([-1,-2]),colorChoice=coloringImage._makeChoice (range(1, 17))-1))
+
+            #reassign the universal image object
+            universal_image = coloringImage.provideImageObject()
+        
+        #color layer
+        elif command == 22:
+            # setting the instance variable
+            if universal_image != None:
+                coloringImage.getImageObject(universal_image)
+            
+            # main effect
+            print("1-> Red,2 -> Green, 3 -> Blue, 4 -> Cyan, 5 -> Magenta, 6 -> Yellow, 7 -> Orange, 8 -> Purple, 9 -> Pink, 10 -> Brown, 11 -> Olive, 12 -> Navy Blue, 13 -> Teal, 14 -> Lavender, 15 -> Gold, 16 -> Silver")
+            print(coloringImage.addColorLayer(choice=coloringImage._makeChoice(range(1, 17))-1))
 
             #reassign the universal image object
             universal_image = coloringImage.provideImageObject()
