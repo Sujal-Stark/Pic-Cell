@@ -18,12 +18,38 @@ class FrameGenerator:
     def get_Message(self):
         return self.user_message
     
-    #accepting image instance
+    #total colors available for user
+    def _colorList(self, index : int) -> tuple:
+        colors = [
+            (255,0,0), # red
+            (0, 255, 0), # green
+            (0, 0, 255), # blue
+            (0, 255, 255), # cyan
+            (255, 0, 255), # magenta
+            (255, 255, 0), # yellow
+            (255, 165, 0), # orange
+            (128, 0, 128), # purble
+            (255, 192, 203), # pink
+            (165, 42, 42), # brown 
+            (128, 128, 0), # olive
+            (0, 0, 128), # navy blue
+            (0, 128, 128), # teal
+            (230, 230, 250), # lavender
+            (255, 215, 0), # gold
+            (192, 192, 192) # silver
+        ]
+        return colors[index]
+    
+    # shows the available color choice
+    def _showColor(self) ->str:
+        return "1-> Red,2 -> Green, 3 -> Blue, 4 -> Cyan, 5 -> Magenta, 6 -> Yellow, 7 -> Orange, 8 -> Purple, 9 -> Pink, 10 -> Brown, 11 -> Olive, 12 -> Navy Blue, 13 -> Teal, 14 -> Lavender, 15 -> Gold, 16 -> Silver"
+    
+    # accepting image instance/
     def getImageObject(self, image:Image.Image)->None:
         self.image = image
         return
     
-    #provide edited image
+    # provide edited image
     def provideImageObject(self)-> Image.Image:
         return self.image
     
@@ -58,6 +84,18 @@ class FrameGenerator:
         self.get_Message()
         #changing meta data
         self._metaData["border"] = userdefinedWidth
+        #process
+        return self.addBorder()
+    
+    # changes the border color
+    def changeColor(self, userColorIndex : int) -> str:
+        # copying image instance
+        self.image = self.imageConst
+        # creating user message
+        self.user_message = self._showColor()
+        self.get_Message()
+        # changing meta data
+        self._metaData["color"] = self._colorList(userColorIndex)
         #process
         return self.addBorder()
     pass
