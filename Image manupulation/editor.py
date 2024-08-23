@@ -15,7 +15,7 @@ if __name__ == '__main__':
     frameGenerator = FrameGenerator(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n20--->Unsharp Mask\n21--->Colorise\n22--->Color Layer\n23---> Add Border\n24 ---> Change Border width\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n20--->Unsharp Mask\n21--->Colorise\n22--->Color Layer\n23---> Add Border\n24 ---> Change Border width\n25 ---> Change border color\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
@@ -329,6 +329,18 @@ if __name__ == '__main__':
             #reassign the universal image object
             universal_image = frameGenerator.provideImageObject()
         
+        # Change border width
+        elif command == 25:
+            # setting the instance variable
+            if universal_image != None:
+                frameGenerator.getImageObject(universal_image)
+            
+            # main effect
+            print(frameGenerator.changeColor(int(input("Enter color:\t"))))
+
+            #reassign the universal image object
+            universal_image = frameGenerator.provideImageObject()
+
         #no command found
         else:
             print("No command found")
