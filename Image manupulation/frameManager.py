@@ -77,8 +77,6 @@ class FrameGenerator:
         
     # change border width
     def  changeWidth(self, userdefinedWidth:int) -> str:
-        # copying image instance
-        image = self.imageConst
         # creating user message
         self.user_message = "Enter Pixel value to change border width"
         self.get_Message()
@@ -89,8 +87,6 @@ class FrameGenerator:
     
     # changes the border color
     def changeColor(self, userColorIndex : int) -> str:
-        # copying image instance
-        self.image = self.imageConst
         # creating user message
         self.user_message = self._showColor()
         self.get_Message()
