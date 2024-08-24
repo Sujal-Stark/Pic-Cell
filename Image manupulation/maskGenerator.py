@@ -62,6 +62,17 @@ class Masks:
         drawObject.polygon(((qWidth,self.height-10), (self.width-10,self.height-10), (self.width-10, qHeight), (qWidth,self.height-10)), fill=(0,0,0,0))
         return self.groundLayer
     
+    # style 2 : five section rectangle
+    def style_two_mask(self) -> Image.Image:
+        qwidth = 2*(self.width/3)
+        lwidth, lheight = (self.width/3), (self.height/2)
+        drawObject = ImageDraw.Draw(self.groundLayer)
+        drawObject.polygon(((lwidth+10,10), (lwidth+10,self.height-10), (qwidth-10,self.height-10), (qwidth-10, 10)),fill=(0,0,0,0))
+        drawObject.polygon(((10,10), (10,lheight-10), (lwidth-10, lheight-10), (lwidth-10, 10)), fill=(0,0,0,0))
+        drawObject.polygon(((10,lheight+10), (10,self.height-10), (lwidth-10, self.height-10), (lwidth-10, lheight+10)), fill=(0,0,0,0))
+        drawObject.polygon(((qwidth+10,lheight+10), (qwidth+10,self.height-10), (self.width-10,self.height-10), (self.width-10,lheight+10)), fill=(0,0,0,0))
+        drawObject.polygon(((qwidth+10,10), (qwidth+10,lheight-10), (self.width-10,lheight-10), (self.width -10,10)), fill=(0,0,0,0))
+        return self.groundLayer
     pass
-mask_one = Masks.style_one_mask(Masks(1920,1080))
+mask_one = Masks.style_two_mask(Masks(1920,1080))
 mask_one.show()
