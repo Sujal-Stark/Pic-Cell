@@ -3,6 +3,7 @@ from ImageframeAdjuster import FrameAdjustment
 from imageColorEnhancer import ColorImage
 from imageFiltering import FilterImage
 from frameManager import FrameGenerator
+from specialFrameGenerator import SpecialFrames
 
 if __name__ == '__main__':
     #setting a universal imageOject as Null
@@ -13,9 +14,10 @@ if __name__ == '__main__':
     filterImage = FilterImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
     coloringImage = ColorImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
     frameGenerator = FrameGenerator(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
+    specialFrames = SpecialFrames(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n20--->Unsharp Mask\n21--->Colorise\n22--->Color Layer\n23---> Add Border\n24 ---> Change Border width\n25 ---> Change border color\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n20--->Unsharp Mask\n21--->Colorise\n22--->Color Layer\n23---> Add Border\n24 ---> Change Border width\n25 ---> Change border color\n26--->layersREctangle frame\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
@@ -340,6 +342,19 @@ if __name__ == '__main__':
 
             #reassign the universal image object
             universal_image = frameGenerator.provideImageObject()
+
+        # special mask layered rectangle
+        elif command == 26:
+            # setting the instance variable
+            if universal_image != None:
+                specialFrames.getImageObject(universal_image)
+            
+            # main effect
+            print("1 -> Rectangle Layer, 2 -> Rombous, 3 -> Ellipse, 4 -> Circle, 5 -> Double Circle, 6 -> Left Diagonal, 7 -> Five Section Rectangle")
+            print(specialFrames.layeredRectangularFrame(int(input("Enter choice:\t"))))
+
+            #reassign the universal image object
+            universal_image = specialFrames.provideImageObject()
 
         #no command found
         else:
