@@ -7,7 +7,7 @@ class Masks:
         self.groundLayer = Image.new(mode='RGBA', size=(self.width,self.height), color=(255,255,255,255))
         return
     
-    # rectangular space mask
+    # rectangle layer
     def layeredRectangle(self) -> Image.Image:
         drawObject = ImageDraw.Draw(self.groundLayer)
         drawObject.rectangle((10,10,self.width-10,self.height-10),fill=(0,0,0,0))
@@ -52,7 +52,7 @@ class Masks:
             return self.ellipticalMask(self.width,self.height)
         return self.groundLayer
     
-    # transverse image
+    # style 1 : Left diagonal
     def style_one_mask(self) -> Image.Image:
         qWidth = 2*(self.width/3)
         qHeight = 2*(self.height/3)
@@ -74,5 +74,3 @@ class Masks:
         drawObject.polygon(((qwidth+10,10), (qwidth+10,lheight-10), (self.width-10,lheight-10), (self.width -10,10)), fill=(0,0,0,0))
         return self.groundLayer
     pass
-mask_one = Masks.style_two_mask(Masks(1920,1080))
-mask_one.show()
