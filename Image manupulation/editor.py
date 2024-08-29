@@ -17,7 +17,7 @@ if __name__ == '__main__':
     specialFrames = SpecialFrames(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n20--->Unsharp Mask\n21--->Colorise\n22--->Color Layer\n23---> Add Border\n24 ---> Change Border width\n25 ---> Change border color\n26--->layersREctangle frame\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n20--->Unsharp Mask\n21--->Colorise\n22--->Color Layer\n23---> Add Border\n24 ---> Change Border width\n25 ---> Change border color\n26--->layersREctangle frame\n27---> change color bg\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
@@ -345,17 +345,32 @@ if __name__ == '__main__':
 
         # special mask layered rectangle
         elif command == 26:
+            # completionChoice = [False,True] # selects if we want to complete the process or not
+            # done = False # initial choice
             # setting the instance variable
             if universal_image != None:
                 specialFrames.getImageObject(universal_image)
             
             # main effect
-            print("1 -> Rectangle Layer, 2 -> Rombous, 3 -> Ellipse, 4 -> Circle, 5 -> Double Circle, 6 -> Left Diagonal, 7 -> Five Section Rectangle")
-            print(specialFrames.layeredRectangularFrame(int(input("Enter choice:\t"))))
+            print("1 -> Rectangle Layer, 2 -> Rombous, 3 -> Ellipse, 4 -> Circle, 5 -> Double Circle, 6 -> Left Diagonal, 7 -> Five Section Rectangle, 8 -> embrald")
+            print(specialFrames.addFrame(int(input("Enter choice:\t"))))
 
             #reassign the universal image object
             universal_image = specialFrames.provideImageObject()
 
+        # special mask background color change
+        elif command == 27:
+            # setting the instance variable
+            if universal_image != None:
+                specialFrames.getImageObject(universal_image)
+            
+            # main effect
+            print("1-> Red,2 -> Green, 3 -> Blue, 4 -> Cyan, 5 -> Magenta, 6 -> Yellow, 7 -> Orange, 8 -> Purple, 9 -> Pink, 10 -> Brown, 11 -> Olive, 12 -> Navy Blue, 13 -> Teal, 14 -> Lavender, 15 -> Gold, 16 -> Silver")
+            print(specialFrames.changeAttribute(int(input("Enter choice:\t"))))
+            
+            #reassign the universal image object
+            universal_image = specialFrames.provideImageObject()
+        
         #no command found
         else:
             print("No command found")
