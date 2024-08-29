@@ -4,7 +4,12 @@ class Masks:
     #constructor
     def __init__(self, width : int, height : int) -> None:
         self.width, self.height = width, height
-        self.groundLayer = Image.new(mode='RGBA', size=(self.width,self.height), color=(255,255,255,255))
+        self._metaData = {
+            1 : "RGBA", # mode
+            2 : (self.width, self.height), # size
+            3 : (255,255,255,255) # color
+        }# meta data helps to change the property of the masks
+        self.groundLayer = Image.new(mode=self._metaData[1], size=self._metaData[2], color= self._metaData[3])
         return
     
     # rectangle layer
@@ -73,4 +78,7 @@ class Masks:
         drawObject.polygon(((qwidth+10,lheight+10), (qwidth+10,self.height-10), (self.width-10,self.height-10), (self.width-10,lheight+10)), fill=(0,0,0,0))
         drawObject.polygon(((qwidth+10,10), (qwidth+10,lheight-10), (self.width-10,lheight-10), (self.width -10,10)), fill=(0,0,0,0))
         return self.groundLayer
-    pass
+    
+    # style 3 : deadpool mask
+    def style_three_mask(self) -> Image.Image:
+        return self.groundLayer
