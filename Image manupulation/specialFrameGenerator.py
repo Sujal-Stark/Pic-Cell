@@ -1,5 +1,5 @@
 # important libraries
-from PIL import Image, ImageOps, ImageChops
+from PIL import Image, ImageChops
 
 # important custom modules
 from maskGenerator import Masks
@@ -11,6 +11,8 @@ class SpecialFrames:
         self.image = Image.open(imageFile) # opens the real image
         self.imageConst = self.image # copying the actual image for modification
         self.user_message = None # accepts user message from methods
+        self.saveStatus = False # the process will go continuously until save status become true
+        self.user_request = None # recored the user taken choice 
         self._metaData = {
             "mode" : 'RGBA'
         } # stores the meta data
@@ -30,14 +32,15 @@ class SpecialFrames:
         return self.image
     
     # # layered rectangle mask
-    def layeredRectangularFrame(self, maskChoice : int) -> str:
+    def addFrame(self, maskChoice : int) -> str:
         #copying image object
         image = self.image
         #creating user message
-        self.user_message = "1 -> Rectangle Layer, 2 -> Rombous, 3 -> Ellipse, 4 -> Circle, 5 -> Double Circle, 6 -> Left Diagonal, 7 -> Five Section Rectangle"
+        self.user_message = "1 -> Rectangle Layer, 2 -> Rombous, 3 -> Ellipse, 4 -> Circle, 5 -> Double Circle, 6 -> Left Diagonal, 7 -> Five Section Rectangle, 8 -> Embrald"
         self.getMessage()
         #operation
         try:
+            self.user_request = maskChoice # recording user choice
             image = image.convert(self._metaData["mode"])
             width,height = image.size
             if maskChoice == 1:
@@ -54,6 +57,11 @@ class SpecialFrames:
                 image = ImageChops.add(image, Masks.style_one_mask(Masks(width,height)))
             elif maskChoice == 7:
                 image = ImageChops.add(image, Masks.style_two_mask(Masks(width,height)))
+            elif maskChoice == 8:
+                image = ImageChops.add(ImageChops.add(image, Masks.rombousMask(Masks(width,height))), Masks.circularMask (Masks(width,height)))
+
+            else:
+                image = self.image # redeemed actual image
         except MemoryError as memoryError:
             return f"Insufficient memory -> {memoryError}"
         except TypeError as typeError:
