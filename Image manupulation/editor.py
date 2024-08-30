@@ -352,7 +352,7 @@ if __name__ == '__main__':
                 specialFrames.getImageObject(universal_image)
             
             # main effect
-            print("1 -> Rectangle Layer, 2 -> Rombous, 3 -> Ellipse, 4 -> Circle, 5 -> Double Circle, 6 -> Left Diagonal, 7 -> Five Section Rectangle, 8 -> embrald")
+            print("1 -> Rectangle Layer, 2 -> Rombous, 3 -> Ellipse, 4 -> Circle, 5 -> Double Circle, 6 -> Left Diagonal, 7 -> Five Section Rectangle, 8 -> embrald, 9 -> Dead Pool Mask")
             print(specialFrames.addFrame(int(input("Enter choice:\t"))))
 
             #reassign the universal image object
