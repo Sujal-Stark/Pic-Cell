@@ -59,7 +59,8 @@ class SpecialFrames:
                 image = ImageChops.add(image, Masks.style_two_mask(Masks(width,height)))
             elif maskChoice == 8:
                 image = ImageChops.add(ImageChops.add(image, Masks.rombousMask(Masks(width,height))), Masks.circularMask (Masks(width,height)))
-
+            elif maskChoice == 9:
+                image = ImageChops.add(image, Masks.style_three_mask(Masks(width,height)))
             else:
                 image = self.image # redeemed actual image
         except MemoryError as memoryError:
