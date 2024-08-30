@@ -81,4 +81,41 @@ class Masks:
     
     # style 3 : deadpool mask
     def style_three_mask(self) -> Image.Image:
+        self.groundLayer = Image.new(mode=self._metaData[1], size=self._metaData[2], color= (0,0,0,20))
+        width, height = self.width, self.height
+        if width > height:
+            pad = (width-height)/2
+            drawObject = ImageDraw.Draw(self.groundLayer)
+            fillColor = [(255,0,0,150), (0,0,0,0), (255,0,0,150)]
+            coordinates = [(pad, 0, width - pad, height),
+                (pad + 20, 20, width - pad - 20, height - 20),
+                (pad + 40, 40, width-pad-40, height-40)
+            ]
+            # outer layer(red), # middle layer(black), # inner layer(red)
+            for i in range(len(fillColor)):
+                drawObject.ellipse(coordinates[i], fill= fillColor[i])
+        border_black = 50
+        heightReducer = 30
+        drawObject.polygon(((width/2 - border_black,heightReducer), (width/2 - border_black, height - heightReducer), (width/2 + border_black, height - heightReducer),(width/2 + border_black, heightReducer), ), fill = (0,0,0,0))
+        # left eyes
+        eyeLeft = (width/2-70,height/2)
+        leftEyeCoordinates = [(width/4 + 40, height/4 + 40),
+            (5*width/16 ,height/2),
+            (5.4*width/16, 9*height/16),
+            (6.1*width/16, 9.5*height/16),
+            (6.8*width/16, 9*height/16),
+        ]
+        for i in range(len(leftEyeCoordinates)-1):
+            drawObject.polygon((eyeLeft, leftEyeCoordinates[i], leftEyeCoordinates[i+1], eyeLeft), fill=(0,0,0,0))
+        
+        # right eye
+        eyeRight = (width/2+70, height/2)
+        rightEyeCoordinate = [(3*width/4 - 40, height/4+40),
+            (11*width/16, height/2),
+            (10.6*width/16, 9*height/16),
+            (9.9*width/16, 9.5*height/16),
+            (9.2*width/16, 9*height/16)
+        ]
+        for i in range(len(rightEyeCoordinate)-1):
+            drawObject.polygon((eyeRight, rightEyeCoordinate[i], rightEyeCoordinate[i+1], eyeRight), fill=(0,0,0,0))
         return self.groundLayer
