@@ -119,3 +119,25 @@ class Masks:
         for i in range(len(rightEyeCoordinate)-1):
             drawObject.polygon((eyeRight, rightEyeCoordinate[i], rightEyeCoordinate[i+1], eyeRight), fill=(0,0,0,0))
         return self.groundLayer
+    
+    # style 4 : star
+    def starShape(self) -> Image.Image:
+        width10, height10 = self.width/10, self.height/10 # smallest units of widtyh and height req here
+        drawObject = ImageDraw.Draw(self.groundLayer)
+        centre = (5*width10, 5*height10)
+        coordinates = [
+            (5*width10, 0.5*height10),
+            (5.78*width10, 4*height10),
+            (8*width10, 4*height10),
+            (6*width10, 6*height10),
+            (7*width10, 9.5*height10),
+            (5*width10, 7*height10),
+            (3*width10, 9.5*height10),
+            (4*width10, 6*height10),
+            (2*width10, 4*height10),
+            (4.3*width10, 4*height10),
+            (5*width10, 0.5*height10)
+        ]
+        for i in range(len(coordinates)-1):
+            drawObject.polygon((centre, coordinates[i], coordinates[i+1], centre), fill=(0,0,0,0))
+        return self.groundLayer
