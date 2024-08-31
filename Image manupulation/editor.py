@@ -4,6 +4,7 @@ from imageColorEnhancer import ColorImage
 from imageFiltering import FilterImage
 from frameManager import FrameGenerator
 from specialFrameGenerator import SpecialFrames
+from deformer import ImageDeformer
 
 if __name__ == '__main__':
     #setting a universal imageOject as Null
@@ -15,9 +16,10 @@ if __name__ == '__main__':
     coloringImage = ColorImage(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
     frameGenerator = FrameGenerator(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
     specialFrames = SpecialFrames(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
+    imageDeformer = ImageDeformer(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
 
     #command List
-    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n20--->Unsharp Mask\n21--->Colorise\n22--->Color Layer\n23---> Add Border\n24 ---> Change Border width\n25 ---> Change border color\n26--->layersREctangle frame\n27---> change color bg\n-1--->To stop programme")
+    print("Command List:\n0--->Save the image\n1--->Open an Image\n2--->Close Image\n3--->Crop Image\n4--->Resize image\n5--->Resample Image\n6--->Rotate an image\n7--->Horizontal Flip\n8--->Vertical Flip\n9---> set Auto Contrast\n10--->GrayScale\n11--->Postarise\n12--->Gaussian BLur\n13--->Sharp image\n14--->Contour\n15---> Add detail\n16--->Smooth out\n17--->Emboss image\n18--->Edge Enhance\n19--->Box Blur\n20--->Unsharp Mask\n21--->Colorise\n22--->Color Layer\n23---> Add Border\n24 ---> Change Border width\n25 ---> Change border color\n26--->layersREctangle frame\n27---> change color bg,\n28 ---> Deform : Middle Twist, \n29 ---> Deform : double twist\n-1--->To stop programme")
 
     command = int(input("Enter command:\t")) # takes user command
 
@@ -345,14 +347,12 @@ if __name__ == '__main__':
 
         # special mask layered rectangle
         elif command == 26:
-            # completionChoice = [False,True] # selects if we want to complete the process or not
-            # done = False # initial choice
-            # setting the instance variable
+            # getting most recent edited iamge
             if universal_image != None:
                 specialFrames.getImageObject(universal_image)
             
             # main effect
-            print("1 -> Rectangle Layer, 2 -> Rombous, 3 -> Ellipse, 4 -> Circle, 5 -> Double Circle, 6 -> Left Diagonal, 7 -> Five Section Rectangle, 8 -> embrald, 9 -> Dead Pool Mask")
+            print("1 -> Rectangle Layer, 2 -> Rombous, 3 -> Ellipse, 4 -> Circle, 5 -> Double Circle, 6 -> Left Diagonal, 7 -> Five Section Rectangle, 8 -> embrald, 9 -> Dead Pool Mask, 10 -> Star mask")
             print(specialFrames.addFrame(int(input("Enter choice:\t"))))
 
             #reassign the universal image object
@@ -371,6 +371,30 @@ if __name__ == '__main__':
             #reassign the universal image object
             universal_image = specialFrames.provideImageObject()
         
+        # deform fast forward
+        elif command == 28:
+            # getting most recent edited iamge
+            if universal_image != None:
+                imageDeformer.getImageObject(universal_image)
+            
+            # main effect
+            print(imageDeformer.middleTwist())
+
+            #reassign the universal image object
+            universal_image = imageDeformer.provideImageObject()
+
+        # deform fast forward
+        elif command == 29:
+            # getting most recent edited iamge
+            if universal_image != None:
+                imageDeformer.getImageObject(universal_image)
+            
+            # main effect
+            print(imageDeformer.doubleTwisted())
+
+            #reassign the universal image object
+            universal_image = imageDeformer.provideImageObject()
+
         #no command found
         else:
             print("No command found")
