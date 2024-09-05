@@ -99,6 +99,46 @@ class ImageDeformer:
         return "Succeed"
     pass
 
-# imd = ImageDeformer(R"C:\Users\SUJAL KHAN\Downloads\uwp4257296.jpeg")
-# print(imd.horizontalSplit(repeaterValue=int(input(" how many times want to repeat: \t "))))
-# imd.image.show()
+    # vertical split
+    def verticalSplit(self, repeaterValue = 4) -> str:
+        image = self.image # copyin the actual image obejct
+        try:
+            class DeformImplicator:
+                def getmesh(self, image : Image.Image):
+                    width, height = image.size # copying actual image size
+                    widthVar, height4 = width//repeaterValue, height//4
+                    height34 = 3*height4
+                    meshes = [] # stores the co ordiantes
+                    for i in range(repeaterValue):
+                        firstQuarter = (0 if i%2 == 0 else height4)
+                        thirdQuarter = (height34 if i%2 ==0 else height)
+                        meshes.append(
+                            (
+                                (
+                                    i*widthVar, 0,
+                                    (i+1)*widthVar, height
+                                ), # target rect
+                                (
+                                    i*widthVar, firstQuarter,
+                                    i*widthVar, thirdQuarter,
+                                    (i+1)*widthVar, thirdQuarter,
+                                    (i+1)*widthVar, firstQuarter
+                                ) # source rect
+                            )
+                        )
+                    return meshes
+            image = ImageOps.deform(image=image, deformer=DeformImplicator())
+        except IOError as ioError:
+            return f"{ioError}"
+        except MemoryError as memoryError:
+            return f"Insufficient Error {memoryError}"
+        except ValueError as valueError:
+            return f"invalid value {valueError}"
+        except ZeroDivisionError as zeroDivisionError:
+            return f"Cant break into more segments {zeroDivisionError}"
+        self.image = image
+        return "Succeed"
+    pass
+imd = ImageDeformer(R"C:\Users\SUJAL KHAN\Downloads\uwp4257296.jpeg")
+print(imd.verticalSplit(repeaterValue=int(input(" how many times want to repeat: \t "))))
+imd.image.show()
