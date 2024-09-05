@@ -63,4 +63,42 @@ class ImageDeformer:
             return f"invalid value {valueError}"
         self.image = image
         return "Succeed"
+    
+    # horizontally devides and deviates the image dimentions
+    def horizontalSplit(self, repeaterValue = 4) -> str:
+        # copying actual image instance
+        image = self.image
+        try:
+            class DefromElmlecator:
+                def getmesh(self, image : Image.Image):
+                    repeater = repeaterValue
+                    width, height = image.size # original size of the image
+                    width4, height8 = width//4, height//repeater # breaking the width and hight into quarters
+                    width34 = width4*3 # 3rd quarter of the width
+                    meshes = [] # stores the mesh co ordinates
+                    for i in range(repeater):
+                        firstQuarter= (0 if i%2 == 0 else width4)
+                        thirdQuarter = (width34 if i%2 == 0 else width)
+                        meshes.append(((0, i*height8,
+                            width, (i+1) * height8),
+                            (firstQuarter, i*height8,
+                            firstQuarter, (i+1)*height8,
+                            thirdQuarter, (i+1)*height8,
+                            thirdQuarter, i* height8)))
+                    return meshes
+            image = ImageOps.deform(image=image, deformer=DefromElmlecator())
+        except IOError as ioError:
+            return f"{ioError}"
+        except MemoryError as memoryError:
+            return f"Insufficient Error {memoryError}"
+        except ValueError as valueError:
+            return f"invalid value {valueError}"
+        except ZeroDivisionError as zeroDivisionError:
+            return f"Cant break into more segments {zeroDivisionError}"
+        self.image = image
+        return "Succeed"
     pass
+
+# imd = ImageDeformer(R"C:\Users\SUJAL KHAN\Downloads\uwp4257296.jpeg")
+# print(imd.horizontalSplit(repeaterValue=int(input(" how many times want to repeat: \t "))))
+# imd.image.show()
