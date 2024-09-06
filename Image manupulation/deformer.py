@@ -138,7 +138,46 @@ class ImageDeformer:
             return f"Cant break into more segments {zeroDivisionError}"
         self.image = image
         return "Succeed"
+    
+    def multiply(self, repitaionNumber = 0) -> str:
+        image = self.image # coping actual image
+        try:
+            # deformed class
+            class DeformImplicator:
+                def getmesh(self, img : Image.Image):
+                    widthHalf, heightHalf = img.size[0]//2, img.size[1]//2
+                    meshes = []
+                    for i in range(2):
+                        for j in range(2):
+                            meshes.append(
+                                (
+                                    (
+                                        i * widthHalf, j * heightHalf,
+                                        (i + 1) * widthHalf, (j + 1) * heightHalf
+                                    ), # target rectangle
+                                    (
+                                        0, 0,
+                                        0, heightHalf * 2,
+                                        widthHalf * 2, heightHalf * 2,
+                                        widthHalf * 2, 0
+                                    ) # source rectangle
+                                )
+                            )
+                    return meshes
+            # main process
+            for _ in range(repitaionNumber):
+                image = ImageOps.deform(image=image, deformer= DeformImplicator())
+        except IOError as ioError:
+            return f"{ioError}"
+        except MemoryError as memoryError:
+            return f"Insufficient Error {memoryError}"
+        except ValueError as valueError:
+            return f"invalid value {valueError}"
+        except ZeroDivisionError as zeroDivisionError:
+            return f"Cant break into more segments {zeroDivisionError}"
+        self.image = image
+        return "Succeed"
     pass
 imd = ImageDeformer(R"C:\Users\SUJAL KHAN\Downloads\uwp4257296.jpeg")
-print(imd.verticalSplit(repeaterValue=int(input(" how many times want to repeat: \t "))))
+print(imd.multiply(int(input("Enter how many times you want to repeat:\t"))))
 imd.image.show()
