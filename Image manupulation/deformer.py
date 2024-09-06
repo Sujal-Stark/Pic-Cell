@@ -177,7 +177,51 @@ class ImageDeformer:
             return f"Cant break into more segments {zeroDivisionError}"
         self.image = image
         return "Succeed"
+
+    # infiinite layer
+    def layerize(self, repeaterValue = 1) -> str:
+        image = self.image # copying actual image object
+        widthRepeater, heightRepeater = image.size[0]//90, image.size[1]//90
+        maxRepeater = widthRepeater if widthRepeater <= heightRepeater else heightRepeater
+        # sending user message
+        self.userMessage = f"Maximum repitation possible : {maxRepeater}"
+        self.getMessage()
+        try:
+            class DeformImplicator:
+                def getmesh(self, img : Image.Image):
+                    width, height = img.size # image width, height 
+                    meshes = [] # holds co ordinates
+                    for i in range(repeaterValue):
+                        pad = 45 * i
+                        if i > maxRepeater-1:
+                            break
+                        meshes.append(
+                            (
+                                (
+                                    pad, pad,
+                                    width - pad, height - pad
+                                ), # target rectangle
+                                (
+                                    0, 0,
+                                    0, height,
+                                    width, height,
+                                    width, 0
+                                ) # source rectangle
+                            )
+                        )
+                    return meshes
+            image = ImageOps.deform(image=image, deformer=DeformImplicator())
+        except IOError as ioError:
+            return f"{ioError}"
+        except MemoryError as memoryError:
+            return f"Insufficient Error {memoryError}"
+        except ValueError as valueError:
+            return f"invalid value {valueError}"
+        except ZeroDivisionError as zeroDivisionError:
+            return f"Cant break into more segments {zeroDivisionError}"
+        self.image = image
+        return "Succeed"
     pass
-imd = ImageDeformer(R"C:\Users\SUJAL KHAN\Downloads\uwp4257296.jpeg")
-print(imd.multiply(int(input("Enter how many times you want to repeat:\t"))))
+imd = ImageDeformer(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
+print(imd.layerize(int(input("Enter repeater value:\t"))))
 imd.image.show()
