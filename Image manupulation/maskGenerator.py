@@ -165,4 +165,18 @@ class Masks:
         width3, height3 =  self.width/3, self.height/3 # 1/3 of the width and height
         drawObject.polygon(xy= ((width3, 10), (width3, self.height - 10), (self.width - 10, self.height - 10,), (self.width - 10, 10)), fill= (0, 0, 0, 0))
         return self.groundLayer
-Masks.style_seven_mask(Masks(1920, 1080)).show()
+    
+    # style 8
+    def style_eight_mask(self) -> Image.Image:
+        drawObject = ImageDraw.Draw(im = self.groundLayer)
+        widthFraction, heightFraction = self.width/6, self.height/6 # divides the width and height in smaller units
+        for i in range(6):
+            drawObject.polygon(xy = ((i * widthFraction+10, 10), (i * widthFraction + 10, (6 - i) * heightFraction - 10), ((i + 1) * widthFraction + 10, (6 - i) * heightFraction - 10), ((i + 1) * widthFraction + 10, 10)), fill = (0, 0, 0 ,0))
+        drawObject.polygon(xy = ((self.width - 10,0), (self.width - 10, heightFraction), (self.width, heightFraction), (self.width, 0)), fill = (255, 255, 255, 255))
+        for i in range(6):
+            drawObject.line(xy = ((i * widthFraction + 10, 0), (i * widthFraction + 10, (6-i) * heightFraction)), fill=(255, 255, 255, 200),width = 2)
+            drawObject.line(xy=((0,i*heightFraction-10),((6-i)*widthFraction+10,i*heightFraction-10)),fill=(255,255,255,200),width=2)
+        return self.groundLayer
+
+    pass
+Masks.style_eight_mask(Masks(1920, 1080)).show()
