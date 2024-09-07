@@ -378,11 +378,60 @@ class ImageDeformer:
             return f"Insufficient Error {memoryError}"
         except ValueError as valueError:
             return f"invalid value {valueError}"
-        # except ZeroDivisionError as zeroDivisionError:
-            # return f"Cant break into more segments {zeroDivisionError}"
+        except ZeroDivisionError as zeroDivisionError:
+            return f"Cant break into more segments {zeroDivisionError}"
+        self.image = image
+        return "Succeed"
+    
+    # a sinosoidal curve is generated
+    def sinCurve(self, cycle = 32) -> str:
+        image = self.image # copying image object
+        halfCycle, quarterHalfCycle = cycle//2, cycle //4
+        # creating user message 
+        self.userMessage = "Maximum cycle value 128"
+        self.getMessage()
+        # procedure
+        try:
+            class deformImplicator:
+                def getmesh(self, img : Image.Image):
+                    width, height = img.size # width and height of the image
+                    # width part creates column and heightPart increase the unit height in iteration
+                    widthPart , increamentFactor = width//cycle, height//halfCycle
+                    # in height = initial height and end height = final height
+                    inheight, endHeight = (quarterHalfCycle-1) * increamentFactor, (halfCycle-1) * increamentFactor
+                    meshes = [] # holds the co ordinates
+                    for i in range(cycle + 1):
+                        inheight = inheight + increamentFactor # updates initial height value
+                        endHeight = endHeight + increamentFactor # updates final height value
+                        meshes.append(
+                            (
+                                (
+                                    i * widthPart, inheight,
+                                    (i + 1)* widthPart, endHeight
+                                ), # targetRectangle
+                                (
+                                    i * widthPart, inheight,
+                                    i * widthPart, endHeight,
+                                    (i + 1) * widthPart, endHeight,
+                                    (i + 1) * widthPart, inheight
+                                ) # rource rectangle
+                            )
+                        )
+                        if (i % quarterHalfCycle) == 0 :
+                            increamentFactor = - increamentFactor
+                    return meshes
+            image = ImageOps.deform(image= image, deformer= deformImplicator())
+        except IOError as ioError:
+            return f"{ioError}"
+        except MemoryError as memoryError:
+            return f"Insufficient Error {memoryError}"
+        except ValueError as valueError:
+            return f"invalid value {valueError}"
+        except ZeroDivisionError as zeroDivisionError:
+            return f"Cant break into more segments {zeroDivisionError}"
         self.image = image
         return "Succeed"
     pass
-imd = ImageDeformer(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
-print(imd.mirrorQuad())
+imd = ImageDeformer(R"D:\Gallery\PhotoSpace\downloaded pic\wp13349909-aquaman-and-the-lost-kingdom-wallpapers.jpg")
+print(imd.sinCurve())
 imd.image.show()
