@@ -264,7 +264,54 @@ class ImageDeformer:
             return f"Cant break into more segments {zeroDivisionError}"
         self.image = image
         return "Succeed"
+    
+    # mirror pattern
+    def mirrorHalf(self)-> str:
+        image = self.image # coping actual image instance
+        try:
+            class DeformImplicator:
+                def getmesh(self, img : Image.Image):
+                    width , height = img.size # weight and height
+                    widthHalf , heightHalf = width//2, height//2 # half of width and height
+                    meshes = [
+                        (
+                            (
+                                0,0,
+                                widthHalf, height
+                            ), # target rectangle
+                            (
+                                0, 0,
+                                0, height,
+                                widthHalf, height,
+                                widthHalf, 0  
+                            )
+                        ),
+                        (
+                            (
+                                widthHalf, 0,
+                                width, height
+                            ), # target rectangle
+                            (
+                                widthHalf, 0,
+                                widthHalf, height,
+                                0, height,
+                                0, 0
+                            ) # source rectangle
+                        )
+                    ]
+                    return meshes
+            image = ImageOps.deform(image=image, deformer=DeformImplicator())
+        except IOError as ioError:
+            return f"{ioError}"
+        except MemoryError as memoryError:
+            return f"Insufficient Error {memoryError}"
+        except ValueError as valueError:
+            return f"invalid value {valueError}"
+        except ZeroDivisionError as zeroDivisionError:
+            return f"Cant break into more segments {zeroDivisionError}"
+        self.image = image
+        return "Succeed"
     pass
 imd = ImageDeformer(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
-print(imd.chess(int(input("Enter box Gap:\t"))))
+print(imd.mirrorHalf())
 imd.image.show()
