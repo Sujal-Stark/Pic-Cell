@@ -311,7 +311,78 @@ class ImageDeformer:
             return f"Cant break into more segments {zeroDivisionError}"
         self.image = image
         return "Succeed"
+    
+    # mirrorification of the first quardant in 4 parts
+    def mirrorQuad(self) -> str:
+        image = self.image # coping actual image instance
+        try:
+            class DeformImplicator:
+                def getmesh(self, img : Image.Image):
+                    width, height = img.size
+                    quarterWidth, quarerHeight = width//2, height//2 # quarter half of the width, height
+                    meshes = [
+                        (
+                            (
+                                0, 0,
+                                quarterWidth, quarerHeight
+                            ), # target rectangle
+                            (
+                                0, 0,
+                                0, quarerHeight,
+                                quarterWidth, quarerHeight,
+                                quarterWidth, 0
+                            ) # source rectangle
+                        ), # first quardant
+                        (
+                            (
+                                quarterWidth, 0,
+                                width, quarerHeight
+                            ), # target rectangle
+                            (
+                                quarterWidth, 0,
+                                quarterWidth, quarerHeight,
+                                0, quarerHeight,
+                                0, 0
+                            ) # source rectangle
+                        ), # second quarter
+                        (
+                            (
+                                0, quarerHeight,
+                                quarterWidth, height
+                            ), # target rectangle
+                            (
+                                0, quarerHeight,
+                                0, 0,
+                                quarterWidth, 0,
+                                quarterWidth, quarerHeight
+                            ) # source rectangle
+                        ), # third quarter
+                        (
+                            (
+                                quarterWidth, quarerHeight,
+                                width, height
+                            ), # target rectangle
+                            (
+                                quarterWidth, quarerHeight,
+                                quarterWidth, 0,
+                                0, 0,
+                                0, quarerHeight
+                            ) # source rectangle
+                        ) # fourth quarter
+                    ]
+                    return meshes
+            image = ImageOps.deform(image = image, deformer = DeformImplicator())
+        except IOError as ioError:
+            return f"{ioError}"
+        except MemoryError as memoryError:
+            return f"Insufficient Error {memoryError}"
+        except ValueError as valueError:
+            return f"invalid value {valueError}"
+        # except ZeroDivisionError as zeroDivisionError:
+            # return f"Cant break into more segments {zeroDivisionError}"
+        self.image = image
+        return "Succeed"
     pass
 imd = ImageDeformer(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
-print(imd.mirrorHalf())
+print(imd.mirrorQuad())
 imd.image.show()
