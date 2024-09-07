@@ -221,7 +221,50 @@ class ImageDeformer:
             return f"Cant break into more segments {zeroDivisionError}"
         self.image = image
         return "Succeed"
+    
+    # chekcer box pattern
+    def chess(self, boxGap = 20) -> str:
+        image = self.image # copying actual image instance
+        # creating user message
+        self.userMessage = "Box Gap should be greater than 0 and less than 80"
+        self.getMessage()
+        # procedure
+        try:
+            columns, rows = image.size[0]//boxGap, image.size[1]//boxGap # row and column
+            class DeformImplicator:
+                def getmesh(self, img : Image.Image):
+                    meshes = []
+                    for i in range(columns):
+                        for j in range(rows):
+                            if i % 2 != 0 or j % 2 != 0:
+                                continue
+                            meshes.append(
+                                (
+                                    (
+                                        i * boxGap, j * boxGap,
+                                        (i+1) * boxGap, (j+1) * boxGap
+                                    ), # target rectangle
+                                    (
+                                        i * boxGap, j * boxGap,
+                                        i * boxGap, (j + 1) * boxGap,
+                                        (i + 1) * boxGap, (j + 1) * boxGap,
+                                         (i+ 1) * boxGap, j * boxGap
+                                    ) # source rectangle
+                                )
+                            )
+                    return meshes
+            image = ImageOps.deform(image=image, deformer= DeformImplicator())
+        except IOError as ioError:
+            return f"{ioError}"
+        except MemoryError as memoryError:
+            return f"Insufficient Error {memoryError}"
+        except ValueError as valueError:
+            return f"invalid value {valueError}"
+        except ZeroDivisionError as zeroDivisionError:
+            return f"Cant break into more segments {zeroDivisionError}"
+        self.image = image
+        return "Succeed"
     pass
 imd = ImageDeformer(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png")
-print(imd.layerize(int(input("Enter repeater value:\t"))))
+print(imd.chess(int(input("Enter box Gap:\t"))))
 imd.image.show()
