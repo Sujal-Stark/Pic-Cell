@@ -141,3 +141,28 @@ class Masks:
         for i in range(len(coordinates)-1):
             drawObject.polygon((centre, coordinates[i], coordinates[i+1], centre), fill=(0,0,0,0))
         return self.groundLayer
+    
+    # style 5 : right diagonal
+    def style_five_mask(self) -> Image.Image:
+        drawObject = ImageDraw.Draw(im = self.groundLayer)
+        quarterWidth, quarterHeight =  2 * self.width/3, 2 * self.height/3 # 2/3 of the width and height
+        width3, height3 = self.width/3, self.height/3 # 1/3 of the width, height
+        drawObject.polygon(xy = ((quarterWidth,10), (self.width-10, height3), (width3, self.height-10), (10, quarterHeight)), fill = (0,0,0,0))
+        drawObject.polygon(xy = ((10, self.height-10), (10, quarterHeight), (width3, self.height - 10), (10, self.height - 10)), fill = (0, 0, 0, 0 ))
+        drawObject.polygon(xy = ((self.width -10, 10), (self.width - 10, height3), (quarterWidth, 10), (self.width-10, 10)), fill = (0, 0, 0, 0))
+        return self.groundLayer
+    
+    # style 6 : left layOut
+    def style_six_mask(self) -> Image.Image:
+        drawObject = ImageDraw.Draw(im = self.groundLayer)
+        quarterWidth, quarterHeight =  2 * self.width/3, 2 * self.height/3 # 2/3 of the width and height
+        drawObject.polygon(xy= ((10, 10), (10, self.height - 10), (quarterWidth, self.height - 10), (quarterWidth, 10)), fill= (0, 0, 0, 0))
+        return self.groundLayer
+    
+    # style 7 : right layOut
+    def style_seven_mask(self) -> Image.Image:
+        drawObject = ImageDraw.Draw(im = self.groundLayer)
+        width3, height3 =  self.width/3, self.height/3 # 1/3 of the width and height
+        drawObject.polygon(xy= ((width3, 10), (width3, self.height - 10), (self.width - 10, self.height - 10,), (self.width - 10, 10)), fill= (0, 0, 0, 0))
+        return self.groundLayer
+Masks.style_seven_mask(Masks(1920, 1080)).show()
