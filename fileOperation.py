@@ -8,7 +8,7 @@ import shutil
 class OperatingSystem:
     def __init__(self,name) -> None:
         self.name = name
-        self.current_directory = "C:\\" #current directory can be accessed by methods and instance
+        self.current_directory = "" #current directory can be accessed by methods and instance
         linkedList = LinkedList(Node(self.current_directory)) #default linkedlist by management system
         self.dir_linked_list = linkedList #self.dir_linked_list is system varaible which can accessed by other linked list and have same features
     
@@ -176,9 +176,12 @@ class OperatingSystem:
     
     #back to previous Directory
     def previousDirectory(self):
-        lastDirectoryNode = self.dir_linked_list.get_lastNode(self.dir_linked_list.head)
-        self.current_directory = lastDirectoryNode.previousNode.directory
-        os.chdir(self.current_directory)
+        try:
+            lastDirectoryNode = self.dir_linked_list.get_lastNode(self.dir_linked_list.head)
+            self.current_directory = lastDirectoryNode.previousNode.directory
+            os.chdir(self.current_directory)
+        except AttributeError:
+            print("No previous directory exist")
     
     def goToDirectory(self):
         iterated_length = self.dir_linked_list.listLength() #length of the linkedlist
