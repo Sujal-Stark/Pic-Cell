@@ -179,4 +179,6 @@ class Masks:
         return self.groundLayer
 
     pass
-Masks.style_eight_mask(Masks(1920, 1080)).show()
+
+if __name__ == '__main__':
+    Masks.style_eight_mask(Masks(1920, 1080)).show()
