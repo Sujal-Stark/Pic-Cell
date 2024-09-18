@@ -153,7 +153,7 @@ class LinkedList:
         copy_head = head   #copying head node
         while copy_head.nextNode != None: #iters upto the last node
             copy_head = copy_head.nextNode
-        return copy_head #returns last node
+        return Node(copy_head) #returns last node
     
     #returns a directory node of desire
     def getDirectoryNode(self,head:Node,curentDirectory:str):
