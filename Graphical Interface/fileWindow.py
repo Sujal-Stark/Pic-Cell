@@ -1,5 +1,5 @@
 # builtin libraries
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem, QPushButton, QFrame, QLabel
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem, QPushButton, QFrame, QLabel, QLineEdit
 from PyQt5.QtCore import Qt
 from PIL import Image
 import os
@@ -12,7 +12,7 @@ class FileWindow(QDialog):
         self.masterLayout = QVBoxLayout(self)
         self.loadFileWindowUi()
         self.setProperties()
-        self.fileListWidget.currentRowChanged.connect(self.fileAccess)
+        self.fileListWidget.currentItemChanged.connect(self.fileAccess)
         self.forwardButton.clicked.connect(self.nextDirectory)
         self.previousButton.clicked.connect(self.previousDirectory)
         return
@@ -28,6 +28,8 @@ class FileWindow(QDialog):
     def loadFileWindowUi(self):
         self.windowButtonLayout = QHBoxLayout()
         self.windowInnerButtonLayout = QHBoxLayout()
+        self.fileOpenerLayout = QHBoxLayout()
+        self.fileOpenerInnerLayout = QHBoxLayout()
 
         self.windowButtonFrame = QFrame()
         self.windowButtonFrame.setFrameShape(QFrame.Shape.Panel)
@@ -46,6 +48,20 @@ class FileWindow(QDialog):
         self.fileListWidget = QListWidget()
         self.masterLayout.addWidget(self.fileListWidget)
         self.fileListWidget.addItems(["Files",R"C:\\", R"D:\\", R"F:\\"])
+
+        self.fileOpenerFrame = QFrame()
+        self.fileOpenerFrame.setFrameShape(QFrame.Shape.Panel)
+        self.fileOpenerLayout.addWidget(self.fileOpenerFrame)
+        self.fileOpenerFrame.setLayout(self.fileOpenerInnerLayout)
+
+        self.ImageFileNameEditor = QLineEdit()
+        self.ImageFileNameEditor.setFixedWidth(260)
+        self.fileOpenButton = QPushButton("Open")
+
+        self.fileOpenerInnerLayout.addWidget(self.ImageFileNameEditor, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.fileOpenerInnerLayout.addWidget(self.fileOpenButton, alignment = Qt.AlignmentFlag.AlignRight)
+
+        self.masterLayout.addLayout(self.fileOpenerLayout)
         return
     
     def storeCurrentPath(self, directory:str):
@@ -91,8 +107,8 @@ class FileWindow(QDialog):
             else:
                 if currentText.split(".")[-1] in ["png", "jpeg", "jfif", "jpg"]:
                     self.iamgeObjectPath = os.path.join(self.currentPathName, currentText)
+                    self.ImageFileNameEditor.setText(currentText)
                     self.currentImageInformation = self.createImageInformation()
-                    self.close()
                     return
         
     def nextDirectory(self):
@@ -131,15 +147,14 @@ class FileWindow(QDialog):
             with Image.open(self.iamgeObjectPath) as imageObject:
                 bands = imageObject.getbands()
                 if list(bands) == ['R', 'G', 'B']:
-                    red_band = imageObject.getchannel("R")
-                    green_band = imageObject.getchannel("G")
-                    blue_band = imageObject.getchannel("B")
-                    bandInformation = f"\n{red_band}\n{green_band}\n{blue_band}"
+                    redBand, greenBand = imageObject.getchannel("R"), imageObject.getchannel("G")
+                    blueBand = imageObject.getchannel("B")
+                    bandInformation = f"Red Band:\t{redBand}\nGreen Band:\t {greenBand}\nBlue Band:\t{blueBand}"
                 extremeValue = imageObject.getextrema()
             return f"""
                 Path: {self.iamgeObjectPath}
                 Bands: {bands}
-                Band Information: {bandInformation}
+                band Infomation:\n{bandInformation}
                 Extrema: {extremeValue}
             """
         else:
