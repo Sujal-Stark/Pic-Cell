@@ -14,7 +14,15 @@ class MasterWindow(QMainWindow):
         self.setCentralWidget(self.mainWidget)
         self.masterLayout = QVBoxLayout(self.mainWidget)
         self.LoadUI()
+        self.assignProperties()
+        self.newFileWindow.fileOpenButton.clicked.connect(self.openGalleryImage)
+        self.closeFile.triggered.connect(self.tab1.closeImageFromGallery)
+        self.newFileWindow.fileListWidget.currentRowChanged.connect(self.connectImageGridWithFiles)
         self.show()
+        return
+    
+    def assignProperties(self):
+        self.newFileWindow = FileWindow()
         return
     
     def LoadUI(self):
@@ -45,6 +53,7 @@ class MasterWindow(QMainWindow):
         self.fileMenu.addActions([self.openFile, self.closeFile])
         self.setMenuBar(self.bar)
         return
+    
     def createButtons(self):
         # self.fileButton = QPushButton("File Access")
         # self.editButton = QPushButton("Edit File")
@@ -92,9 +101,22 @@ class MasterWindow(QMainWindow):
         return
     
     def createSeondWindow(self):
-        self.newFileWindow = FileWindow()
         self.newFileWindow.show()
-    pass
+        return
+    
+    def connectImageGridWithFiles(self):
+        self.tab1.loadImageGrid(self.newFileWindow.iamgeObjectListPath)
+        # self.tab1.viewBar.acceptData(self.newFileWindow.iamgeObjectListPath)
+        # self.tab1.viewBar.addShowableImages()
+        return
+
+    def openGalleryImage(self):
+        self.tab1.imageToShow = self.newFileWindow.iamgeObjectPath
+        if self.tab1.imageToShow != None:
+            self.tab1.openImageInGallery()
+            self.tab1.imageInformationLabel.setText(self.newFileWindow.currentImageInformation)
+            self.newFileWindow.close()
+        return
     
     pass
 
@@ -102,4 +124,3 @@ if __name__ == '__main__':
     app = QApplication([])
     masterWindow = MasterWindow()
     app.exec_()
-
