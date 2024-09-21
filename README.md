@@ -7,6 +7,7 @@
 <body>
     <div class="poster">
         <h1>Pic-Cell</h1>
+        ![alt text]([image-URL](https://ibb.co/vvXsQBv))
     </div>
 </body>
 </html>
