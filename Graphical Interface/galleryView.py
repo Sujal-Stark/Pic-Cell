@@ -181,7 +181,7 @@ class GalleryWindow(QWidget):
         self.emptyImageGrid()
         i, j = 0, 0
         for image in self.imageLabelList:
-            if j == 4:
+            if j == 6:
                 j = 0
                 i += 1
             self.imageGrid.addWidget(image, i, j)
