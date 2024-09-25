@@ -1,9 +1,9 @@
 # important libraries
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QFrame, QScrollArea
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal, QObject
 from PyQt5.QtGui import QPixmap
 from fileWindow import FileWindow
-from viewerGrid import ViewerGrid
+import os
 
 class GalleryWindow(QWidget):
     def __init__(self)-> None:
@@ -16,8 +16,15 @@ class GalleryWindow(QWidget):
     
     def galleryWindowProperty(self):
         self.windowView = FileWindow()
-        self.imageToShow = None
+        self.imageToShow = ""
         self.labelList = []
+        self.imagePaths = []
+        self.currentImageObjectIndex = -1 # helps to shoe all the image in the directory one by one
+        self.currentDirectory = ""
+        self.bufferDirectory = ""
+        self.isGridEmpty = True
+        self.signalGenerator = AccessCommunication()
+        self.imageLabelList = []
         return
 
     def loadGalleryUI(self):
@@ -110,7 +117,7 @@ class GalleryWindow(QWidget):
         return
     
     def openImageInGallery(self):
-        if self.imageToShow != None:
+        if self.imageToShow != "":
             qImageObject = QPixmap(self.imageToShow)
             qImageObject = qImageObject.scaled(self.galleryImageLabel.width(), self.galleryImageLabel.height(), aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
             self.galleryImageLabel.hide()
@@ -119,16 +126,72 @@ class GalleryWindow(QWidget):
         else:
             return
     
-    def openImageFromGrid(self):
-        self.imageToShow = self.imageGrid.sender().objectName()
+    def openImageFromGrid(self, imagePathFromGrid:str):
+        self.imageToShow = os.path.join(self.currentDirectory,imagePathFromGrid)
         self.openImageInGallery()
         return
+    
+    def emptyImageGrid(self) -> str:
+        if len(self.imageLabelList) != 0:
+            i, j = 0, 0
+            try:
+                for label in self.imageLabelList:
+                    if j == 4:
+                        i += 1
+                        j == 0
+                    currentItem : QLabel = self.imageGrid.itemAtPosition(i,j)
+                    # currentItem.hide()
+                    self.imageGrid.removeItem(currentItem)
+                    j += 1
+                return "Succeed"
+            except RuntimeError as runTimeError:
+                return f"{runTimeError} -> Unable to empty the Image View"
+        else:
+            return "Grid is already Empty"
+    
+    def createImageLabel(self):
+        if len(self.imagePaths) == 0:
+            return
+        else:
+            try:
+                for imagePath in self.imagePaths:
+                    label = ClickableLabel(imagePath)
+                    pixmap = QPixmap(imagePath)
+                    pixmap = pixmap.scaled(50,50)
+                    label.setPixmap(pixmap)
+                    label.signalGenerator.mouseCLickSignal.connect(self.openImageFromGrid)
+                    self.imageLabelList.append(label)
+                return
+            except IndexError:
+                return 
+    
+    def loadImageToGrid(self):
+        if self.bufferDirectory == self.currentDirectory:
+            return "Already Opened"
+        else:
+            self.bufferDirectory = self.currentDirectory
+            self.createImageLabel()
+            if len(self.imageLabelList) == 0:
+                return "No Image to show"
+            else:
+                self.signalGenerator.imageReadySignal.emit()
+            return "Succeed"
 
+    def addImagesToGrid(self):
+        self.emptyImageGrid()
+        i, j = 0, 0
+        for image in self.imageLabelList:
+            if j == 4:
+                j = 0
+                i += 1
+            self.imageGrid.addWidget(image, i, j)
+            j += 1
+        return
+    
     def closeImageFromGallery(self):
         if self.imageToShow != None:
             self.galleryImageLabel.hide()
             self.imageInformationLabel.hide()
-            self.emptyImageGrid()
 
             self.galleryImageLabel.setText("Your Image will show up here")
             self.imageInformationLabel.setText("Image Information")
@@ -137,37 +200,54 @@ class GalleryWindow(QWidget):
             self.imageInformationLabel.show()
         return
     
-    def emptyImageGrid(self):
-        if len(self.labelList) != 0:
-            try:
-                for labels in self.labelList:
-                    self.imageGrid.removeWidget(labels)
-                self.labelList.clear()
-            except RuntimeError as runTimeError:
-                return f"{runTimeError} -> Unable to empty the Image View"
-
-    def loadImageGrid(self, imageFileList:list):
-        if len(imageFileList) == 0:
-            return
+    # shows the next image Object to the screeen
+    def showNextImage(self, imageFileList:list):
+        if len(imageFileList) == 0 or self.currentImageObjectIndex == (len(imageFileList)-1):
+            return "Last image"
         else:
-            self.emptyImageGrid()
             try:
-                for row in range((len(imageFileList) // 4)+1):
-                    for col in range(4):
-                        index = row * 3 + col
-                        if index < len(imageFileList):
-                            label = QLabel()
-                            label.setObjectName(imageFileList[index])
-                            self.labelList.append(label)
-                            label.setFixedSize(50,50)
-                            pixmap = QPixmap(imageFileList[index])
-                            pixmap = pixmap.scaled(50,50)
-                            label.setPixmap(pixmap)
-                            self.imageGrid.addWidget(label, row, col)
-                            self.imageGrid.setSpacing(1)
-            except IndexError:
-                print("Out off index")
+                self.currentImageObjectIndex = imageFileList.index(self.imageToShow.split("\\")[-1])
+                self.currentImageObjectIndex += 1
+                self.imageToShow = imageFileList[self.currentImageObjectIndex]
+                self.openImageInGallery()
+                return "Succeed"
+            except ValueError:
+                return "Unable to open This Image"
             return
+
+    # shows the previous image Object to the screeen
+    def showPreviousImage(self, imageFileList:list):
+        if len(imageFileList) == 0 or self.currentImageObjectIndex == 0:
+            return "First Image"
+        else:
+            try:
+                self.currentImageObjectIndex = imageFileList.index(self.imageToShow.split("\\")[-1])
+                self.currentImageObjectIndex -= 1
+                self.imageToShow = imageFileList[self.currentImageObjectIndex]
+                self.openImageInGallery()
+                return "Succeed"
+            except ValueError:
+                return "Unable to open This Image"
+    
+    pass
+
+class ClickableLabel(QLabel):
+    def __init__(self, text = ""):
+        super().__init__()
+        self.signalGenerator = AccessCommunication()
+        self.text = text
+        return
+    
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.signalGenerator.mouseCLickSignal.emit(self.text)
+        return
+    pass
+
+class AccessCommunication(QObject):
+    imageReadySignal = pyqtSignal()
+    mouseCLickSignal = pyqtSignal(str)
     pass
 
 if __name__ == '__main__':
