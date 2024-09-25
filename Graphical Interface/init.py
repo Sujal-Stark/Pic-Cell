@@ -1,9 +1,10 @@
 # libraries
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QPushButton, QLabel, QFrame, QMenuBar, QMenu, QAction, QDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QPushButton, QLabel, QFrame, QMenuBar, QMenu, QAction, QShortcut
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QPixmap
 from galleryView import GalleryWindow
 from fileWindow import FileWindow
+from threading import Thread
+
 class MasterWindow(QMainWindow):
     def __init__(self)-> None:
         super().__init__()
@@ -15,14 +16,8 @@ class MasterWindow(QMainWindow):
         self.masterLayout = QVBoxLayout(self.mainWidget)
         self.LoadUI()
         self.assignProperties()
-        self.newFileWindow.fileOpenButton.clicked.connect(self.openGalleryImage)
-        self.closeFile.triggered.connect(self.tab1.closeImageFromGallery)
-        self.newFileWindow.fileListWidget.currentRowChanged.connect(self.connectImageGridWithFiles)
+        self.eventManager()
         self.show()
-        return
-    
-    def assignProperties(self):
-        self.newFileWindow = FileWindow()
         return
     
     def LoadUI(self):
@@ -33,7 +28,28 @@ class MasterWindow(QMainWindow):
         self.createFrames()
         self.createTabs()
         self.construct()
+        self.controlKeys()
         return
+    
+    def controlKeys(self):
+        self.pressKeyToNextImage = QShortcut(Qt.Key.Key_Right, self)
+        self.pressKeyToPreviousImage = QShortcut(Qt.Key.Key_Left, self)
+        return
+    
+    def eventManager(self):
+        self.newFileWindow.fileOpenButton.clicked.connect(self.openGalleryImage)
+        self.closeFile.triggered.connect(self.tab1.closeImageFromGallery)
+        self.loadOtherImages.triggered.connect(self.connectImageGridWithFiles)
+        self.newFileWindow.fileListWidget.currentItemChanged.connect(self.newFileWindow.fileAccess)
+        self.pressKeyToNextImage.activated.connect(self.openNextImageInGallery)
+        self.pressKeyToPreviousImage.activated.connect(self.openPreviousImageInGallery)
+        self.tab1.signalGenerator.imageReadySignal.connect(self.showGridObjects)
+        return
+    
+    def assignProperties(self):
+        self.newFileWindow = FileWindow()
+        return
+    
     
     def createMenubar(self):
         self.bar = QMenuBar(self)
@@ -49,8 +65,10 @@ class MasterWindow(QMainWindow):
         self.openFile.triggered.connect(self.createSeondWindow)
         self.closeFile = QAction("Close", self)
         self.closeFile.setShortcut("ctrl+w")
+        self.loadOtherImages = QAction("Load Other Images", self)
+        self.loadOtherImages.setShortcut("ctrl+i")
 
-        self.fileMenu.addActions([self.openFile, self.closeFile])
+        self.fileMenu.addActions([self.openFile, self.closeFile, self.loadOtherImages])
         self.setMenuBar(self.bar)
         return
     
@@ -105,19 +123,32 @@ class MasterWindow(QMainWindow):
         return
     
     def connectImageGridWithFiles(self):
-        self.tab1.loadImageGrid(self.newFileWindow.iamgeObjectListPath)
-        # self.tab1.viewBar.acceptData(self.newFileWindow.iamgeObjectListPath)
-        # self.tab1.viewBar.addShowableImages()
+        self.tab1.imagePaths = self.newFileWindow.iamgeObjectListPath
+        self.tab1.currentDirectory = self.newFileWindow.currentPathName
+        self.tab1.loadImageToGrid()
+        self.tab1.currentDirectory = self.newFileWindow.currentPathName
         return
+    
+    def showGridObjects(self):
+            newThread = Thread(target = self.tab1.addImagesToGrid, args=())
+            newThread.start()
+            return
 
     def openGalleryImage(self):
         self.tab1.imageToShow = self.newFileWindow.iamgeObjectPath
-        if self.tab1.imageToShow != None:
+        if self.tab1.imageToShow != "":
             self.tab1.openImageInGallery()
             self.tab1.imageInformationLabel.setText(self.newFileWindow.currentImageInformation)
             self.newFileWindow.close()
         return
     
+    def openNextImageInGallery(self):
+        self.methodInfo.setText(self.tab1.showNextImage(self.newFileWindow.iamgeObjectListPath))
+        return
+    
+    def openPreviousImageInGallery(self):
+        self.methodInfo.setText(self.tab1.showPreviousImage(self.newFileWindow.iamgeObjectListPath))
+        return
     pass
 
 if __name__ == '__main__':
