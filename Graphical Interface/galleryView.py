@@ -182,7 +182,6 @@ class GalleryWindow(QWidget):
             self.createImageLabel()
         else:
             self.emptyImageGrid()
-        print(self.imageLabelList,"\n\n\n\n\n\n\n\n")
         i, j = 0, 0
         for image in self.imageLabelList:
             if j == 6:
