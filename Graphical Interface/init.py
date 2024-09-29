@@ -130,24 +130,28 @@ class MasterWindow(QMainWindow):
         return
     
     def showGridObjects(self):
+            self.methodInfo.setText("Loading... Please Wait")
             newThread = Thread(target = self.tab1.addImagesToGrid, args=())
             newThread.start()
+            self.methodInfo.setText("Loaded Successfully")
             return
 
     def openGalleryImage(self):
         self.tab1.imageToShow = self.newFileWindow.iamgeObjectPath
         if self.tab1.imageToShow != "":
             self.tab1.openImageInGallery()
-            self.tab1.imageInformationLabel.setText(self.newFileWindow.currentImageInformation)
+            self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
             self.newFileWindow.close()
         return
     
     def openNextImageInGallery(self):
         self.methodInfo.setText(self.tab1.showNextImage(self.newFileWindow.iamgeObjectListPath))
+        self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
         return
     
     def openPreviousImageInGallery(self):
         self.methodInfo.setText(self.tab1.showPreviousImage(self.newFileWindow.iamgeObjectListPath))
+        self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
         return
     pass
 

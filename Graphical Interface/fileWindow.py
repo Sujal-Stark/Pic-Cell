@@ -108,7 +108,7 @@ class FileWindow(QDialog):
                 if currentText.split(".")[-1] in ["png", "jpeg", "jfif", "jpg"]:
                     self.iamgeObjectPath = os.path.join(self.currentPathName, currentText)
                     self.ImageFileNameEditor.setText(currentText)
-                    self.currentImageInformation = self.createImageInformation()
+                    self.currentImageInformation = self.createImageInformation(currentText)
                     return
         
     def nextDirectory(self):
@@ -141,10 +141,10 @@ class FileWindow(QDialog):
         except ValueError:
             return "Value is not present"
         
-    def createImageInformation(self) -> str:
+    def createImageInformation(self, imagePath : str) -> str:
         bandInformation = ""
-        if self.iamgeObjectPath != None:
-            with Image.open(self.iamgeObjectPath) as imageObject:
+        if imagePath != None:
+            with Image.open(imagePath) as imageObject:
                 bands = imageObject.getbands()
                 if list(bands) == ['R', 'G', 'B']:
                     redBand, greenBand = imageObject.getchannel("R"), imageObject.getchannel("G")
@@ -152,9 +152,9 @@ class FileWindow(QDialog):
                     bandInformation = f"Red Band:\t{redBand}\nGreen Band:\t {greenBand}\nBlue Band:\t{blueBand}"
                 extremeValue = imageObject.getextrema()
             return f"""
-                Path: {self.iamgeObjectPath}
-                Bands: {bands}
-                band Infomation:\n{bandInformation}
+                Path: {imagePath}\n
+                Bands: {bands}\n
+                band Infomation:\n{bandInformation}\n
                 Extrema: {extremeValue}
             """
         else:

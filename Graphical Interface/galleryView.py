@@ -57,11 +57,9 @@ class GalleryWindow(QWidget):
 
         self.imageGridFrame = QFrame()
         self.imageGridFrame.setFrameShape(QFrame.Shape.Panel)
-        # self.imageGridFrame.setFixedSize(250,400)
 
         self.imageInformationFrame = QFrame()
         self.imageInformationFrame.setFrameShape(QFrame.Shape.Panel)
-        # self.imageInformationFrame.setFixedSize(250,200)
         return
     
     def createScrollAreaWidgets(self):
@@ -133,16 +131,16 @@ class GalleryWindow(QWidget):
     
     def emptyImageGrid(self) -> str:
         if len(self.imageLabelList) != 0:
-            i, j = 0, 0
             try:
-                for label in self.imageLabelList:
-                    if j == 4:
-                        i += 1
-                        j == 0
-                    currentItem : QLabel = self.imageGrid.itemAtPosition(i,j)
-                    # currentItem.hide()
-                    self.imageGrid.removeItem(currentItem)
-                    j += 1
+                for i in range(self.imageGrid.count()):
+                    currentItem = self.imageGrid.takeAt(0)
+                    widgetInItem = currentItem.widget()
+                    if widgetInItem:
+                        widgetInItem.deleteLater()
+                self.imageGrid.update()
+                otherImagesLabel = QLabel("Other Images")
+                otherImagesLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.imageGrid.addWidget(otherImagesLabel, 0, 0)
                 return "Succeed"
             except RuntimeError as runTimeError:
                 return f"{runTimeError} -> Unable to empty the Image View"
@@ -154,6 +152,7 @@ class GalleryWindow(QWidget):
             return
         else:
             try:
+                self.imageLabelList.clear()
                 for imagePath in self.imagePaths:
                     label = ClickableLabel(imagePath)
                     pixmap = QPixmap(imagePath)
@@ -166,19 +165,24 @@ class GalleryWindow(QWidget):
                 return 
     
     def loadImageToGrid(self):
-        if self.bufferDirectory == self.currentDirectory:
-            return "Already Opened"
-        else:
-            self.bufferDirectory = self.currentDirectory
+        if self.isGridEmpty:
             self.createImageLabel()
             if len(self.imageLabelList) == 0:
                 return "No Image to show"
             else:
+                self.isGridEmpty = False
                 self.signalGenerator.imageReadySignal.emit()
             return "Succeed"
+        else:
+            self.isGridEmpty = True
+            return self.emptyImageGrid()
 
     def addImagesToGrid(self):
-        self.emptyImageGrid()
+        if self.isGridEmpty:
+            self.createImageLabel()
+        else:
+            self.emptyImageGrid()
+        print(self.imageLabelList,"\n\n\n\n\n\n\n\n")
         i, j = 0, 0
         for image in self.imageLabelList:
             if j == 6:
