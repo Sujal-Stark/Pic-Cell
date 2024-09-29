@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt
 from galleryView import GalleryWindow
 from fileWindow import FileWindow
 from threading import Thread
+from editManager import EditingActionManager
 
 class MasterWindow(QMainWindow):
     def __init__(self)-> None:
@@ -100,7 +101,7 @@ class MasterWindow(QMainWindow):
         self.tabScreen = QTabWidget()
 
         self.tab1 = GalleryWindow()
-        self.tab2 = QWidget()
+        self.tab2 = EditingActionManager()
 
         self.tabScreen.addTab(self.tab1, "Gallery")
         self.tabScreen.addTab(self.tab2, "Edit Section")
