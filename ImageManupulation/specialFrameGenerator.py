@@ -2,6 +2,9 @@
 from PIL import Image, ImageChops
 
 # important custom modules
+import sys, os
+
+sys.path.append(os.getcwd())
 from maskGenerator import Masks
 
 # class
