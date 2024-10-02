@@ -1,6 +1,8 @@
 from PIL import Image, ImageDraw
 
 class Masks:
+    frameOptions = ["Rectangle Layer", "Rombous", "Ellipse", "Circle", "Double Circle", "Left Diagonal", "Right Diagonal", "Five Section Rectangle", "Embrald", "Dead pool", "Star", "Left Frame", "Right Frame", "Step Size"] # editing options available
+
     #constructor
     def __init__(self, width : int, height : int) -> None:
         self.width, self.height = width, height
@@ -179,6 +181,3 @@ class Masks:
         return self.groundLayer
 
     pass
-
-if __name__ == '__main__':
-    Masks.style_six_mask(Masks(1920, 1080)).show()
