@@ -1,9 +1,9 @@
 # important Libraries
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QPushButton, QLabel, QFrame, QMenuBar, QMenu, QAction, QShortcut
+from PyQt5.QtGui import QMouseEvent
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea
 from PyQt5.QtCore import Qt
-from galleryView import GalleryWindow
-from fileWindow import FileWindow
 from threading import Thread
+import sys, os
 
 class EditingActionManager(QWidget):
     def __init__(self) -> None:
@@ -18,7 +18,9 @@ class EditingActionManager(QWidget):
         self.createListWidgets()
         self.creteScrollAreas()
         self.createLayouts()
+        self.editingTree()
         self.constructInterface()
+        self.addWidgetAttributes()
         return
     
     def addProperties(self):
@@ -42,12 +44,12 @@ class EditingActionManager(QWidget):
         return
     
     def createLayouts(self):
-        self.editingZoneLayout = QVBoxLayout()
+        self.editingZoneLayout = QHBoxLayout()
 
+        self.editOptionPanel = QVBoxLayout()
+        self.innerEditOptionPanel = QVBoxLayout()
         self.imageViewingPanel = QHBoxLayout()
         self.innerImageViewingPanel = QHBoxLayout()
-        self.editOptionPanel = QHBoxLayout()
-        self.innerEditOptionPanel = QHBoxLayout()
 
         self.editControlLayout = QVBoxLayout()
 
@@ -61,19 +63,31 @@ class EditingActionManager(QWidget):
         return
     
     def creteScrollAreas(self):
+        self.ScrollEditingBody = QScrollArea()
+        self.ScrollEditingBody.setWidgetResizable(True)
+        return
+    
+    def editingTree(self):
+        self.editingTreeBody = QTreeWidget()
+        self.editingTreeBody.setColumnCount(1)
+        self.editingTreeBody.setHeaderLabel("Editing Body")
+        editSections = self.addTreeItems()
+        # EditSections = ["Adjust", "Filters", "Color Enhance", "Deform Image", "Frames", "Collage"]
+        for editSection in editSections:
+            self.editingTreeBody.addTopLevelItem(editSection)
         return
     
     def constructInterface(self):
         self.editSectionMasterLayout.addLayout(self.editingZoneLayout, 80)
         self.editSectionMasterLayout.addLayout(self.editControlLayout, 20)
 
-        self.editingZoneLayout.addLayout(self.imageViewingPanel, 90)
-        self.imageViewingPanel.addWidget(self.imageViewingFrame)
-        self.imageViewingFrame.setLayout(self.innerImageViewingPanel)
-
-        self.editingZoneLayout.addLayout(self.editOptionPanel, 10)
+        self.editingZoneLayout.addLayout(self.editOptionPanel, 15)
         self.editOptionPanel.addWidget(self.editOptionFrame)
         self.editOptionFrame.setLayout(self.innerEditOptionPanel)
+
+        self.editingZoneLayout.addLayout(self.imageViewingPanel, 85)
+        self.imageViewingPanel.addWidget(self.imageViewingFrame)
+        self.imageViewingFrame.setLayout(self.innerImageViewingPanel)
 
         self.editControlLayout.addLayout(self.editSpectrumLayout, 60)
         self.editSpectrumLayout.addWidget(self.editSpectrumFrame)
@@ -84,4 +98,10 @@ class EditingActionManager(QWidget):
         self.advancementframe.setLayout(self.innerAdvancementLayout)
         return
     
+    def addWidgetAttributes(self):
+        self.innerEditOptionPanel.addWidget(self.editingTreeBody)
+    
+    def addTreeItems(self):
+        return []
     pass
+
