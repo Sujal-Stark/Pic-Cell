@@ -25,6 +25,8 @@ class GalleryWindow(QWidget):
         self.isGridEmpty = True
         self.signalGenerator = AccessCommunication()
         self.imageLabelList = []
+        self.imageNormalSize = (1050,600)
+        self.originalSize = (1050, 600)
         return
 
     def loadGalleryUI(self):
@@ -53,7 +55,6 @@ class GalleryWindow(QWidget):
     def createGalleryFrames(self):
         self.galleryImageViewFrame = QFrame()
         self.galleryImageViewFrame.setFrameShape(QFrame.Shape.Panel)
-        self.galleryImageViewFrame.setFixedSize(1055,615)
 
         self.imageGridFrame = QFrame()
         self.imageGridFrame.setFrameShape(QFrame.Shape.Panel)
@@ -72,12 +73,15 @@ class GalleryWindow(QWidget):
         self.imageGridScrollArea.setWidgetResizable(True)
         self.imageGridScrollArea.setFixedSize(250, 400)
         self.imageGridScrollArea.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.imageViewScrollArea = QScrollArea()
+        self.imageViewScrollArea.setWidgetResizable(True)
+        self.imageViewScrollArea.setFixedSize(1050,600)
         return
 
     def createGalleryLabels(self):
         self.galleryImageLabel = QLabel("Your Image will show up here")
         self.galleryImageLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.galleryImageLabel.setFixedSize(1000,600)
 
         self.gridViewLabel = QLabel("Other Images")
         self.labelList.append(self.gridViewLabel)
@@ -93,7 +97,8 @@ class GalleryWindow(QWidget):
         self.galleryMasterLayout.addLayout(self.galleryControlpanel,20)
         
         # adding in gallery imageview layout
-        self.galleryImageView.addWidget(self.galleryImageViewFrame)
+        self.galleryImageView.addWidget(self.imageViewScrollArea)
+        self.imageViewScrollArea.setWidget(self.galleryImageViewFrame)
         self.galleryImageViewFrame.setLayout(self.galleryInnerImageView)
 
         # adding in gallery control pannel layout
@@ -117,7 +122,7 @@ class GalleryWindow(QWidget):
     def openImageInGallery(self):
         if self.imageToShow != "":
             qImageObject = QPixmap(self.imageToShow)
-            qImageObject = qImageObject.scaled(self.galleryImageLabel.width(), self.galleryImageLabel.height(), aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
+            qImageObject = qImageObject.scaled(self.imageNormalSize[0], self.imageNormalSize[1], aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
             self.galleryImageLabel.hide()
             self.galleryImageLabel.setPixmap(qImageObject)
             self.galleryImageLabel.show()
