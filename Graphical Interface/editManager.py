@@ -4,12 +4,22 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton,QFram
 from PyQt5.QtCore import Qt
 from threading import Thread
 import sys, os
+# adding current path to the system
+sys.path.append(os.getcwd())
+
+from  ImageManupulation.ImageframeAdjuster import FrameAdjustment
+from ImageManupulation.deformer import ImageDeformer
+from ImageManupulation.imageColorEnhancer import ColorImage
+from ImageManupulation.imageFiltering import FilterImage
+# from ImageManupulation.specialFrameGenerator import SpecialFrames
+from ImageManupulation.maskGenerator import Masks
 
 class EditingActionManager(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self.editSectionMasterLayout = QHBoxLayout(self)
         self.loadUi()
+        self.addResponse()
         return
     
     def loadUi(self):
@@ -23,6 +33,8 @@ class EditingActionManager(QWidget):
         self.addWidgetAttributes()
         return
     
+    def addResponse(self):
+        self.editingTreeBody.itemClicked.connect(self.addTreeItems)
     def addProperties(self):
         return
     
@@ -71,10 +83,10 @@ class EditingActionManager(QWidget):
         self.editingTreeBody = QTreeWidget()
         self.editingTreeBody.setColumnCount(1)
         self.editingTreeBody.setHeaderLabel("Editing Body")
-        editSections = self.addTreeItems()
-        # EditSections = ["Adjust", "Filters", "Color Enhance", "Deform Image", "Frames", "Collage"]
+        # editSections = self.addTreeItems()
+        editSections = ["Adjust", "Filters", "Color Enhance", "Deform Image", "Frames", "Collage"]
         for editSection in editSections:
-            self.editingTreeBody.addTopLevelItem(editSection)
+            self.editingTreeBody.addTopLevelItem(QTreeWidgetItem([editSection]))
         return
     
     def constructInterface(self):
@@ -101,7 +113,26 @@ class EditingActionManager(QWidget):
     def addWidgetAttributes(self):
         self.innerEditOptionPanel.addWidget(self.editingTreeBody)
     
-    def addTreeItems(self):
-        return []
+    def addTreeItems(self, item : QTreeWidgetItem):
+        parsedClass = item.text(0)
+        editOptions = []
+        if parsedClass == "Adjust":
+            editOptions = FrameAdjustment.adjustmentSubEditOption
+        elif parsedClass == "Filters":
+            editOptions = FilterImage.filteringOption
+        elif parsedClass == "Color Enhance":
+            editOptions = ColorImage.colorEnhanceOptions
+        elif parsedClass == "Deform Image":
+            editOptions = ImageDeformer.deformOptions
+        elif parsedClass == "Frames":
+            editOptions = Masks.frameOptions
+        elif parsedClass == "Collage":
+            pass
+        else:
+            pass
+
+        for editOption in editOptions:
+            item.addChild(QTreeWidgetItem([editOption]))
+        editOptions.clear()
     pass
 
