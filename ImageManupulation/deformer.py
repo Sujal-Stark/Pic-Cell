@@ -435,6 +435,8 @@ class ImageDeformer:
         self.image = image
         return "Succeed"
     pass
-imd = ImageDeformer(R"D:\Gallery\PhotoSpace\downloaded pic\wp13349909-aquaman-and-the-lost-kingdom-wallpapers.jpg")
-print(imd.sinCurve())
-imd.image.show()
+
+if __name__ == '__main__':
+    imd = ImageDeformer(R"D:\Gallery\PhotoSpace\downloaded pic\wp13349909-aquaman-and-the-lost-kingdom-wallpapers.jpg")
+    print(imd.sinCurve())
+    imd.image.show()
