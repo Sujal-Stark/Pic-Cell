@@ -1,6 +1,6 @@
 # important Libraries
 from PyQt5.QtGui import QMouseEvent
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog
 from PyQt5.QtCore import Qt
 from threading import Thread
 import sys, os
@@ -23,6 +23,8 @@ class EditingActionManager(QWidget):
         return
     
     def loadUi(self):
+        self.addProperties()
+        self.createLabels()
         self.createButtons()
         self.createFrames()
         self.createListWidgets()
@@ -35,10 +37,20 @@ class EditingActionManager(QWidget):
     
     def addResponse(self):
         self.editingTreeBody.itemClicked.connect(self.addTreeItems)
+        self.chooseColorLabel.clicked.connect(self.createColorPicker)
+        return
+    
     def addProperties(self):
+        self.currentColor = ""
+        return
+    
+    def createLabels(self):
+        self.imageForEdit = QLabel("Edit Your Image here")
+        self.specialEditOptions = QLabel("Special editing choice will show up here")
         return
     
     def createButtons(self):
+        self.chooseColorLabel = QPushButton("Choose color")
         return
     
     def createFrames(self):
@@ -77,6 +89,9 @@ class EditingActionManager(QWidget):
     def creteScrollAreas(self):
         self.ScrollEditingBody = QScrollArea()
         self.ScrollEditingBody.setWidgetResizable(True)
+
+        self.editableImageField = QScrollArea()
+        self.editableImageField.setWidgetResizable(True)
         return
     
     def editingTree(self):
@@ -98,7 +113,8 @@ class EditingActionManager(QWidget):
         self.editOptionFrame.setLayout(self.innerEditOptionPanel)
 
         self.editingZoneLayout.addLayout(self.imageViewingPanel, 85)
-        self.imageViewingPanel.addWidget(self.imageViewingFrame)
+        self.imageViewingPanel.addWidget(self.editableImageField)
+        self.editableImageField.setWidget(self.imageViewingFrame)
         self.imageViewingFrame.setLayout(self.innerImageViewingPanel)
 
         self.editControlLayout.addLayout(self.editSpectrumLayout, 60)
@@ -112,6 +128,9 @@ class EditingActionManager(QWidget):
     
     def addWidgetAttributes(self):
         self.innerEditOptionPanel.addWidget(self.editingTreeBody)
+        self.innerImageViewingPanel.addWidget(self.imageForEdit, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerEditSpectrumLayout.addWidget(self.specialEditOptions, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerAdvancementLayout.addWidget(self.chooseColorLabel, alignment = Qt.AlignmentFlag.AlignBottom)
     
     def addTreeItems(self, item : QTreeWidgetItem):
         parsedClass = item.text(0)
@@ -134,5 +153,10 @@ class EditingActionManager(QWidget):
         for editOption in editOptions:
             item.addChild(QTreeWidgetItem([editOption]))
         editOptions.clear()
+        return
+    
+    def createColorPicker(self):
+        self.currentColor = QColorDialog.getColor()
+        return
     pass
 
