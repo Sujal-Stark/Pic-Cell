@@ -45,6 +45,9 @@ class MasterWindow(QMainWindow):
         self.pressKeyToNextImage.activated.connect(self.openNextImageInGallery)
         self.pressKeyToPreviousImage.activated.connect(self.openPreviousImageInGallery)
         self.tab1.signalGenerator.imageReadySignal.connect(self.showGridObjects)
+        self.zoomInOption.triggered.connect(self.scaleUPImage)
+        self.zoomOutOption.triggered.connect(self.scaleDownImage)
+        self.OriginalSize.triggered.connect(self.originalScale)
         return
     
     def assignProperties(self):
@@ -70,6 +73,24 @@ class MasterWindow(QMainWindow):
         self.loadOtherImages.setShortcut("ctrl+i")
 
         self.fileMenu.addActions([self.openFile, self.closeFile, self.loadOtherImages])
+
+        self.undoMethod = QAction("Undo", self)
+        self.undoMethod.setShortcut("ctrl+z")
+        self.redoMethod = QAction("Redo", self)
+        self.redoMethod.setShortcut("ctrl+y")
+
+        self.editMenu.addActions([self.undoMethod, self.redoMethod])
+
+        self.zoomInOption = QAction("Zoom In", self)
+        self.zoomInOption.setShortcut("ctrl+b")
+        self.zoomOutOption = QAction("Zoom Out", self)
+        self.zoomOutOption.setShortcut("ctrl+l")
+        self.OriginalSize = QAction("original Size",self)
+        self.OriginalSize.setShortcut("ctrl+.")
+        self.theme = QAction("toggle Theme", self)
+        self.theme.setCheckable(True)
+        self.theme.setChecked(True)
+        self.viewMenu.addActions([self.zoomInOption, self.zoomOutOption, self.OriginalSize, self.theme])
         self.setMenuBar(self.bar)
         return
     
@@ -146,13 +167,36 @@ class MasterWindow(QMainWindow):
         return
     
     def openNextImageInGallery(self):
+        self.tab1.imageNormalSize = self.tab1.originalSize
         self.methodInfo.setText(self.tab1.showNextImage(self.newFileWindow.iamgeObjectListPath))
         self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
         return
     
     def openPreviousImageInGallery(self):
+        self.tab1.imageNormalSize = self.tab1.originalSize
         self.methodInfo.setText(self.tab1.showPreviousImage(self.newFileWindow.iamgeObjectListPath))
         self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
+        return
+    
+    def scaleUPImage(self):
+        if self.tab1.imageNormalSize <= (10000, 10000):
+            self.tab1.imageNormalSize=(self.tab1.imageNormalSize[0]*1.25,self.tab1.imageNormalSize[1]*1.25)
+            self.tab1.openImageInGallery()
+            return
+        else:
+            return
+    
+    def scaleDownImage(self):
+        if self.tab1.imageNormalSize >= (100, 100):
+            self.tab1.imageNormalSize = (self.tab1.imageNormalSize[0] / 1.25, self.tab1.imageNormalSize[1] / 1.25)
+            self.tab1.openImageInGallery()
+            return
+        else:
+            return
+    
+    def originalScale(self):
+        self.tab1.imageNormalSize = self.tab1.originalSize
+        self.tab1.openImageInGallery()
         return
     pass
 
