@@ -38,8 +38,8 @@ class MasterWindow(QMainWindow):
         return
     
     def eventManager(self):
-        self.newFileWindow.fileOpenButton.clicked.connect(self.openGalleryImage)
-        self.closeFile.triggered.connect(self.tab1.closeImageFromGallery)
+        self.newFileWindow.fileOpenButton.clicked.connect(self.openImageFromMainWindow)
+        self.closeFile.triggered.connect(self.closeImageObject)
         self.loadOtherImages.triggered.connect(self.connectImageGridWithFiles)
         self.newFileWindow.fileListWidget.currentItemChanged.connect(self.newFileWindow.fileAccess)
         self.pressKeyToNextImage.activated.connect(self.openNextImageInGallery)
@@ -52,6 +52,7 @@ class MasterWindow(QMainWindow):
     
     def assignProperties(self):
         self.newFileWindow = FileWindow()
+        self.outputInfo = ""
         return
     
     
@@ -144,6 +145,19 @@ class MasterWindow(QMainWindow):
         self.newFileWindow.show()
         return
     
+    def openImageFromMainWindow(self):
+        if self.tabScreen.currentIndex() == 0:
+            self.openGalleryImage()
+        elif self.tabScreen.currentIndex() == 1:
+            self.openEditSectionImage()
+
+    def closeImageObject(self):
+        if self.tabScreen.currentIndex() == 0:
+            self.outputInfo = self.tab1.closeImageFromGallery()
+        elif self.tabScreen.currentIndex() == 1:
+            self.outputInfo = self.tab2.closeImageInEditSection()
+        self.methodInfo.setText(self.outputInfo)
+
     def connectImageGridWithFiles(self):
         self.tab1.imagePaths = self.newFileWindow.iamgeObjectListPath
         self.tab1.currentDirectory = self.newFileWindow.currentPathName
@@ -167,15 +181,21 @@ class MasterWindow(QMainWindow):
         return
     
     def openNextImageInGallery(self):
-        self.tab1.imageNormalSize = self.tab1.originalSize
-        self.methodInfo.setText(self.tab1.showNextImage(self.newFileWindow.iamgeObjectListPath))
-        self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
+        if self.tabScreen.currentIndex() == 0:
+            self.tab1.imageNormalSize = self.tab1.originalSize
+            self.methodInfo.setText(self.tab1.showNextImage(self.newFileWindow.iamgeObjectListPath))
+            self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
+        elif self.tabScreen.currentIndex() == 1:
+            self.methodInfo.setText("Can't Open next image in edit mode")
         return
     
     def openPreviousImageInGallery(self):
-        self.tab1.imageNormalSize = self.tab1.originalSize
-        self.methodInfo.setText(self.tab1.showPreviousImage(self.newFileWindow.iamgeObjectListPath))
-        self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
+        if self.tabScreen.currentIndex() == 0:
+            self.tab1.imageNormalSize = self.tab1.originalSize
+            self.methodInfo.setText(self.tab1.showPreviousImage(self.newFileWindow.iamgeObjectListPath))
+            self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
+        elif self.tabScreen.currentIndex() == 1:
+            self.methodInfo.setText("Can't open previous Image in edit mode")
         return
     
     def scaleUPImage(self):
@@ -197,6 +217,12 @@ class MasterWindow(QMainWindow):
     def originalScale(self):
         self.tab1.imageNormalSize = self.tab1.originalSize
         self.tab1.openImageInGallery()
+        return
+    
+    def openEditSectionImage(self):
+        self.tab2.imageToEdit = self.newFileWindow.iamgeObjectPath
+        self.methodInfo.setText(self.tab2.openImageInEditSection())
+        self.newFileWindow.close()
         return
     pass
 
