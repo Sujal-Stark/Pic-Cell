@@ -1,5 +1,5 @@
 # important Libraries
-from PyQt5.QtGui import QMouseEvent
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog
 from PyQt5.QtCore import Qt
 from threading import Thread
@@ -42,10 +42,13 @@ class EditingActionManager(QWidget):
     
     def addProperties(self):
         self.currentColor = ""
+        self.imageToEdit = ""
+        self.imageSize = (850, 600)
+        self.originalSize = (850, 600)
         return
     
     def createLabels(self):
-        self.imageForEdit = QLabel("Edit Your Image here")
+        self.imageForEditLabel = QLabel("Edit Your Image here")
         self.specialEditOptions = QLabel("Special editing choice will show up here")
         return
     
@@ -92,6 +95,7 @@ class EditingActionManager(QWidget):
 
         self.editableImageField = QScrollArea()
         self.editableImageField.setWidgetResizable(True)
+        self.editableImageField.setFixedSize(850,600)
         return
     
     def editingTree(self):
@@ -128,7 +132,7 @@ class EditingActionManager(QWidget):
     
     def addWidgetAttributes(self):
         self.innerEditOptionPanel.addWidget(self.editingTreeBody)
-        self.innerImageViewingPanel.addWidget(self.imageForEdit, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerImageViewingPanel.addWidget(self.imageForEditLabel, alignment = Qt.AlignmentFlag.AlignCenter)
         self.innerEditSpectrumLayout.addWidget(self.specialEditOptions, alignment = Qt.AlignmentFlag.AlignCenter)
         self.innerAdvancementLayout.addWidget(self.chooseColorLabel, alignment = Qt.AlignmentFlag.AlignBottom)
     
@@ -158,5 +162,24 @@ class EditingActionManager(QWidget):
     def createColorPicker(self):
         self.currentColor = QColorDialog.getColor()
         return
+    
+    def openImageInEditSection(self):
+        if self.imageToEdit != "":
+            self.imageSize = self.originalSize
+            self.imageObject = QPixmap(self.imageToEdit)
+            self.imageForEditLabel.hide()
+            self.imageObject = self.imageObject.scaled(self.imageSize[0], self.imageSize[1], aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
+            self.imageForEditLabel.setPixmap(self.imageObject)
+            self.imageForEditLabel.show()
+            return "Opened Successfully"
+        else:
+            return "Error occurred"
+    
+    def closeImageInEditSection(self):
+        if self.imageToEdit != "":
+            self.imageForEditLabel.hide()
+            self.imageForEditLabel.setText("Edit Your Image here")
+            self.imageForEditLabel.show()
+            return "Closed Successfully"
     pass
 
