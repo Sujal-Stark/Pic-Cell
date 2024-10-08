@@ -149,7 +149,11 @@ class FileWindow(QDialog):
                 if list(bands) == ['R', 'G', 'B']:
                     redBand, greenBand = imageObject.getchannel("R"), imageObject.getchannel("G")
                     blueBand = imageObject.getchannel("B")
-                    bandInformation = f"Red Band:\t{redBand}\nGreen Band:\t {greenBand}\nBlue Band:\t{blueBand}"
+                    bandInformation = f"Red Band: {redBand}\nGreen Band: {greenBand}\nBlue Band: {blueBand}"
+                elif list(bands) == ['C', 'M', 'Y']:
+                    cBand, mBand = imageObject.getchannel("C"), imageObject.getchannel("M")
+                    yBand = imageObject.getchannel("Y")
+                    bandInformation = f"Cyan Band: {cBand}\nMagenta Band: {mBand}\nYellow Band: {yBand}"
                 extremeValue = imageObject.getextrema()
             return f"""
                 Path: {imagePath}\n
