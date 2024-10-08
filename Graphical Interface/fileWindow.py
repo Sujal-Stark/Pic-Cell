@@ -143,7 +143,7 @@ class FileWindow(QDialog):
         
     def createImageInformation(self, imagePath : str) -> str:
         bandInformation = ""
-        if imagePath != None:
+        if imagePath != "":
             with Image.open(imagePath) as imageObject:
                 bands = imageObject.getbands()
                 if list(bands) == ['R', 'G', 'B']:
