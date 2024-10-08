@@ -131,6 +131,7 @@ class GalleryWindow(QWidget):
     
     def openImageFromGrid(self, imagePathFromGrid:str):
         self.imageToShow = os.path.join(self.currentDirectory,imagePathFromGrid)
+        self.imageNormalSize = self.originalSize
         self.openImageInGallery()
         return
     
@@ -206,11 +207,13 @@ class GalleryWindow(QWidget):
 
             self.galleryImageLabel.show()
             self.imageInformationLabel.show()
-        return
+            return "Closed Successfully"
     
     # shows the next image Object to the screeen
     def showNextImage(self, imageFileList:list):
-        if len(imageFileList) == 0 or self.currentImageObjectIndex == (len(imageFileList)-1):
+        if len(imageFileList) == 0 :
+            return "No Image in directory"
+        elif self.currentImageObjectIndex == (len(imageFileList)-1):
             return "Last image"
         else:
             try:
@@ -221,12 +224,13 @@ class GalleryWindow(QWidget):
                 return "Succeed"
             except ValueError:
                 return "Unable to open This Image"
-            return
 
     # shows the previous image Object to the screeen
     def showPreviousImage(self, imageFileList:list):
-        if len(imageFileList) == 0 or self.currentImageObjectIndex == 0:
+        if self.currentImageObjectIndex == 0:
             return "First Image"
+        elif len(imageFileList) == 0:
+            return "No Image in directory"
         else:
             try:
                 self.currentImageObjectIndex = imageFileList.index(self.imageToShow.split("\\")[-1])
