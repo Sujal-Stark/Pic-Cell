@@ -6,14 +6,22 @@ from PIL import Image, ImageOps, ImageFilter
 #classes
 class FrameAdjustment:
     adjustmentSubEditOption = ["Crop", "Resize", "Resample", "Rotate", "Horizontal Flip", "Vertical Flip"] # editing options available
-
-    #creates a image object and makes it a class attribute
-    def __init__(self,image_file) -> None:
-        self.image = Image.open(image_file)
-        self.image.load() #loads the image in the memory
-        self.user_message = None #any info regarding operation will send to main
-        return
-    
+    subEditingTree = {
+        "Crop" : {
+            "Custom" : 1, "1:1" : 2, "4:3" : 3, "3:4" : 4, "9:16" : 5, "16:9" : 6
+        },
+        "Resize" : {
+            "Custom" : 1, "1:1" : 2, "4:3" : 3, "3:4" : 4, "16:9" : 5, "9:16" : 6
+        },
+        "Resample" : {
+            "NEAREST" : 1, "BILINEAR" : 2, "BICUBIC" : 3, "LANCZOS" : 4
+        },
+        "Rotate" : {
+            "Custom" : 1, "Left" : 2, "right" : 3
+        }, 
+        "Horizontal Flip" : {},
+        "Vertical Flip" : {}
+    }
     # shows the image
     def showImage(self)-> bool:
         self.image.show()
@@ -115,197 +123,151 @@ class FrameAdjustment:
         return (reducedWidth,reducedHeight)
     
     # resize the image 
-    def imageCrop(self)->None:
+    def imageCrop(self, choice : int)->None:
         # actual image size
         width,height = self.image.size
-
-        #create message
-        self.user_message = {0:"Stop",1:"Custom size", 2:"1:1",3:"4:3",4:"3:4",5:"16:9",6:"9:16"}
-        self.getMessage()
-
-        #user choice
-        choice = int(input("Enter choice:\t"))
-        while choice != 0:
-            #for custom input
-            if choice == 1:
-                horizontal_shift = int(input("Horizontal shift:\t"))
-                vertical_shift = int(input("Vertical shift:\t"))
+        
+        #for custom input
+        if choice == 1:
+            horizontal_shift = int(input("Horizontal shift:\t"))
+            vertical_shift = int(input("Vertical shift:\t"))
+            
+            if horizontal_shift >width or vertical_shift > height:
+                horizontal_shift,vertical_shift = width,height
                 
-                if horizontal_shift >width or vertical_shift > height:
-                    horizontal_shift,vertical_shift = width,height
-                
-                image = self.image.crop((horizontal_shift,vertical_shift,width-horizontal_shift, height-vertical_shift))
+            image = self.image.crop((horizontal_shift,vertical_shift,width-horizontal_shift, height-vertical_shift))
             
-            #for 1 : 1 convention
-            elif choice == 2:
-                _size1isto1 = self.__get1isto1()
-                width_reduction,height_reduction = _size1isto1
-                image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
+        #for 1 : 1 convention
+        elif choice == 2:
+            _size1isto1 = self.__get1isto1()
+            width_reduction,height_reduction = _size1isto1
+            image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
 
-            #for 4 : 3 convention
-            elif choice == 3:
-                _size4isto3 = self.__get4isto3()
-                width_reduction,height_reduction = _size4isto3
-                image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
+        #for 4 : 3 convention
+        elif choice == 3:
+            _size4isto3 = self.__get4isto3()
+            width_reduction,height_reduction = _size4isto3
+            image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
             
-            # for 3 : 4 convention
-            elif choice == 4:
-                _size3isto4 = self.__get3isto4()
-                width_reduction,height_reduction = _size3isto4
-                image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
+        # for 3 : 4 convention
+        elif choice == 4:
+            _size3isto4 = self.__get3isto4()
+            width_reduction,height_reduction = _size3isto4
+            image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
 
-            #for 16:9 convension
-            elif choice == 5:
-                _size16isto9 = self.__get16isto9()
-                width_reduction, height_reduction = _size16isto9
-                image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height -height_reduction))
+        #for 16:9 convension
+        elif choice == 5:
+            _size16isto9 = self.__get16isto9()
+            width_reduction, height_reduction = _size16isto9
+            image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height -height_reduction))
             
-            #for 9 : 16 convention
-            elif choice == 6:
-                _size9isto16 = self.__get9isto16()
-                width_reduction, height_reduction = _size9isto16
-                image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
-            
-            #if no choice works
-            else:
-                print("Incorrect Choice")
-
-            #choice for next resizement
-            choice = int(input("Enter choice:\t"))
+        #for 9 : 16 convention
+        elif choice == 6:
+            _size9isto16 = self.__get9isto16()
+            width_reduction, height_reduction = _size9isto16
+            image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
 
         # after all adjustments final iamge is stored as class variable
         self.image = image
-        return
+        return self.image
     
     #resize the image
-    def resizeImage(self)->None:
-        image = None #local image variable
+    def resizeImage(self, resize_choice :int)->Image.Image:
+        image = self.image #local image variable
         width,height = self.image.size
-        #creating user message
-        self.user_message = {0:"Stop",1:"Custom size",2:"1:1",3:"4:3",4:"3:4",5:"16:9",6:"9:16"}
-        self.getMessage()
+
+        print("Agaya")
+        if resize_choice == 1:
+            image = self.image.resize((int(input("Enter Width:\t")),int(input("Enter height:\t"))))
+            
+        #1:1 convention
+        elif resize_choice == 2:
+            _resize1isto1 = self.__get1isto1()
+            reduced_width,reduced_height  = 2*(int(_resize1isto1[0])),2*(int(_resize1isto1[1]))
+            image = self.image.resize((width-reduced_width,height-reduced_height))
+            
+        # 4:3 convention
+        elif resize_choice == 3:
+            _resize4isto3 = self.__get4isto3()
+            reduced_width,reduced_height = 2*(int(_resize4isto3[0])),2*(int(_resize4isto3[1]))
+            image = self.image.resize((width-reduced_width,height-reduced_height))
+
+        # 3:4 convention
+        elif resize_choice == 4:
+            _resize3isto4 = self.__get3isto4()
+            reduced_width,reduced_height = 2*(int(_resize3isto4[0])),2*(int(_resize3isto4[1]))
+            image = self.image.resize((width-reduced_width,height-reduced_height))
+
+        # 16:9 convention
+        elif resize_choice == 5:
+            _resize16isto9 = self.__get16isto9()
+            reduced_width,reduced_height = 2*(int(_resize16isto9[0])),2*(int(_resize16isto9[1]))
+            image = self.image.resize((width-reduced_width,height-reduced_height))
+
+        # 9:16 convention
+        elif resize_choice == 6:
+            _resize9isto16 = self.__get9isto16()
+            reduced_width,reduced_height = 2*(int(_resize9isto16[0])),2*(int(_resize9isto16[1]))
+            image = self.image.resize((width-reduced_width,height-reduced_height))
         
-        #user choice
-        resize_choice = int(input("Enter Choice:\t"))
-
-        while resize_choice != 0:
-            #custom resize
-            if resize_choice == 1:
-                image = self.image.resize((int(input("Enter Width:\t")),int(input("Enter height:\t"))))
-            
-            #1:1 convention
-            elif resize_choice == 2:
-                _resize1isto1 = self.__get1isto1()
-                reduced_width,reduced_height  = 2*(int(_resize1isto1[0])),2*(int(_resize1isto1[1]))
-                image = self.image.resize((width-reduced_width,height-reduced_height))
-            
-            # 4:3 convention
-            elif resize_choice == 3:
-                _resize4isto3 = self.__get4isto3()
-                reduced_width,reduced_height = 2*(int(_resize4isto3[0])),2*(int(_resize4isto3[1]))
-                image = self.image.resize((width-reduced_width,height-reduced_height))
-
-            # 3:4 convention
-            elif resize_choice == 4:
-                _resize3isto4 = self.__get3isto4()
-                reduced_width,reduced_height = 2*(int(_resize3isto4[0])),2*(int(_resize3isto4[1]))
-                image = self.image.resize((width-reduced_width,height-reduced_height))
-
-            # 16:9 convention
-            elif resize_choice == 5:
-                _resize16isto9 = self.__get16isto9()
-                reduced_width,reduced_height = 2*(int(_resize16isto9[0])),2*(int(_resize16isto9[1]))
-                image = self.image.resize((width-reduced_width,height-reduced_height))
-
-            # 9:16 convention
-            elif resize_choice == 6:
-                _resize9isto16 = self.__get9isto16()
-                reduced_width,reduced_height = 2*(int(_resize9isto16[0])),2*(int(_resize9isto16[1]))
-                image = self.image.resize((width-reduced_width,height-reduced_height))
-
-            #for uncorrect choice
-            else:
-                print("Incorrect choice")
-            
-            #choice for next resize
-            resize_choice = int(input("Enter Choice:\t"))
-
-        #finalizing cahnges
         self.image = image
-        return
+        return self.image
     
     # change resampling technique
-    def changeResampleType(self):
-        #create message
-        self.user_message = {0:"none",1:"nearest",2:"BILINEAR",3:"BICUBIC",4:"LANCZOS"}
-        self.getMessage()
+    def changeResampleType(self, resample_choice : int) -> Image.Image:
+        image = self.image # copying the original image
 
         #all possible resampling type is stored here
         resampler = [Image.NEAREST, Image.BILINEAR, Image.BICUBIC, Image.LANCZOS]
 
-        #user choice
-        resample_choice = int(input("Enter choice:\t"))
-
-        #if user dont want change the resample type
-        if resample_choice == 0:
-            return "No change is made"
         # user wants to resample
-        elif resample_choice <= 4 and resample_choice > 0:
-            self.image=self.image.resize((self.image.size[0],self.image.size[1]),resample= resampler[ resample_choice-1])
-        #if no choice matches
-        else:
-            return "No similer option"
+        image=self.image.resize((self.image.size[0],self.image.size[1]),resample= resampler[ resample_choice-1])
+        self.image = image
+        return self.image
 
     #rotate an image
-    def imageRotate(self) -> None:
-        flag = 1 # helps to re rotate everytime
+    def imageRotate(self, rotationSignal : int) -> None:
         image = self.image
+        angleVal = 0
+        if rotationSignal == 1:
+            pass
+        elif rotationSignal == 2:
+            angleVal = 90
+        elif rotationSignal == 3:
+            angleVal = -90
+        try:
+            image = self.image.rotate(angle = angleVal,expand= True)
+        except ValueError:
+            return "Un matched value"
+        except MemoryError:
+            return "Unavailable space"
 
-        #create message
-        self.user_message = {1:"continue",0:"Stop"}
-        self.getMessage()
-
-        while flag != 0:
-            #rotation process
-            image = self.image.rotate(float(input("Enter rotation angle:\t")),expand= True)
-            flag = int(input("Rotation flag status:\t"))
-        
         self.image = image #rotation is finalized
-        return
+        return self.image
 
     #flip an image horizontally
     def flip_horizontal(self) -> None:
-        flag = 1 #helps to flip multiple time
-        image = self.image
-
-        #create message
-        self.user_message = {1:"continue",0:"Stop"}
-        self.getMessage()
-
-        while flag != 0:
-            #flip process
+        try:
             image = ImageOps.mirror(self.image)
-            print("Flip Successful.....") #message to user
-            flag = int(input("Rotation flag status:\t")) #re assign user action request
-
+        except MemoryError:
+            return "Unsufficient Memory"
+        except ValueError:
+            return "Invalid Type"
+        
         self.image = image
-        return
+        return self.image
 
     #flips an image vertically
     def flip_vertical(self) -> None:
-        flag = 1 #helps to flip multiple time
-        image = self.image
-
-        #create message
-        self.user_message = {1:"continue",0:"Stop"}
-        self.getMessage()
-
-        while flag != 0 :
+        try:
             image = ImageOps.flip(self.image)
-            print("Flip Successful.....") #message to user
-            flag = int(input("Rotation flag status:\t")) #re assign user action request
+        except MemoryError:
+            return "Unsufficient Memory"
+        except ValueError:
+            return "Invalid Type"
         
         self.image = image
+        return self.image
         return
     
     pass
