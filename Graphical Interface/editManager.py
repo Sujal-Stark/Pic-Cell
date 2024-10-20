@@ -273,7 +273,11 @@ class EditingActionManager(QWidget):
                     self.valuePackage = ColorImage.subEditingTree[treeItem.text(0)]
                     self.fillEditSpectrum(self.valuePackage)
                 elif treeItem.parent().text(0) == "Deform Image":
-                    pass
+                    self.valuePackage = ImageDeformer.subEditingTree[treeItem.text(0)]
+                    if treeItem.text(0) in ["Twist", "Double Twist", "Half Mirror", "Four Mirror"]:
+                        self.fillEditSpectrum(self.valuePackage)
+                    else:
+                        self.fillInnerAdvanceMentlayout(self.valuePackage)
                 elif treeItem.parent().text(0) == "Frames":
                     pass
                 else:
@@ -305,6 +309,8 @@ class EditingActionManager(QWidget):
     
     def closeImageInEditSection(self):
         if self.imageToEdit != "":
+            self.imageObject = None
+            self.newImageObject = None
             self.imageForEditLabel.hide()
             self.imageForEditLabel.setText("Edit Your Image here")
             self.imageForEditLabel.show()

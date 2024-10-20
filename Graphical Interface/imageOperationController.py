@@ -3,6 +3,7 @@ sys.path.append(os.getcwd())
 from ImageManupulation.ImageframeAdjuster import FrameAdjustment
 from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.imageColorEnhancer import ColorImage
+from ImageManupulation.deformer import ImageDeformer
 from PIL import Image
 
 from PyQt5.QtWidgets import QTreeWidgetItem
@@ -14,6 +15,7 @@ class OperationFramework:
         self.fileAdjustment = FrameAdjustment()
         self.imageFiltering = FilterImage()
         self.imageColoring = ColorImage()
+        self.imageDeforming = ImageDeformer()
         return
     
     def signalManager(self, treeChild : QTreeWidgetItem, valuePackage : dict, signalValue : object):
@@ -71,6 +73,16 @@ class OperationFramework:
                     return self.imageFiltering.contourImage()
                 elif subOperation == "Emboss":
                     return self.imageFiltering.addEmboss()
+            elif parentItem.text(0) == "Deform Image":
+                self.imageDeforming.getImageObject(self.imageObject)
+                if subOperation == "Twist":
+                    return self.imageDeforming.middleTwist()
+                elif subOperation == "Double Twist":
+                    return self.imageDeforming.doubleTwisted()
+                elif subOperation == "Half Mirror":
+                    return self.imageDeforming.mirrorHalf()
+                elif subOperation == "Four Mirror":
+                    return self.imageDeforming.mirrorQuad()
         return self.imageObject
     
     def multivalueOperation(self, subOperation : str, signalValue:object):
@@ -96,4 +108,19 @@ class OperationFramework:
                         return self.imageFiltering.imageUnsharpMask(radius_choice = signalValue["radius"])
                     elif "Threshold" == keyList[0]:
                         return self.imageFiltering.imageUnsharpMask(threshold_choice = signalValue["Threshold"])
+            if parentItem.text(0) == "Deform Image":
+                self.imageDeforming.getImageObject(self.imageObject)
+                if subOperation == "Horizontal Split":
+                    return self.imageDeforming.horizontalSplit(repeaterValue = signalValue)
+                elif subOperation == "Vertical Split":
+                    return self.imageDeforming.verticalSplit(repeaterValue = signalValue)
+                elif subOperation == "Multiply":
+                    return self.imageDeforming.multiply(repitaionNumber = signalValue)
+                elif subOperation == "Add Layer":
+                    return self.imageDeforming.layerize(repeaterValue = signalValue)
+                elif subOperation == "Chess Like":
+                    return self.imageDeforming.chess(boxGap = signalValue)
+                elif subOperation == "Sine Curve":
+                    print(signalValue)
+                    return self.imageDeforming.sinCurve(cycle = signalValue)
         return self.imageObject
