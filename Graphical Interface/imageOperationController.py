@@ -11,6 +11,7 @@ class OperationFramework:
         self.treeChildItem : QTreeWidgetItem
         self.imageObject : Image.Image
         self.fileAdjustment = FrameAdjustment()
+        self.imageFiltering = FilterImage()
         return
     
     def signalManager(self, treeChild : QTreeWidgetItem, valuePackage : dict, signalValue : object):
@@ -37,6 +38,10 @@ class OperationFramework:
                     return self.fileAdjustment.changeResampleType(resample_choice = signalValue)
                 elif subOperation == "Rotate":
                     return self.fileAdjustment.imageRotate(rotationSignal = signalValue)
+            elif parentItem.text(0) == "Filters":
+                self.imageFiltering.getImageObject(self.imageObject)
+                if subOperation == "Edge Enhance":
+                    return self.imageFiltering.ImageEdgeEnhance(editChoice = signalValue)
         return self.imageObject
     
     def singleOperations(self, parentItem : QTreeWidgetItem, subOperation : str) -> Image.Image:
@@ -47,4 +52,40 @@ class OperationFramework:
                     return self.fileAdjustment.flip_horizontal()
                 elif subOperation == "Vertical Flip":
                     return self.fileAdjustment.flip_vertical()
+            elif parentItem.text(0) == "Filters":
+                self.imageFiltering.getImageObject(self.imageObject)
+                if subOperation == "Grey Scale":
+                    return self.imageFiltering.grayScaleimage()
+                elif subOperation == "Posterize":
+                    print("hey i am here")
+                    return self.imageFiltering.postarizeimage()
+                elif subOperation == "Contour":
+                    return self.imageFiltering.contourImage()
+                elif subOperation == "Emboss":
+                    return self.imageFiltering.addEmboss()
+        return self.imageObject
+    
+    def multivalueOperation(self, subOperation : str, signalValue:object):
+        parentItem = self.treeChildItem.parent()
+        if parentItem:
+            if parentItem.text(0) == "Filters":
+                self.imageFiltering.getImageObject(self.imageObject)
+                if subOperation == "Auto contrast":
+                    return self.imageFiltering.imageAutoContrast(cutoffValue = signalValue)
+                elif subOperation == "Gaussian Blur":
+                    return self.imageFiltering.gaussianBlurImage(blurStrength = signalValue)
+                elif subOperation == "Sharpen":
+                    return self.imageFiltering.sharpenImage(sharpValue = signalValue)
+                elif subOperation == "Detail":
+                    return self.imageFiltering.addDetail(strenghtChoice = signalValue)
+                elif subOperation == "Smoothen":
+                    return self.imageFiltering.smoothenImage(smoothingChoice = signalValue)
+                elif subOperation == "Box Blur":
+                    return self.imageFiltering.boxBlurImage(blurStrength = signalValue)
+                elif subOperation == "Unsharp":
+                    keyList = list(signalValue.keys())
+                    if "radius" == keyList[0]:
+                        return self.imageFiltering.imageUnsharpMask(radius_choice = signalValue["radius"])
+                    elif "Threshold" == keyList[0]:
+                        return self.imageFiltering.imageUnsharpMask(threshold_choice = signalValue["Threshold"])
         return self.imageObject
