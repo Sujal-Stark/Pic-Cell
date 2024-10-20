@@ -270,7 +270,8 @@ class EditingActionManager(QWidget):
                     else:
                         self.fillEditSpectrum(self.valuePackage)
                 elif treeItem.parent().text(0) == "Color Enhance":
-                    pass
+                    self.valuePackage = ColorImage.subEditingTree[treeItem.text(0)]
+                    self.fillEditSpectrum(self.valuePackage)
                 elif treeItem.parent().text(0) == "Deform Image":
                     pass
                 elif treeItem.parent().text(0) == "Frames":

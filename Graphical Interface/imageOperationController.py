@@ -2,6 +2,7 @@ import sys, os
 sys.path.append(os.getcwd())
 from ImageManupulation.ImageframeAdjuster import FrameAdjustment
 from ImageManupulation.imageFiltering import FilterImage
+from ImageManupulation.imageColorEnhancer import ColorImage
 from PIL import Image
 
 from PyQt5.QtWidgets import QTreeWidgetItem
@@ -12,6 +13,7 @@ class OperationFramework:
         self.imageObject : Image.Image
         self.fileAdjustment = FrameAdjustment()
         self.imageFiltering = FilterImage()
+        self.imageColoring = ColorImage()
         return
     
     def signalManager(self, treeChild : QTreeWidgetItem, valuePackage : dict, signalValue : object):
@@ -42,6 +44,12 @@ class OperationFramework:
                 self.imageFiltering.getImageObject(self.imageObject)
                 if subOperation == "Edge Enhance":
                     return self.imageFiltering.ImageEdgeEnhance(editChoice = signalValue)
+            elif parentItem.text(0) == "Color Enhance":
+                self.imageColoring.getImageObject(self.imageObject)
+                if subOperation == "Change Color":
+                    return self.imageColoring.changeColor(colorChoice = signalValue)
+                elif subOperation == "Add color layer":
+                    return self.imageColoring.addColorLayer(choice = signalValue)
         return self.imageObject
     
     def singleOperations(self, parentItem : QTreeWidgetItem, subOperation : str) -> Image.Image:

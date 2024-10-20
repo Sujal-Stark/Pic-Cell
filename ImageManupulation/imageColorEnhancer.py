@@ -5,17 +5,18 @@ from PIL import Image, ImageOps, ImageColor, ImageChops, ImageDraw
 class ColorImage:
     colorEnhanceOptions = ["Change Color", "Add color layer"] # editing options available
     
-     #constructor
-    def __init__(self,fileName : str) -> None:
-        self.image = Image.open(fileName)
-        self.copyImage = self.image
-        self.user_message = None
-
-        #sends user message
-    def getMessage(self)->None:
-        print(self.user_message)
-        self.user_message=None # sets user message to null for next message
-        return
+    subEditingTree = {
+        "Change Color" : {
+            "Custom" : 0, "Red" : 1, "Green" : 2, "Blue" : 3, "Cyan" : 4, "Magenta" : 5, "Yellow" : 6,
+            "Orange" : 7, "Purple" : 8, "Pink" : 9, "Brown" : 10, "Olive" : 11, "Navy Blue" : 12, "Teal" : 13,
+            "Lavender" : 14, "Gold" : 15, "Silver" : 16
+        },
+        "Add color layer" : {
+            "Custom" : 0, "Red" : 1, "Green" : 2, "Blue" : 3, "Cyan" : 4, "Magenta" : 5, "Yellow" : 6,
+            "Orange" : 7, "Purple" : 8, "Pink" : 9, "Brown" : 10, "Olive" : 11, "Navy Blue" : 12, "Teal" : 13,
+            "Lavender" : 14, "Gold" : 15, "Silver" : 16
+        }
+    }
 
     #interchanges the image with different classes
     def getImageObject(self,image:Image.Image):
@@ -29,28 +30,18 @@ class ColorImage:
         finally:
             return "Succeed"
     
-    #transmits an image
-    def provideImageObject(self) -> Image.Image:
-        return self.image
-    
-    #takes user choice
-    def _makeChoice(self,choiceList:list)->int:
-        try:
-            user_choice = int(input("Enter choice:\t"))
-        except ValueError:
-            user_choice = 0
-        if  user_choice not in choiceList:
-            return 0
-        else:
-            return user_choice
-    
     #total colors available for user
-    def _colorList(self, index : int) -> list:
-        colors = [[255,0,0], [0, 255, 0], [0, 0, 255], [0, 255, 255], [255, 0, 255], [255, 255, 0], [255, 165, 0], [128, 0, 128], [255, 192, 203], [165, 42, 42], [128, 128, 0], [0, 0, 128], [0, 128, 128], [230, 230, 250], [255, 215, 0], [192, 192, 192]]
+    def _colorList(self, index : int) -> tuple:
+        colors = [
+            (255,0,0), (0, 255, 0), (0, 0, 255), (0, 255, 255), 
+            (255, 0, 255), (255, 255, 0),(255, 165, 0), (128, 0, 128),
+            (255, 192, 203), (165, 42, 42), (128, 128, 0), (0, 0, 128),
+            (0, 128, 128), (230, 230, 250), (255, 215, 0), (192, 192, 192)
+        ]
         return colors[index]
     
     #total RGBA colors available for user
-    def _RGBAcolorList(self, index : int) -> list:
+    def _RGBAcolorList(self, index : int) -> tuple:
         color_list = [
         (255, 0, 0, 0),  # Red
         (0, 255, 0, 128),  # Green
@@ -72,44 +63,33 @@ class ColorImage:
         return color_list[index]
     
     # changes the color
-    def changeColor(self,modeChoice : int,colorChoice : int) -> str:
-        # creating user message
-        self.user_message = "Modes:\n-1 -> Background, -2 -> Foreground\nChoice:\n0->None, 1-> Red,2 -> Green, 3 -> Blue, 4 -> Cyan, 5 -> Magenta, 6 -> Yellow, 7 -> Orange, 8 -> Purple, 9 -> Pink, 10 -> Brown, 11 -> Olive, 12 -> Navy Blue, 13 -> Teal, 14 -> Lavender, 15 -> Gold, 16 -> Silver"
-        self.getMessage()
+    def changeColor(self, colorChoice : int):
         #copying current image
         image = self.image
         try: # operaion
-            if modeChoice == -1:
-                image = ImageOps.colorize(image.convert('L'),black=tuple(self._colorList(colorChoice)), white='White')
-            elif modeChoice == -2:
-                image = ImageOps.colorize(image.convert('L'),black= 'black', white= tuple(self._colorList(colorChoice)))
-            else:
-                return "Invalid Input"
-            return "Operation Completed"
+            if colorChoice != 0:
+                image = ImageOps.colorize(image.convert('L'), black = 'black',white=self._colorList(colorChoice-1))
         except MemoryError as memoryError:
             return f"Memory Error Occurred-> {memoryError}"
         except ValueError as valueError:
             return f"Value is unclear -> {valueError}"
         except IndexError as indexError:
             return f"{indexError}"
-        finally:
-            self.image = image
+        
+        self.image = image
+        return self.image
     
     # color Filter
-    def addColorLayer(self, choice : int) -> str:
+    def addColorLayer(self, choice : int):
         #copying current image
         image = self.image
-        #creating user message
-        self.user_message = "1-> Red,2 -> Green, 3 -> Blue, 4 -> Cyan, 5 -> Magenta, 6 -> Yellow, 7 -> Orange, 8 -> Purple, 9 -> Pink, 10 -> Brown, 11 -> Olive, 12 -> Navy Blue, 13 -> Teal, 14 -> Lavender, 15 -> Gold, 16 -> Silver"
-        self.getMessage()
+
         #procedure
         try:
-            if choice == 0:
-                return "Operation Complete"
-            else:
-                layer = Image.new(mode='RGBA',size=image.size,color=tuple(255-i for i in self._RGBAcolorList (choice)))#color is inverted as it will merge with image
-                image = ImageChops.blend(layer,image.convert('RGBA'),alpha=2)
-                return "Operation compelte"
+            if choice != 0:
+                # color layer creation
+                layer = Image.new(mode='RGBA',size=image.size,color = self._RGBAcolorList(index = choice-1))
+                image = ImageChops.blend(layer,image.convert('RGBA'),alpha=2) # blending
         except MemoryError as memoryError:
             return f"Insufficient Memory -> {memoryError}"
         except ValueError as valueError:
@@ -118,6 +98,7 @@ class ColorImage:
             return f"Invalid Index -> {indexError}"
         except TypeError as typeError:
             return f"Wrong Type -> {typeError}"
-        finally:
-            self.image = image
+        
+        self.image = image
+        return self.image
     pass
