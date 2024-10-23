@@ -1,5 +1,5 @@
 # builtin libraries
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem, QPushButton, QFrame, QLabel, QLineEdit
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem, QPushButton, QFrame, QLabel, QLineEdit, QComboBox
 from PyQt5.QtCore import Qt
 from PIL import Image
 import os
@@ -12,6 +12,10 @@ class FileWindow(QDialog):
         self.masterLayout = QVBoxLayout(self)
         self.loadFileWindowUi()
         self.setProperties()
+        self.createResponse()
+        return
+    
+    def createResponse(self):
         self.fileListWidget.currentItemChanged.connect(self.fileAccess)
         self.forwardButton.clicked.connect(self.nextDirectory)
         self.previousButton.clicked.connect(self.previousDirectory)
@@ -28,8 +32,10 @@ class FileWindow(QDialog):
     def loadFileWindowUi(self):
         self.windowButtonLayout = QHBoxLayout()
         self.windowInnerButtonLayout = QHBoxLayout()
-        self.fileOpenerLayout = QHBoxLayout()
+        self.fileOpenerLayout = QVBoxLayout()
         self.fileOpenerInnerLayout = QHBoxLayout()
+        self.fileSaveAndOpenLayout = QVBoxLayout()
+        self.fileExtenstionsetterLayout = QVBoxLayout()
 
         self.windowButtonFrame = QFrame()
         self.windowButtonFrame.setFrameShape(QFrame.Shape.Panel)
@@ -52,15 +58,17 @@ class FileWindow(QDialog):
         self.fileOpenerFrame = QFrame()
         self.fileOpenerFrame.setFrameShape(QFrame.Shape.Panel)
         self.fileOpenerLayout.addWidget(self.fileOpenerFrame)
-        self.fileOpenerFrame.setLayout(self.fileOpenerInnerLayout)
+        self.fileOpenerFrame.setLayout(self.fileSaveAndOpenLayout)
 
         self.ImageFileNameEditor = QLineEdit()
         self.ImageFileNameEditor.setFixedWidth(260)
         self.fileOpenButton = QPushButton("Open")
+        self.fileSaveButton = QPushButton("Save")
 
         self.fileOpenerInnerLayout.addWidget(self.ImageFileNameEditor, alignment = Qt.AlignmentFlag.AlignCenter)
         self.fileOpenerInnerLayout.addWidget(self.fileOpenButton, alignment = Qt.AlignmentFlag.AlignRight)
 
+        self.fileSaveAndOpenLayout.addLayout(self.fileOpenerInnerLayout)
         self.masterLayout.addLayout(self.fileOpenerLayout)
         return
     
@@ -163,6 +171,22 @@ class FileWindow(QDialog):
             """
         else:
             return
+    
+    def saveFileByNmae(self):
+        if self.fileOpenButton:
+            self.fileOpenerInnerLayout.removeWidget(self.fileOpenButton)
+            self.fileOpenerInnerLayout.addWidget(self.fileSaveButton, alignment = Qt.AlignmentFlag.AlignCenter)
+            self.fileOpenButton.deleteLater()
+            self.fileOpenButton = None
+            self.fileExtensionListWidget = QComboBox()
+            self.fileExtensionListWidget.setFixedWidth(self.ImageFileNameEditor.width())
+            self.fileExtensionListWidget.addItems([".png", ".jpeg", ".jfif", ".jpg"])
+            self.fileExtenstionsetterLayout.addWidget(self.fileExtensionListWidget, alignment = Qt.AlignmentFlag.AlignCenter)
+            self.fileSaveAndOpenLayout.addLayout(self.fileExtenstionsetterLayout)
+            self.setWindowTitle("Save image in machine")
+        self.ImageFileNameEditor.setText("")
+        self.show()
+        return
     pass
     
 if __name__ == '__main__':
