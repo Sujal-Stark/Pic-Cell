@@ -1,25 +1,55 @@
 from PIL import Image, ImageDraw
 
 class Masks:
-    frameOptions = ["Rectangle Layer", "Rombous", "Ellipse", "Circle", "Double Circle", "Left Diagonal", "Right Diagonal", "Five Section Rectangle", "Embrald", "Dead pool", "Star", "Left Frame", "Right Frame", "Step Size"] # editing options available
-
-    #constructor
-    def __init__(self, width : int, height : int) -> None:
-        self.width, self.height = width, height
-        self._metaData = {
-            1 : "RGBA", # mode
-            2 : (self.width, self.height), # size
-            3 : (255,255,255,255) # color
-        }# meta data helps to change the property of the masks
-        self.groundLayer = Image.new(mode=self._metaData[1], size=self._metaData[2], color= self._metaData[3])
+    frameOptions = ["Rectangle Layer", "Rombous", "Ellipse", "Circle", "Double Circle", "Left Diagonal", "Right Diagonal", "Five Section Rectangle", "Dead pool", "Star", "Left Frame", "Right Frame", "Step Size"] # editing options available
+    subEditingTree = {
+        "Rectangle Layer" : {
+            "Border" : {"minVal" : 10, "maxVal" : 200, "currentPosition" : 10, "change" : 10}
+        },
+        "Rombous" : {},
+        "Ellipse" : {
+            "Border" : {"minVal" : 0, "maxVal" : 250, "currentPosition" : 0, "change" : 10}
+        },
+        "Circle" : {
+            "Border" : {"minVal" : 0, "maxVal" : 250, "currentPosition" : 0, "change" : 10}
+        },
+        "Double Circle" : {},
+        "Left Diagonal" : {
+            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 0, "change" : 10}
+        },
+        "Right Diagonal" : {
+            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 0, "change" : 10}
+        },
+        "Left Frame" : {
+            "Border" : {"minVal" : 0, "maxVal" : 800, "currentPosition" : 0, "change" : 10}
+        },
+        "Right Frame" : {
+            "Border" : {"minVal" : 0, "maxVal" : 800, "currentPosition" : 0, "change" : 10}
+        },
+        "Star" : {},
+        "Dead pool" : {},
+        "Five Section Rectangle" : {},
+        "Step Size" : {}
+    }
+    
+    def getImageObject(self, img : Image.Image) -> None:
+        self.image = img
+        self.width, self.height = img.size
+        self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=(255,255,255,255))
         return
     
+    # buffer objects
+    bufferGroundLayer = Image.new(mode = "RGBA", size = (0,0), color = (255,255,255,255))
+
     # rectangle layer
-    def layeredRectangle(self) -> Image.Image:
+    def layeredRectangle(self, modifier : int) -> Image.Image:
         drawObject = ImageDraw.Draw(self.groundLayer)
-        drawObject.rectangle((10,10,self.width-10,self.height-10),fill=(0,0,0,0))
-        drawObject.rectangle((20,20,self.width-20,self.height-20),fill=(255,255,255,255))
-        drawObject.rectangle((30,30,self.width-30,self.height-30),fill=(0,0,0,0))
+        modifier1 = modifier + 10
+        modifier2 = modifier + 20
+        modifier3 = modifier + 30
+        drawObject.rectangle((modifier1,modifier1 ,self.width-modifier1,self.height-modifier1),fill=(0,0,0,0))
+        drawObject.rectangle((modifier2,modifier2,self.width-modifier2,self.height-modifier2),(255,255,255,255))
+        drawObject.rectangle((modifier3,modifier3,self.width-modifier3,self.height-modifier3),fill=(0,0,0,0))
         return self.groundLayer
     
     # creating roumbous mask
@@ -28,20 +58,22 @@ class Masks:
         return self.groundLayer
     
     # Elliptical mask
-    def ellipticalMask(self) -> Image.Image:
-        ImageDraw.Draw(self.groundLayer).ellipse((1.5, 1.5, self.width - 1.5, self.height - 1.5),fill=(0,0,0,0))
+    def ellipticalMask(self, modifier : int) -> Image.Image:
+        if (modifier <= self.width-modifier) and (modifier <= self.height-modifier):
+            ImageDraw.Draw(self.groundLayer).ellipse((modifier,modifier,self.width-modifier,self.height-modifier),fill=(0,0,0,0))
         return self.groundLayer
     
     # Circular mask
-    def circularMask(self) -> Image.Image:
+    def circularMask(self, modifier : int) -> Image.Image:
+        pad = abs(self.width-self.height)/2
         if self.width > self.height:
-            pad = (self.width-self.height)/2
-            ImageDraw.Draw(self.groundLayer).ellipse((pad, 0, self.width - pad, self.height), fill= (0,0,0,0))
+            if (2*(pad + modifier) <= self.width) and (2 * pad <= self.height):
+                ImageDraw.Draw(self.groundLayer).ellipse((pad + modifier, modifier, self.width - pad - modifier, self.height - modifier), fill= (0,0,0,0))
         elif self.height > self.width:
-            pad = (self.height-self.width)/2
-            ImageDraw.Draw(self.groundLayer).ellipse((0, pad, self.width, self.height-pad), fill=(0,0,0,0))
+            if (2*(pad + modifier) <= self.height) and (2 * pad <= self.width):
+                ImageDraw.Draw(self.groundLayer).ellipse((modifier, pad + modifier, self.width - modifier, self.height-pad - modifier), fill=(0,0,0,0))
         else:
-            return self.ellipticalMask(self.width,self.height)
+            return self.ellipticalMask(modifier = modifier)
         return self.groundLayer
     
     # Double circle mask
@@ -60,13 +92,14 @@ class Masks:
         return self.groundLayer
     
     # style 1 : Left diagonal
-    def style_one_mask(self) -> Image.Image:
+    def style_one_mask(self, modifier : int = 10) -> Image.Image:
         qWidth = 2*(self.width/3)
         qHeight = 2*(self.height/3)
         drawObject = ImageDraw.Draw(self.groundLayer)
-        drawObject.polygon(((10,10), (10,self.height/3), (self.width/3,10), (10,10)),fill=(0,0,0,0))
-        drawObject.polygon(((10,self.height/3), (qWidth,self.height-10), (self.width-10,qHeight), (self.width/3,10)),fill=(0,0,0,0))
-        drawObject.polygon(((qWidth,self.height-10), (self.width-10,self.height-10), (self.width-10, qHeight), (qWidth,self.height-10)), fill=(0,0,0,0))
+        if modifier <= qWidth and modifier <= qHeight:
+            drawObject.polygon(((modifier,modifier), (modifier,self.height/3), (self.width/3,modifier), (modifier,modifier)),fill=(0,0,0,0))
+            drawObject.polygon(((modifier,self.height/3), (qWidth,self.height-modifier), (self.width-modifier,qHeight), (self.width/3,modifier)),fill=(0,0,0,0))
+            drawObject.polygon(((qWidth,self.height-modifier), (self.width-modifier,self.height-modifier), (self.width-modifier, qHeight), (qWidth,self.height-modifier)), fill=(0,0,0,0))
         return self.groundLayer
     
     # style 2 : five section rectangle
@@ -83,10 +116,10 @@ class Masks:
     
     # style 3 : deadpool mask
     def style_three_mask(self) -> Image.Image:
-        self.groundLayer = Image.new(mode=self._metaData[1], size=self._metaData[2], color= (0,0,0,20))
+        self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color= (0,0,0,20))
         width, height = self.width, self.height
-        if width > height:
-            pad = (width-height)/2
+        if self.width >= self.height:
+            pad = abs(width-height)/2
             drawObject = ImageDraw.Draw(self.groundLayer)
             fillColor = [(255,0,0,150), (0,0,0,0), (255,0,0,150)]
             coordinates = [(pad, 0, width - pad, height),
@@ -145,27 +178,36 @@ class Masks:
         return self.groundLayer
     
     # style 5 : right diagonal
-    def style_five_mask(self) -> Image.Image:
+    def style_five_mask(self, modifier : int = 10) -> Image.Image:
         drawObject = ImageDraw.Draw(im = self.groundLayer)
-        quarterWidth, quarterHeight =  2 * self.width/3, 2 * self.height/3 # 2/3 of the width and height
         width3, height3 = self.width/3, self.height/3 # 1/3 of the width, height
-        drawObject.polygon(xy = ((quarterWidth,10), (self.width-10, height3), (width3, self.height-10), (10, quarterHeight)), fill = (0,0,0,0))
-        drawObject.polygon(xy = ((10, self.height-10), (10, quarterHeight), (width3, self.height - 10), (10, self.height - 10)), fill = (0, 0, 0, 0 ))
-        drawObject.polygon(xy = ((self.width -10, 10), (self.width - 10, height3), (quarterWidth, 10), (self.width-10, 10)), fill = (0, 0, 0, 0))
+        if modifier <= width3 and modifier <= height3:
+            quarterWidth, quarterHeight =  2 * self.width/3, 2 * self.height/3 # 2/3 of the width and height
+            drawObject.polygon(xy = ((quarterWidth,modifier), (self.width-modifier, height3), (width3, self.height-modifier), (modifier, quarterHeight)), fill = (0,0,0,0))
+            drawObject.polygon(xy = ((modifier, self.height-modifier), (modifier, quarterHeight), (width3, self.height - modifier), (modifier, self.height - modifier)), fill = (0, 0, 0, 0 ))
+            drawObject.polygon(xy = ((self.width -modifier, modifier), (self.width - modifier, height3), (quarterWidth, modifier), (self.width-modifier, modifier)), fill = (0, 0, 0, 0))
         return self.groundLayer
     
     # style 6 : left layOut
-    def style_six_mask(self) -> Image.Image:
+    def style_six_mask(self, modifier : int = 10) -> Image.Image:
         drawObject = ImageDraw.Draw(im = self.groundLayer)
-        quarterWidth, quarterHeight =  2 * self.width/3, 2 * self.height/3 # 2/3 of the width and height
-        drawObject.polygon(xy= ((10, 10), (10, self.height - 10), (quarterWidth, self.height - 10), (quarterWidth, 10)), fill= (0, 0, 0, 0))
+        quarterWidth =  2 * self.width/3 # 2/3 of the width
+        if (modifier <= quarterWidth) and (quarterWidth - modifier >= self.width/3):
+            drawObject.polygon(xy= ((10, 10), (10, self.height - 10), (quarterWidth-modifier, self.height - 10), (quarterWidth-modifier, 10)), fill= (0, 0, 0, 0))
+            self.bufferGroundLayer = self.groundLayer
+        else:
+            self.groundLayer = self.bufferGroundLayer
         return self.groundLayer
     
     # style 7 : right layOut
-    def style_seven_mask(self) -> Image.Image:
+    def style_seven_mask(self, modifier : int = 10) -> Image.Image:
         drawObject = ImageDraw.Draw(im = self.groundLayer)
-        width3, height3 =  self.width/3, self.height/3 # 1/3 of the width and height
-        drawObject.polygon(xy= ((width3, 10), (width3, self.height - 10), (self.width - 10, self.height - 10,), (self.width - 10, 10)), fill= (0, 0, 0, 0))
+        width3 =  self.width/3 # 1/3 of the width
+        if (modifier + width3 <= 2*width3):
+            drawObject.polygon(xy= ((width3 + modifier, 10), (width3 + modifier, self.height - 10), (self.width - 10, self.height - 10,), (self.width - 10, 10)), fill= (0, 0, 0, 0))
+            self.bufferGroundLayer = self.groundLayer
+        else:
+            self.groundLayer = self.bufferGroundLayer
         return self.groundLayer
     
     # style 8

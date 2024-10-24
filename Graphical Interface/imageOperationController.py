@@ -4,6 +4,9 @@ from ImageManupulation.ImageframeAdjuster import FrameAdjustment
 from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.imageColorEnhancer import ColorImage
 from ImageManupulation.deformer import ImageDeformer
+from ImageManupulation.frameManager import FrameGenerator
+from ImageManupulation.specialFrameGenerator import SpecialFrames
+from ImageManupulation.maskGenerator import Masks
 from PIL import Image
 
 from PyQt5.QtWidgets import QTreeWidgetItem
@@ -16,6 +19,7 @@ class OperationFramework:
         self.imageFiltering = FilterImage()
         self.imageColoring = ColorImage()
         self.imageDeforming = ImageDeformer()
+        self.imageFrames = Masks()
         return
     
     def signalManager(self, treeChild : QTreeWidgetItem, valuePackage : dict, signalValue : object):
@@ -83,6 +87,20 @@ class OperationFramework:
                     return self.imageDeforming.mirrorHalf()
                 elif subOperation == "Four Mirror":
                     return self.imageDeforming.mirrorQuad()
+            elif parentItem.text(0) == "Frames":
+                self.imageFrames.getImageObject(self.imageObject)
+                if subOperation == "Rombous":
+                    return self.imageFrames.rombousMask()
+                elif subOperation == "Double Circle":
+                    return self.imageFrames.doubleCircleMask()
+                elif subOperation == "Star":
+                    return self.imageFrames.starShape()
+                elif subOperation == "Dead pool":
+                    return self.imageFrames.style_three_mask()
+                elif subOperation == "Five Section Rectangle":
+                    return self.imageFrames.style_two_mask()
+                elif subOperation == "Step Size":
+                    return self.imageFrames.style_eight_mask()
         return self.imageObject
     
     def multivalueOperation(self, subOperation : str, signalValue:object):
@@ -121,6 +139,21 @@ class OperationFramework:
                 elif subOperation == "Chess Like":
                     return self.imageDeforming.chess(boxGap = signalValue)
                 elif subOperation == "Sine Curve":
-                    print(signalValue)
                     return self.imageDeforming.sinCurve(cycle = signalValue)
+            if parentItem.text(0) == "Frames":
+                self.imageFrames.getImageObject(self.imageObject)
+                if subOperation == "Rectangle Layer":
+                    return self.imageFrames.layeredRectangle(modifier = signalValue)
+                elif subOperation == "Ellipse":
+                    return self.imageFrames.ellipticalMask(modifier = signalValue)
+                elif subOperation == "Circle":
+                    return self.imageFrames.circularMask(modifier = signalValue)
+                elif subOperation == "Left Diagonal":
+                    return self.imageFrames.style_one_mask(modifier = signalValue)
+                elif subOperation == "Right Diagonal":
+                    return self.imageFrames.style_five_mask(modifier = signalValue)
+                elif subOperation == "Left Frame":
+                    return self.imageFrames.style_six_mask(modifier = signalValue)
+                elif subOperation == "Right Frame":
+                    return self.imageFrames.style_seven_mask(modifier = signalValue)
         return self.imageObject

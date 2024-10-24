@@ -1,5 +1,5 @@
 # important Libraries
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QPixmap, QImage, QPainter
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider
 from PyQt5.QtCore import Qt
 from threading import Thread
@@ -8,7 +8,7 @@ import sys, os
 
 # adding current path to the system
 sys.path.append(os.getcwd())
-
+from fileWindow import FileWindow
 from ImageManupulation.ImageframeAdjuster import FrameAdjustment
 from ImageManupulation.deformer import ImageDeformer
 from ImageManupulation.imageColorEnhancer import ColorImage
@@ -43,9 +43,11 @@ class EditingActionManager(QWidget):
         self.editingTreeBody.itemChanged.connect(self.clearAdvancementLayer)
         self.chooseColorLabel.clicked.connect(self.createColorPicker)
         self.setEdit.clicked.connect(self.keepEdit)
+        self.filewinowForSave.fileSaveButton.clicked.connect(self.saveImage)
         return
     
     def addProperties(self):
+        self.filewinowForSave = FileWindow()
         self.currentColor = ""
         self.imageToEdit = ""
         self.imageSize = (850, 600)
@@ -213,11 +215,11 @@ class EditingActionManager(QWidget):
             self.clearAdvancementLayer()
             for valueDictKey in valueparserList.keys():
                 slider = QSlider(Qt.Orientation.Horizontal)
-                slider.setObjectName(valueDictKey)
                 slider.setFixedWidth(180)
                 slider.setRange(valueparserList[valueDictKey]["minVal"], valueparserList[valueDictKey]["maxVal"])
                 slider.setTickPosition(valueparserList[valueDictKey]["currentPosition"])
                 slider.setTickInterval(valueparserList[valueDictKey]["change"])
+                slider.setObjectName(valueDictKey)
                 slider.setTickPosition(QSlider.TicksBelow)
                 slider.valueChanged.connect(self.performImageOperation)
                 newLabel = QLabel(valueDictKey)
@@ -279,7 +281,8 @@ class EditingActionManager(QWidget):
                     else:
                         self.fillInnerAdvanceMentlayout(self.valuePackage)
                 elif treeItem.parent().text(0) == "Frames":
-                    pass
+                    self.valuePackage = Masks.subEditingTree[treeItem.text(0)]
+                    self.fillInnerAdvanceMentlayout(self.valuePackage)
                 else:
                     pass
                 return "Loading"
@@ -316,6 +319,22 @@ class EditingActionManager(QWidget):
             self.imageForEditLabel.show()
             return "Closed Successfully"
     
+    def saveImageInMachine(self):
+        self.filewinowForSave.saveFileByNmae()
+        return
+    
+    def saveImage(self):
+        fileName = self.filewinowForSave.ImageFileNameEditor.text()
+        extension = self.filewinowForSave.fileExtensionListWidget.currentText()
+        directory = self.filewinowForSave.currentPathName
+        if directory:
+            fullPath = os.path.join(directory, (fileName+extension))
+            if self.imageObject:
+                img = self.convertPixMaptoImage(self.imageObject)
+                img = img.convert('RGB')
+                img.save(fullPath)
+                self.filewinowForSave.close()
+        return
     def convertPixMaptoImage(self, imageObjectEditable : QPixmap) -> Image.Image:
         if self.imageObject:
             qImage = imageObjectEditable.toImage()
@@ -334,6 +353,13 @@ class EditingActionManager(QWidget):
         except MemoryError:
             return "Huge size of image"
         return self.newImageObject
+    
+    def overLayPixmapObjects(self, basePixmap : QPixmap, overLayPixmap : QPixmap) -> QPixmap:
+        resultPixmap = QPixmap(basePixmap.size())
+        backGround = QPainter(resultPixmap)
+        backGround.drawPixmap(0, 0, basePixmap)
+        backGround.drawPixmap(0, 0, overLayPixmap)
+        return resultPixmap
     
     def performImageOperation(self, signalValue : object = None):
         if self.editingTreeBody.currentItem() != None and self.imageObject != None:
@@ -357,7 +383,10 @@ class EditingActionManager(QWidget):
 
             # conversion and showing image
             self.newImageObject = self.convertImagetoPixMap(pilImage = pilImageEdited)
-            if (self.editingTreeBody.currentItem().text(0) in self.savingRequired):
+
+            if self.editingTreeBody.currentItem().parent().text(0) == "Frames":
+                self.newImageObject = self.overLayPixmapObjects(self.imageObject, self.newImageObject)
+            elif (self.editingTreeBody.currentItem().text(0) in self.savingRequired):
                 self.imageObject = self.newImageObject
             self.showPixmap(self.newImageObject)
         return "Succeed"

@@ -41,6 +41,8 @@ class MasterWindow(QMainWindow):
         self.newFileWindow.fileOpenButton.clicked.connect(self.openImageFromMainWindow)
         self.closeFile.triggered.connect(self.closeImageObject)
         self.loadOtherImages.triggered.connect(self.connectImageGridWithFiles)
+        self.saveImage.triggered.connect(self.tab2.saveImageInMachine)
+
         self.newFileWindow.fileListWidget.currentItemChanged.connect(self.newFileWindow.fileAccess)
         self.pressKeyToNextImage.activated.connect(self.openNextImageInGallery)
         self.pressKeyToPreviousImage.activated.connect(self.openPreviousImageInGallery)
@@ -72,8 +74,10 @@ class MasterWindow(QMainWindow):
         self.closeFile.setShortcut("ctrl+w")
         self.loadOtherImages = QAction("Load Other Images", self)
         self.loadOtherImages.setShortcut("ctrl+i")
+        self.saveImage = QAction("Save", self)
+        self.saveImage.setShortcut("ctrl+s")
 
-        self.fileMenu.addActions([self.openFile, self.closeFile, self.loadOtherImages])
+        self.fileMenu.addActions([self.openFile, self.closeFile, self.loadOtherImages, self.saveImage])
 
         self.undoMethod = QAction("Undo", self)
         self.undoMethod.setShortcut("ctrl+z")
