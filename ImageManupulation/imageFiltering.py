@@ -30,13 +30,7 @@ class FilterImage:
             "radius" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 0, "change" : 1},
             "Threshold" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 0, "change" : 1}
         }
-    }    
-    #sends user message
-    def getMessage(self)->None:
-        print(self.user_message)
-        self.user_message=None # sets user message to null for next message
-        return
-
+    }
     #interchanges the image with different classes
     def getImageObject(self,image:Image.Image):
         try:
@@ -48,6 +42,10 @@ class FilterImage:
             return f"Can't load the image -> {memoryError}"
         finally:
             return "Succeed"
+
+    # old value containing parameter
+    _newThresHold = 0 # for unsharp mask threshold parameter
+    _newRadius = 0 # for unsharp mask raidus
 
     #manupulates the contrast of the image    
     def imageAutoContrast(self, cutoffValue : float)->bool:
@@ -270,9 +268,14 @@ class FilterImage:
         # copying the image
         image = self.image
 
+        if threshold_choice != 0:
+            self._newThresHold = threshold_choice
+        if radius_choice != 0:
+            self._newRadius = radius_choice
+
         #process
         try:
-            image =image.convert('RGB').filter(ImageFilter.UnsharpMask(radius=radius_choice, threshold = threshold_choice))
+            image =image.convert('RGB').filter(ImageFilter.UnsharpMask(radius=self._newRadius, threshold = self._newThresHold))
         # excetion handleing
         except IOError as ioError:
             return f"Can't write the image file -> {ioError}"
