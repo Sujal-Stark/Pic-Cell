@@ -50,6 +50,9 @@ class MasterWindow(QMainWindow):
         self.zoomInOption.triggered.connect(self.scaleUPImage)
         self.zoomOutOption.triggered.connect(self.scaleDownImage)
         self.OriginalSize.triggered.connect(self.originalScale)
+
+        self.undoMethod.triggered.connect(self.tab2.undoOperation)
+        self.redoMethod.triggered.connect(self.tab2.redoOperation)
         return
     
     def assignProperties(self):
