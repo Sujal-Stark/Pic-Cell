@@ -4,8 +4,6 @@ from ImageManupulation.ImageframeAdjuster import FrameAdjustment
 from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.imageColorEnhancer import ColorImage
 from ImageManupulation.deformer import ImageDeformer
-from ImageManupulation.frameManager import FrameGenerator
-from ImageManupulation.specialFrameGenerator import SpecialFrames
 from ImageManupulation.maskGenerator import Masks
 from PIL import Image
 
@@ -109,51 +107,111 @@ class OperationFramework:
             if parentItem.text(0) == "Filters":
                 self.imageFiltering.getImageObject(self.imageObject)
                 if subOperation == "Auto contrast":
-                    return self.imageFiltering.imageAutoContrast(cutoffValue = signalValue)
+                    if signalValue != None:
+                        return self.imageFiltering.imageAutoContrast(cutoffValue = signalValue)
+                    else:
+                        return self.imageFiltering.imageAutoContrast()
                 elif subOperation == "Gaussian Blur":
-                    return self.imageFiltering.gaussianBlurImage(blurStrength = signalValue)
+                    if signalValue != None:
+                        return self.imageFiltering.gaussianBlurImage(blurStrength = signalValue)
+                    else:
+                        return self.imageFiltering.gaussianBlurImage()
                 elif subOperation == "Sharpen":
-                    return self.imageFiltering.sharpenImage(sharpValue = signalValue)
+                    if signalValue != None:
+                        return self.imageFiltering.sharpenImage(sharpValue = signalValue)
+                    else:
+                        return self.imageFiltering.sharpenImage()
                 elif subOperation == "Detail":
-                    return self.imageFiltering.addDetail(strenghtChoice = signalValue)
+                    if signalValue != None:
+                        return self.imageFiltering.addDetail(strenghtChoice = signalValue)
+                    else:
+                        return self.imageFiltering.addDetail()
                 elif subOperation == "Smoothen":
-                    return self.imageFiltering.smoothenImage(smoothingChoice = signalValue)
+                    if signalValue != None:
+                        return self.imageFiltering.smoothenImage(smoothingChoice = signalValue)
+                    else:
+                        return self.imageFiltering.smoothenImage()
                 elif subOperation == "Box Blur":
-                    return self.imageFiltering.boxBlurImage(blurStrength = signalValue)
+                    if signalValue != None:
+                        return self.imageFiltering.boxBlurImage(blurStrength = signalValue)
+                    else:
+                        return self.imageFiltering.boxBlurImage()
                 elif subOperation == "Unsharp":
                     keyList = list(signalValue.keys())
-                    if "radius" == keyList[0]:
-                        return self.imageFiltering.imageUnsharpMask(radius_choice = signalValue["radius"])
-                    elif "Threshold" == keyList[0]:
-                        return self.imageFiltering.imageUnsharpMask(threshold_choice = signalValue["Threshold"])
+                    if signalValue != None:
+                        if "radius" == keyList[0]:
+                            return self.imageFiltering.imageUnsharpMask(radius_choice=signalValue["radius"])
+                        elif "Threshold" == keyList[0]:
+                            return self.imageFiltering.imageUnsharpMask(threshold_choice= signalValue["Threshold"])
+                    else:
+                        return self.imageFiltering.imageUnsharpMask()
             if parentItem.text(0) == "Deform Image":
                 self.imageDeforming.getImageObject(self.imageObject)
                 if subOperation == "Horizontal Split":
-                    return self.imageDeforming.horizontalSplit(repeaterValue = signalValue)
+                    if signalValue != None:
+                        return self.imageDeforming.horizontalSplit(repeaterValue = signalValue)
+                    else:
+                        return self.imageDeforming.horizontalSplit()
                 elif subOperation == "Vertical Split":
-                    return self.imageDeforming.verticalSplit(repeaterValue = signalValue)
+                    if signalValue != None:
+                        return self.imageDeforming.verticalSplit(repeaterValue = signalValue)
+                    else:
+                        return self.imageDeforming.verticalSplit()
                 elif subOperation == "Multiply":
-                    return self.imageDeforming.multiply(repitaionNumber = signalValue)
+                    if signalValue != None:
+                        return self.imageDeforming.multiply(repitaionNumber = signalValue)
+                    else:
+                        return self.imageDeforming.multiply()
                 elif subOperation == "Add Layer":
-                    return self.imageDeforming.layerize(repeaterValue = signalValue)
+                    if signalValue != None:
+                        return self.imageDeforming.layerize(repeaterValue = signalValue)
+                    else:
+                        return self.imageDeforming.layerize()
                 elif subOperation == "Chess Like":
-                    return self.imageDeforming.chess(boxGap = signalValue)
+                    if signalValue != None:
+                        return self.imageDeforming.chess(boxGap = signalValue)
+                    else:
+                        return self.imageDeforming.chess()
                 elif subOperation == "Sine Curve":
-                    return self.imageDeforming.sinCurve(cycle = signalValue)
+                    if signalValue != None:
+                        return self.imageDeforming.sinCurve(cycle = signalValue)
+                    else:
+                        return self.imageDeforming.sinCurve()
             if parentItem.text(0) == "Frames":
                 self.imageFrames.getImageObject(self.imageObject)
                 if subOperation == "Rectangle Layer":
-                    return self.imageFrames.layeredRectangle(modifier = signalValue)
+                    if signalValue != None:
+                        return self.imageFrames.layeredRectangle(modifier = signalValue)
+                    else:
+                        return self.imageFrames.layeredRectangle()
                 elif subOperation == "Ellipse":
-                    return self.imageFrames.ellipticalMask(modifier = signalValue)
+                    if signalValue != None:
+                        return self.imageFrames.ellipticalMask(modifier = signalValue)
+                    else:
+                        return self.imageFrames.ellipticalMask()
                 elif subOperation == "Circle":
-                    return self.imageFrames.circularMask(modifier = signalValue)
+                    if signalValue != None:
+                        return self.imageFrames.circularMask(modifier = signalValue)
+                    else:
+                        return self.imageFrames.circularMask()
                 elif subOperation == "Left Diagonal":
-                    return self.imageFrames.style_one_mask(modifier = signalValue)
+                    if signalValue != None:
+                        return self.imageFrames.style_one_mask(modifier = signalValue)
+                    else:
+                        return self.imageFrames.style_one_mask()
                 elif subOperation == "Right Diagonal":
-                    return self.imageFrames.style_five_mask(modifier = signalValue)
+                    if signalValue != None:
+                        return self.imageFrames.style_five_mask(modifier = signalValue)
+                    else:
+                        return self.imageFrames.style_five_mask()
                 elif subOperation == "Left Frame":
-                    return self.imageFrames.style_six_mask(modifier = signalValue)
+                    if signalValue != None:
+                        return self.imageFrames.style_six_mask(modifier = signalValue)
+                    else:
+                        return self.imageFrames.style_six_mask()
                 elif subOperation == "Right Frame":
-                    return self.imageFrames.style_seven_mask(modifier = signalValue)
+                    if signalValue != None:
+                        return self.imageFrames.style_seven_mask(modifier = signalValue)
+                    else:
+                        return self.imageFrames.style_seven_mask()
         return self.imageObject
