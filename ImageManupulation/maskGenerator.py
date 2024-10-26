@@ -4,27 +4,27 @@ class Masks:
     frameOptions = ["Rectangle Layer", "Rombous", "Ellipse", "Circle", "Double Circle", "Left Diagonal", "Right Diagonal", "Five Section Rectangle", "Dead pool", "Star", "Left Frame", "Right Frame", "Step Size"] # editing options available
     subEditingTree = {
         "Rectangle Layer" : {
-            "Border" : {"minVal" : 10, "maxVal" : 200, "currentPosition" : 10, "change" : 10}
+            "Border" : {"minVal" : 10, "maxVal" : 200, "currentPosition" : 10, "change" : 5}
         },
         "Rombous" : {},
         "Ellipse" : {
-            "Border" : {"minVal" : 0, "maxVal" : 250, "currentPosition" : 0, "change" : 10}
+            "Border" : {"minVal" : 0, "maxVal" : 250, "currentPosition" : 10, "change" : 5}
         },
         "Circle" : {
-            "Border" : {"minVal" : 0, "maxVal" : 250, "currentPosition" : 0, "change" : 10}
+            "Border" : {"minVal" : 0, "maxVal" : 250, "currentPosition" : 10, "change" : 5}
         },
         "Double Circle" : {},
         "Left Diagonal" : {
-            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 0, "change" : 10}
+            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 10, "change" : 5}
         },
         "Right Diagonal" : {
-            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 0, "change" : 10}
+            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 10, "change" : 5}
         },
         "Left Frame" : {
-            "Border" : {"minVal" : 0, "maxVal" : 800, "currentPosition" : 0, "change" : 10}
+            "Border" : {"minVal" : 0, "maxVal" : 400, "currentPosition" : 10, "change" : 20}
         },
         "Right Frame" : {
-            "Border" : {"minVal" : 0, "maxVal" : 800, "currentPosition" : 0, "change" : 10}
+            "Border" : {"minVal" : 0, "maxVal" : 400, "currentPosition" : 10, "change" : 20}
         },
         "Star" : {},
         "Dead pool" : {},
@@ -42,7 +42,7 @@ class Masks:
     bufferGroundLayer = Image.new(mode = "RGBA", size = (0,0), color = (255,255,255,255))
 
     # rectangle layer
-    def layeredRectangle(self, modifier : int) -> Image.Image:
+    def layeredRectangle(self, modifier : int = 10) -> Image.Image:
         drawObject = ImageDraw.Draw(self.groundLayer)
         modifier1 = modifier + 10
         modifier2 = modifier + 20
@@ -58,13 +58,13 @@ class Masks:
         return self.groundLayer
     
     # Elliptical mask
-    def ellipticalMask(self, modifier : int) -> Image.Image:
+    def ellipticalMask(self, modifier : int =10) -> Image.Image:
         if (modifier <= self.width-modifier) and (modifier <= self.height-modifier):
             ImageDraw.Draw(self.groundLayer).ellipse((modifier,modifier,self.width-modifier,self.height-modifier),fill=(0,0,0,0))
         return self.groundLayer
     
     # Circular mask
-    def circularMask(self, modifier : int) -> Image.Image:
+    def circularMask(self, modifier : int = 10) -> Image.Image:
         pad = abs(self.width-self.height)/2
         if self.width > self.height:
             if (2*(pad + modifier) <= self.width) and (2 * pad <= self.height):
@@ -100,6 +100,8 @@ class Masks:
             drawObject.polygon(((modifier,modifier), (modifier,self.height/3), (self.width/3,modifier), (modifier,modifier)),fill=(0,0,0,0))
             drawObject.polygon(((modifier,self.height/3), (qWidth,self.height-modifier), (self.width-modifier,qHeight), (self.width/3,modifier)),fill=(0,0,0,0))
             drawObject.polygon(((qWidth,self.height-modifier), (self.width-modifier,self.height-modifier), (self.width-modifier, qHeight), (qWidth,self.height-modifier)), fill=(0,0,0,0))
+        else:
+            self.groundLayer = self.bufferGroundLayer
         return self.groundLayer
     
     # style 2 : five section rectangle
