@@ -18,7 +18,7 @@ class ImageDeformer:
             "Multiply factor" : {"minVal" : 0, "maxVal" : 6, "currentPosition" : 0, "change" : 1}
         },
         "Add Layer" : {
-            "Layer number" : {"minVal" : 1, "maxVal" : 10, "currentPosition" : 0, "change" : 1},
+            "Layer number" : {"minVal" : 1, "maxVal" : 10, "currentPosition" : 5, "change" : 1},
         },
         "Chess Like" : {
             "Box Length" : {"minVal" : 1, "maxVal" : 80, "currentPosition" : 20, "change" : 5}
@@ -158,7 +158,7 @@ class ImageDeformer:
         self.image = image
         return self.image
     
-    def multiply(self, repitaionNumber = 0):
+    def multiply(self, repitaionNumber = 2):
         image = self.image # coping actual image
         try:
             # deformed class
@@ -198,13 +198,7 @@ class ImageDeformer:
         return self.image
 
     # infiinite layer
-    def layerize(self, repeaterValue = 1):
-        if breaker:
-            self.breakerValue = breaker
-        else:
-            breaker = self.breakerValue
-        
-        print("breaker:", breaker)
+    def layerize(self, repeaterValue = 5):
         image = self.image # copying actual image object
         widthRepeater, heightRepeater = image.size[0]//50, image.size[1]//50
         repeater = widthRepeater if widthRepeater <= heightRepeater else heightRepeater
