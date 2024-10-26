@@ -4,31 +4,31 @@ class FilterImage:
     
     subEditingTree = {
         "Auto contrast" : {
-            "Intensity" : {"minVal" : 0, "maxVal" : 50, "currentPosition" : 0, "change" : 1}
+            "Intensity" : {"minVal" : 0, "maxVal" : 13, "currentPosition" : 2, "change" : 1}
         },
         "Grey Scale" : {},
         "Posterize" : {},
         "Gaussian Blur" : {
-            "Blur Strength" : {"minVal" : 0, "maxVal" : 100, "currentPosition" : 0, "change" : 1}
+            "Blur Strength" : {"minVal" : 0, "maxVal" : 100, "currentPosition" : 10, "change" : 1}
         },
         "Edge Enhance" : {"Edge Enhance" : 1 , "Maximum Edge Enhance" : 2},
         "Sharpen" : {
-            "Sharp Value" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 0, "change" : 1}
+            "Sharp Value" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 2, "change" : 1}
         }, 
         "Contour" : {},
         "Detail" : {
-            "Intensity" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 0, "change" : 1}
+            "Intensity" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 2, "change" : 1}
         },
         "Smoothen" : {
-            "Intensity" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 0, "change" : 1}
+            "Intensity" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 2, "change" : 1}
         },
         "Emboss" : {},
         "Box Blur" : {
-            "Blur Strength" : {"minVal" : 0, "maxVal" : 100, "currentPosition" : 0, "change" : 1}
+            "Blur Strength" : {"minVal" : 0, "maxVal" : 100, "currentPosition" : 2, "change" : 1}
         },
         "Unsharp" : {
-            "radius" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 0, "change" : 1},
-            "Threshold" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 0, "change" : 1}
+            "radius" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 2, "change" : 1},
+            "Threshold" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 2, "change" : 1}
         }
     }
     #interchanges the image with different classes
@@ -48,7 +48,7 @@ class FilterImage:
     _newRadius = 0 # for unsharp mask raidus
 
     #manupulates the contrast of the image    
-    def imageAutoContrast(self, cutoffValue : float)->bool:
+    def imageAutoContrast(self, cutoffValue : float = 2.0)->bool:
         #creating a copy image
         image = self.image
 
@@ -105,7 +105,7 @@ class FilterImage:
         return self.image
     
     # Gaussian Blur
-    def gaussianBlurImage(self, blurStrength):
+    def gaussianBlurImage(self, blurStrength : float = 10):
         #copying instance image
         image = self.image
 
@@ -124,7 +124,7 @@ class FilterImage:
         self.image = image
         return self.image
 
-    def sharpenImage(self, sharpValue : int):
+    def sharpenImage(self, sharpValue : int = 2):
         # copying instance image 
         image = self.image
 
@@ -164,7 +164,7 @@ class FilterImage:
         return self.image
     
     # add detail (constrast + Sharpness)
-    def addDetail(self, strenghtChoice : int):
+    def addDetail(self, strenghtChoice : int = 2):
         # copying the instance image
         image = self.image
 
@@ -184,7 +184,7 @@ class FilterImage:
         return self.image
     
     #add Smoothness
-    def smoothenImage(self, smoothingChoice : int):
+    def smoothenImage(self, smoothingChoice : int = 2):
         # copying the image instance
         image = self.image
 
@@ -244,7 +244,7 @@ class FilterImage:
         return self.image
     
     #box blur effect
-    def boxBlurImage(self , blurStrength : int):
+    def boxBlurImage(self , blurStrength : int  = 2):
         #creating copy of image
         image = self.image
 
@@ -264,7 +264,7 @@ class FilterImage:
         return self.image
 
     # unsharp mask
-    def imageUnsharpMask(self, radius_choice : int = 0, threshold_choice : int = 0):
+    def imageUnsharpMask(self, radius_choice : int = 2, threshold_choice : int = 2):
         # copying the image
         image = self.image
 
