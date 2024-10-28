@@ -18,17 +18,11 @@ class PixmapLinker:
             self.head.image = img
             return
         
-    def addPixmap(self, img : QPixmap):
-        if self.head != None:
+    def addPixmap(self, targetNode : Node, img : QPixmap) -> Node:
+        if targetNode != None:
             newNode = Node()
             newNode.image = img
-            newNode.nextNode = self.head
-            self.head.previousNode = newNode
-            self.head = newNode
-            return
-    
-    def getlastPixmap(self) -> Node:
-        newHead = self.head
-        while newHead.nextNode:
-            newHead = newHead.nextNode
-        return newHead
+            newNode.nextNode = targetNode
+            targetNode.previousNode = newNode
+            targetNode = newNode
+            return targetNode
