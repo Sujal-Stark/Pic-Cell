@@ -22,20 +22,7 @@ class FrameAdjustment:
         "Horizontal Flip" : {},
         "Vertical Flip" : {}
     }
-    # shows the image
-    def showImage(self)-> bool:
-        self.image.show()
-        return True
     
-    #close the image object
-    def close(self)->bool:
-        self.image.close()
-        return True
-    
-    #sends user message
-    def getMessage(self)->None:
-        print(self.user_message)
-        self.user_message=None
 
     #interchanges the image with different classes
     def getImageObject(self,image:Image.Image):
@@ -48,23 +35,6 @@ class FrameAdjustment:
             return f"Can't load the image -> {memoryError}"
         finally:
             return "Succeed"
-    
-    #transmits an image
-    def provideImageObject(self) -> Image.Image:
-        return self.image
-
-    # save the image with desired extension
-    def saveImage(self) -> bool:
-        #sending user message
-        self.user_message = {0:"Stop",1:'.png',2:'.jpeg',3:'.jpg',4:'.jfif'}
-        extensionList = ['.png','.jpeg','.jpg','.jfif']
-        self.getMessage()
-
-        #user choice
-        extension_choice = int(input("Choose extension:\t"))-1
-        new_name = input("Provide name:\t")
-        self.image.save(Rf"C:\Users\SUJAL KHAN\Downloads\{new_name}{extensionList[extension_choice]}")
-        return True
 
     #predefined reductions
     #16:9 convention
@@ -176,7 +146,6 @@ class FrameAdjustment:
         image = self.image #local image variable
         width,height = self.image.size
 
-        print("Agaya")
         if resize_choice == 1:
             image = self.image.resize((int(input("Enter Width:\t")),int(input("Enter height:\t"))))
             
@@ -268,6 +237,5 @@ class FrameAdjustment:
         
         self.image = image
         return self.image
-        return
     
     pass
