@@ -1,6 +1,6 @@
 # important Libraries
-from PyQt5.QtGui import QPixmap, QImage, QPainter
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider
+from PyQt5.QtGui import QPixmap, QImage, QPainter, QKeySequence
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider, QApplication
 from PyQt5.QtCore import Qt
 from threading import Thread
 from PIL import Image
@@ -15,6 +15,7 @@ from ImageManupulation.imageColorEnhancer import ColorImage
 from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.maskGenerator import Masks
 from imageOperationController import OperationFramework
+from pixmapLinker import PixmapLinker, Node
 
 class EditingActionManager(QWidget):
     def __init__(self) -> None:
@@ -47,17 +48,20 @@ class EditingActionManager(QWidget):
         return
     
     def addProperties(self):
-        self.filewinowForSave = FileWindow()
+        self.filewinowForSave = FileWindow() # file window is used to open or save image
         self.currentColor = ""
-        self.imageToEdit = ""
-        self.imageSize = (850, 600)
-        self.originalSize = (850, 600)
+        self.imageToEdit = "" # the name of the image which is about to get edit
+        self.imageSize = (850, 600) # the size of the panel where the image must be shown
+        self.ORIGINALSIZE = (850, 600) # this value is same but its like a constant
         self.valuePackage = {}
         self.imageObject : QPixmap = None
         self.newImageObject : QPixmap = None
         self.operationManager = OperationFramework()
         self.savingRequired = ["Rotate", "Horizontal Flip", "Vertical Flip"]
         self.removeableWidgets = []
+        self.pixmapConnector = PixmapLinker()
+        self.linker = None
+        self.firstCallFlag : bool
         return
     
     def createLabels(self):
@@ -68,6 +72,10 @@ class EditingActionManager(QWidget):
     def createButtons(self):
         self.chooseColorLabel = QPushButton("Choose color")
         self.setEdit = QPushButton("Set")
+        return
+    
+    def createColorPicker(self):
+        self.currentColor = QColorDialog.getColor()
         return
     
     def createFrames(self):
@@ -103,7 +111,7 @@ class EditingActionManager(QWidget):
     
     def createListWidgets(self):
         return
-    
+
     def creteScrollAreas(self):
         self.ScrollEditingBody = QScrollArea()
         self.ScrollEditingBody.setWidgetResizable(True)
@@ -177,14 +185,13 @@ class EditingActionManager(QWidget):
             editOptions = Masks.frameOptions
         elif parsedClass == "Collage":
             pass
-        else:
-            pass
         for editOption in editOptions:
             item.addChild(QTreeWidgetItem([editOption]))
         editOptions.clear()
         return
     
     def treeBodyItemclicked(self, treeItem : QTreeWidgetItem):
+        self.clearAdvancementLayer()
         self.addTreeItems(item = treeItem)
         self.addSpecialMethodsToGrid(treeItem = treeItem)
         return
@@ -209,32 +216,43 @@ class EditingActionManager(QWidget):
             return
 
     def fillInnerAdvanceMentlayout(self, valueparserList : dict):
+        self.innerEditSpectrumLayout.addWidget(QLabel("Editing choice will show up here"), 0, 0, alignment = Qt.AlignmentFlag.AlignCenter)
         if len(valueparserList) == 0:
             self.performImageOperation()
         else:
             self.clearAdvancementLayer()
             for valueDictKey in valueparserList.keys():
+                # creating slider
                 slider = QSlider(Qt.Orientation.Horizontal)
                 slider.setFixedWidth(180)
-                slider.setRange(valueparserList[valueDictKey]["minVal"], valueparserList[valueDictKey]["maxVal"])
-                slider.setTickPosition(valueparserList[valueDictKey]["currentPosition"])
-                slider.setTickInterval(valueparserList[valueDictKey]["change"])
+
+                # setting parameters
+                sliderParameter = valueparserList[valueDictKey]
+                slider.setRange(sliderParameter["minVal"], sliderParameter["maxVal"])
+                slider.setSliderPosition(sliderParameter["currentPosition"])
+                slider.setTickInterval(sliderParameter["change"])
                 slider.setObjectName(valueDictKey)
                 slider.setTickPosition(QSlider.TicksBelow)
                 slider.valueChanged.connect(self.performImageOperation)
+
+                # invoking initial edit
+                self.performImageOperation(signalValue = slider.sliderPosition())
+
+                # labels and sliders are merged into GUI
                 newLabel = QLabel(valueDictKey)
                 self.sliderHolderLayout.addWidget(newLabel,alignment = Qt.AlignmentFlag.AlignTop)
                 self.sliderHolderLayout.addWidget(slider, alignment = Qt.AlignmentFlag.AlignTop)
+
+                # storing widgets in delete bin
                 self.removeableWidgets.append(newLabel)
                 self.removeableWidgets.append(slider)
+            return
 
+    # handles multiple parameters in advancement layout by generating meta signal for operation controller
     def modifySignalValueForMultipleSignal(self, key :str, signal : object):
         try:
             if isinstance(self.valuePackage[key],dict):
-                if len(self.valuePackage) > 1:
-                    return {key : signal}
-                else:
-                    return signal
+                return {key : signal} if len(self.valuePackage) > 1 else signal
         except KeyError:
             return signal
 
@@ -262,36 +280,39 @@ class EditingActionManager(QWidget):
             self.clearEditSpectrum()
             try:
                 self.valuePackage = {}
+                # image adjustments
                 if treeItem.parent().text(0) == "Adjust":
                     self.valuePackage = FrameAdjustment.subEditingTree[treeItem.text(0)]
                     self.fillEditSpectrum(self.valuePackage)
+                
+                # Image Filering
                 elif treeItem.parent().text(0) == "Filters":
                     self.valuePackage = FilterImage.subEditingTree[treeItem.text(0)]
                     if treeItem.text(0) != "Edge Enhance":
                         self.fillInnerAdvanceMentlayout(self.valuePackage)
                     else:
                         self.fillEditSpectrum(self.valuePackage)
+
+                # Image Color Enhance
                 elif treeItem.parent().text(0) == "Color Enhance":
                     self.valuePackage = ColorImage.subEditingTree[treeItem.text(0)]
                     self.fillEditSpectrum(self.valuePackage)
+
+                # Image Deforming
                 elif treeItem.parent().text(0) == "Deform Image":
                     self.valuePackage = ImageDeformer.subEditingTree[treeItem.text(0)]
                     if treeItem.text(0) in ["Twist", "Double Twist", "Half Mirror", "Four Mirror"]:
                         self.fillEditSpectrum(self.valuePackage)
                     else:
                         self.fillInnerAdvanceMentlayout(self.valuePackage)
+
+                # image Frames
                 elif treeItem.parent().text(0) == "Frames":
                     self.valuePackage = Masks.subEditingTree[treeItem.text(0)]
                     self.fillInnerAdvanceMentlayout(self.valuePackage)
-                else:
-                    pass
                 return "Loading"
             except KeyError:
                 return "Method access denied"
-    
-    def createColorPicker(self):
-        self.currentColor = QColorDialog.getColor()
-        return
     
     def showPixmap(self, imageObject : QPixmap):
         self.imageForEditLabel.hide()
@@ -300,10 +321,12 @@ class EditingActionManager(QWidget):
     
     def openImageInEditSection(self):
         if self.imageToEdit != "":
-            self.imageSize = self.originalSize
+            self.imageSize = self.ORIGINALSIZE
             self.imageObject = QPixmap(self.imageToEdit)
             self.imageForEditLabel.hide()
             self.imageObject = self.imageObject.scaled(self.imageSize[0], self.imageSize[1], aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
+            self.pixmapConnector.createhead(self.imageObject)
+            self.firstCallFlag = True
             self.imageForEditLabel.setPixmap(self.imageObject)
             self.imageForEditLabel.show()
             return "Opened Successfully"
@@ -366,6 +389,10 @@ class EditingActionManager(QWidget):
             currentButton1 : QPushButton = self.innerEditSpectrumLayout.sender() # operaional button
             self.operationManager.imageObject = self.convertPixMaptoImage(self.imageObject) # passing ImageObject
 
+            # handles if edit occur while itering
+            if self.linker != None:
+                self.linker.previousNode = None
+
             sender = self.sender()
             if isinstance(sender, QPushButton):
                 # invoking operation manager to perform editng
@@ -376,10 +403,17 @@ class EditingActionManager(QWidget):
                     pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.valuePackage, None)
 
             elif isinstance(sender, QSlider):
+                print(QSlider(sender).sliderPosition())
                 self.operationManager.treeChildItem = self.editingTreeBody.currentItem()
                 subOperation = self.editingTreeBody.currentItem().text(0)
                 signalValue = self.modifySignalValueForMultipleSignal(key = sender.objectName(), signal =signalValue)
                 pilImageEdited = self.operationManager.multivalueOperation(subOperation, signalValue)
+            
+            # Initial edit for slider value operations
+            elif isinstance(sender, QTreeWidget):
+                self.operationManager.treeChildItem = self.editingTreeBody.currentItem()
+                subOperation = self.editingTreeBody.currentItem().text(0)
+                pilImageEdited = self.operationManager.multivalueOperation(subOperation, None)
 
             # conversion and showing image
             self.newImageObject = self.convertImagetoPixMap(pilImage = pilImageEdited)
@@ -390,8 +424,35 @@ class EditingActionManager(QWidget):
                 self.imageObject = self.newImageObject
             self.showPixmap(self.newImageObject)
         return "Succeed"
+    
+    def undoOperation(self):
+        if self.linker == None:
+            # copies the real pixmap connectors head with the linker
+            if self.pixmapConnector.head != None and self.firstCallFlag:
+                self.linker = self.pixmapConnector.head
+                self.linker = self.linker.nextNode
+                self.imageObject = self.linker.image
+                self.showPixmap(self.linker.image)
+                self.firstCallFlag = False
+        else:
+            if self.linker.nextNode:
+                self.linker = self.linker.nextNode
+                self.imageObject = self.linker.image
+                self.showPixmap(self.linker.image)
+        return
 
+    def redoOperation(self):
+        if self.linker.previousNode:
+            self.linker : Node = self.linker.previousNode
+            self.imageObject = self.linker.image
+            self.showPixmap(self.linker.image)
+        return
+    
     def keepEdit(self):
         if self.newImageObject != None:
             self.imageObject = self.newImageObject
+            if self.linker:
+                self.linker = self.pixmapConnector.addPixmap(self.linker, self.imageObject)
+            else:
+                self.pixmapConnector.head = self.pixmapConnector.addPixmap(self.pixmapConnector.head, self.imageObject)
     pass
