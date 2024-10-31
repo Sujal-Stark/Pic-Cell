@@ -12,7 +12,7 @@
     </div>
     <div class="Editor">
         <h2>Editing Interface</h2>
-        <a href="https://ibb.co/x3FRgSj"><img src="https://i.ibb.co/QXD1HFN/Screenshot-263.png" alt="Screenshot-263" border="0"></a><br /><a target='_blank' </a><br />
+        <a href="https://ibb.co/TYd3nBh"><img src="https://i.ibb.co/7jLmTJy/App-Editing-Features.png" alt="App-Editing-Features" border="0"></a>
     </div>
 </body>
 </html>
