@@ -14,5 +14,9 @@
         <h2>Editing Interface</h2>
         <a href="https://ibb.co/TYd3nBh"><img src="https://i.ibb.co/7jLmTJy/App-Editing-Features.png" alt="App-Editing-Features" border="0"></a>
     </div>
+    <div class = "Edits">
+        <h2>Edits done by this app</h2>
+        <a href="https://imgbb.com/"><img src="https://i.ibb.co/DrrS0pc/Ironman-Golden-Edit.png" alt="Ironman-Golden-Edit" border="0"></a>
+    </div>
 </body>
 </html>
