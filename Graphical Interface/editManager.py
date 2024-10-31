@@ -1,7 +1,7 @@
 # important Libraries
 from PyQt5.QtGui import QPixmap, QImage, QPainter, QKeySequence
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider, QApplication
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider
+from PyQt5.QtCore import Qt, QTimer
 from threading import Thread
 from PIL import Image
 import sys, os
@@ -41,10 +41,12 @@ class EditingActionManager(QWidget):
     
     def addResponse(self):
         self.editingTreeBody.itemClicked.connect(self.treeBodyItemclicked)
-        self.editingTreeBody.itemChanged.connect(self.clearAdvancementLayer)
         self.chooseColorLabel.clicked.connect(self.createColorPicker)
         self.setEdit.clicked.connect(self.keepEdit)
         self.filewinowForSave.fileSaveButton.clicked.connect(self.saveImage)
+        self.timeHolder.timeout.connect(self.showOriginal)
+        self.viewOriginal.pressed.connect(self.buttonPressedAction)
+        self.viewOriginal.released.connect(self.buttonRealeaseAction)
         return
     
     def addProperties(self):
@@ -53,15 +55,18 @@ class EditingActionManager(QWidget):
         self.imageToEdit = "" # the name of the image which is about to get edit
         self.imageSize = (850, 600) # the size of the panel where the image must be shown
         self.ORIGINALSIZE = (850, 600) # this value is same but its like a constant
-        self.valuePackage = {}
-        self.imageObject : QPixmap = None
-        self.newImageObject : QPixmap = None
-        self.operationManager = OperationFramework()
-        self.savingRequired = ["Rotate", "Horizontal Flip", "Vertical Flip"]
-        self.removeableWidgets = []
-        self.pixmapConnector = PixmapLinker()
-        self.linker = None
-        self.firstCallFlag : bool
+        self.valuePackage = {} # stores the edit option in edit spectrum and advancement Layout
+        self.imageObject : QPixmap = None # Qpixmap object that is used everywhere
+        self.ORIGINALIMAGEOBJECT = None # Qpixmap object that holds the original image
+        self.newImageObject : QPixmap = None # shows unsaved edits
+        self.operationManager = OperationFramework() # framework that connects edit option with GUI
+        self.savingRequired = ["Rotate", "Horizontal Flip", "Vertical Flip"] # edit which needs to save automatically
+        self.removeableWidgets = [] # widgets in spectrum and advancement that is needed to be removed
+        self.pixmapConnector = PixmapLinker() # pixmap linkedlist variable
+        self.linker = None # undo and redo operator
+        self.firstCallFlag : bool # first undo initiation flag
+        self.timeHolder = QTimer() # helps to show original Image for the time
+        self.timeHolder.setInterval(100)
         return
     
     def createLabels(self):
@@ -72,6 +77,7 @@ class EditingActionManager(QWidget):
     def createButtons(self):
         self.chooseColorLabel = QPushButton("Choose color")
         self.setEdit = QPushButton("Set")
+        self.viewOriginal = QPushButton("View Original")
         return
     
     def createColorPicker(self):
@@ -122,7 +128,7 @@ class EditingActionManager(QWidget):
 
         self.editSpectrumScrollArea = QScrollArea()
         self.editSpectrumScrollArea.setWidgetResizable(True)
-        self.editSpectrumScrollArea.setFixedSize(230,360)
+        self.editSpectrumScrollArea.setFixedSize(230,330)
 
         self.innerAdvancementScrollArea = QScrollArea()
         self.innerAdvancementScrollArea.setWidgetResizable(True)
@@ -165,10 +171,12 @@ class EditingActionManager(QWidget):
         self.innerEditOptionPanel.addWidget(self.editingTreeBody)
         self.innerImageViewingPanel.addWidget(self.imageForEditLabel, alignment = Qt.AlignmentFlag.AlignCenter)
         self.editSpectrumLayout.addWidget(self.setEdit, alignment = Qt.AlignmentFlag.AlignTop)
+        self.editSpectrumLayout.addWidget(self.viewOriginal, alignment = Qt.AlignmentFlag.AlignTop)
         self.innerEditSpectrumLayout.addWidget(self.specialEditOptions, 0, 0, alignment= Qt.AlignmentFlag.AlignCenter)
         self.innerAdvancementLayout.addWidget(self.innerAdvancementScrollArea, alignment = Qt.AlignmentFlag.AlignTop)
         self.innerAdvancementLayout.addWidget(self.chooseColorLabel, alignment = Qt.AlignmentFlag.AlignBottom)
         self.innerAdvancementScrollArea.setLayout(self.sliderHolderLayout)
+        self.sliderHolderLayout.addWidget(QLabel("Advancement Options"),alignment=Qt.AlignmentFlag.AlignCenter)
 
     def addTreeItems(self, item : QTreeWidgetItem):
         parsedClass = item.text(0)
@@ -197,7 +205,7 @@ class EditingActionManager(QWidget):
         return
 
     def clearEditSpectrum(self):
-        for i in range(self.innerEditSpectrumLayout.count()):
+        for _ in range(self.innerEditSpectrumLayout.count()):
             currentItem = self.innerEditSpectrumLayout.takeAt(0)
             internalWidget = currentItem.widget()
             if internalWidget:
@@ -325,6 +333,7 @@ class EditingActionManager(QWidget):
             self.imageObject = QPixmap(self.imageToEdit)
             self.imageForEditLabel.hide()
             self.imageObject = self.imageObject.scaled(self.imageSize[0], self.imageSize[1], aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
+            self.ORIGINALIMAGEOBJECT = self.imageObject
             self.pixmapConnector.createhead(self.imageObject)
             self.firstCallFlag = True
             self.imageForEditLabel.setPixmap(self.imageObject)
@@ -337,8 +346,12 @@ class EditingActionManager(QWidget):
         if self.imageToEdit != "":
             self.imageObject = None
             self.newImageObject = None
+            self.ORIGINALIMAGEOBJECT = None
             self.imageForEditLabel.hide()
             self.imageForEditLabel.setText("Edit Your Image here")
+            self.clearAdvancementLayer()
+            self.clearEditSpectrum()
+            self.editingTreeBody.collapseAll()
             self.imageForEditLabel.show()
             return "Closed Successfully"
     
@@ -441,6 +454,7 @@ class EditingActionManager(QWidget):
                 self.showPixmap(self.linker.image)
         return
 
+    # shows the latest Image
     def redoOperation(self):
         if self.linker.previousNode:
             self.linker : Node = self.linker.previousNode
@@ -455,4 +469,20 @@ class EditingActionManager(QWidget):
                 self.linker = self.pixmapConnector.addPixmap(self.linker, self.imageObject)
             else:
                 self.pixmapConnector.head = self.pixmapConnector.addPixmap(self.pixmapConnector.head, self.imageObject)
+
+    def showOriginal(self):
+        if self.ORIGINALIMAGEOBJECT:
+            self.showPixmap(self.ORIGINALIMAGEOBJECT)
+            return
+        
+    def buttonPressedAction(self):
+        self.timeHolder.start()
+        return
+    
+    def buttonRealeaseAction(self):
+        if self.timeHolder.isActive():
+            self.timeHolder.stop()
+            self.showPixmap(self.imageObject)
+            return
+        
     pass
