@@ -1,7 +1,7 @@
 # important Libraries
-from PyQt5.QtGui import QPixmap, QImage, QPainter, QKeySequence
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QMouseEvent, QPixmap, QImage, QPainter
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider, QRubberBand
+from PyQt5.QtCore import Qt, QTimer, QPoint, QRect
 from threading import Thread
 from PIL import Image
 import sys, os
@@ -16,6 +16,7 @@ from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.maskGenerator import Masks
 from imageOperationController import OperationFramework
 from pixmapLinker import PixmapLinker, Node
+# from cropFrameWidget import CropWidget
 
 class EditingActionManager(QWidget):
     def __init__(self) -> None:
@@ -67,10 +68,15 @@ class EditingActionManager(QWidget):
         self.firstCallFlag : bool # first undo initiation flag
         self.timeHolder = QTimer() # helps to show original Image for the time
         self.timeHolder.setInterval(100)
+        self.cropRubberBand = QRubberBand(QRubberBand.Shape.Rectangle) # helps to crop the image efficiently
+        self.cropRubberBand.close() # initially the image is closed
+        self.isDragging = False # helps to check is mouse is moving or not
+        self.currentPosition = QPoint() # position differnce between top left cropRubberBand and mouse position
         return
     
     def createLabels(self):
         self.imageForEditLabel = QLabel("Edit Your Image here")
+        self.cropRubberBand.setParent(self.imageForEditLabel)
         self.specialEditOptions = QLabel("Editing choice will show up here")
         return
     
@@ -125,6 +131,7 @@ class EditingActionManager(QWidget):
         self.editableImageField = QScrollArea()
         self.editableImageField.setWidgetResizable(True)
         self.editableImageField.setFixedSize(860,610)
+        # self.cropRubberBand.setParent(self)
 
         self.editSpectrumScrollArea = QScrollArea()
         self.editSpectrumScrollArea.setWidgetResizable(True)
@@ -290,6 +297,7 @@ class EditingActionManager(QWidget):
                 self.valuePackage = {}
                 # image adjustments
                 if treeItem.parent().text(0) == "Adjust":
+                    # self.operationManager.editRubberWidget = self.cropRubberBand
                     self.valuePackage = FrameAdjustment.subEditingTree[treeItem.text(0)]
                     self.fillEditSpectrum(self.valuePackage)
                 
@@ -353,6 +361,7 @@ class EditingActionManager(QWidget):
             self.clearEditSpectrum()
             self.editingTreeBody.collapseAll()
             self.imageForEditLabel.show()
+            self.innerEditSpectrumLayout.addWidget(QLabel("Editing choice will show up here"), 0, 0, alignment = Qt.AlignmentFlag.AlignCenter)
             return "Closed Successfully"
     
     def saveImageInMachine(self):
@@ -410,7 +419,12 @@ class EditingActionManager(QWidget):
             if isinstance(sender, QPushButton):
                 # invoking operation manager to perform editng
                 if len(self.valuePackage.keys()) > 0:
-                    pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.valuePackage, self.valuePackage[currentButton1.text()])
+                    if self.editingTreeBody.currentItem().text(0) == "Crop":
+                        self.getCropDimention(self.valuePackage[currentButton1.text()])
+                        pilImageEdited = self.convertPixMaptoImage(self.imageObject)
+                        # signalValue = self
+                    else:
+                        pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.valuePackage, self.valuePackage[currentButton1.text()])
 
             elif signalValue == None:
                     pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.valuePackage, None)
@@ -439,6 +453,8 @@ class EditingActionManager(QWidget):
         return "Succeed"
     
     def undoOperation(self):
+        if self.imageObject == None:
+            return
         if self.linker == None:
             # copies the real pixmap connectors head with the linker
             if self.pixmapConnector.head != None and self.firstCallFlag:
@@ -456,6 +472,8 @@ class EditingActionManager(QWidget):
 
     # shows the latest Image
     def redoOperation(self):
+        if self.imageObject == None:
+            return
         if self.linker.previousNode:
             self.linker : Node = self.linker.previousNode
             self.imageObject = self.linker.image
@@ -464,6 +482,12 @@ class EditingActionManager(QWidget):
     
     def keepEdit(self):
         if self.newImageObject != None:
+            if self.editingTreeBody.currentItem().text(0) == "Crop":
+                topLeftBand = self.imageForEditLabel.mapTo(self.imageForEditLabel, self.cropRubberBand.geometry().topLeft())
+                rectBand = QRect(topLeftBand, self.cropRubberBand.size())
+                self.newImageObject = self.convertImagetoPixMap(self.frameAdjustment.cropImage(list(rectBand.getCoords())))
+                self.cropRubberBand.close()
+                self.showPixmap(self.newImageObject)
             self.imageObject = self.newImageObject
             if self.linker:
                 self.linker = self.pixmapConnector.addPixmap(self.linker, self.imageObject)
@@ -474,15 +498,46 @@ class EditingActionManager(QWidget):
         if self.ORIGINALIMAGEOBJECT:
             self.showPixmap(self.ORIGINALIMAGEOBJECT)
             return
-        
+    
     def buttonPressedAction(self):
         self.timeHolder.start()
         return
     
     def buttonRealeaseAction(self):
-        if self.timeHolder.isActive():
+        if self.timeHolder.isActive() and self.ORIGINALIMAGEOBJECT:
             self.timeHolder.stop()
             self.showPixmap(self.imageObject)
             return
         
+    def getCropDimention(self, signal):
+        self.frameAdjustment = FrameAdjustment()
+        self.frameAdjustment.getImageObject(self.convertPixMaptoImage(self.imageObject))
+        a,b,c,d = self.frameAdjustment.sendCropDimention(signal)
+        self.cropRubberBand.setFixedSize(c-a, d-b)
+        self.cropRubberBand.move(a,b)
+        self.cropRubberBand.show()
+
+    def mousePressEvent(self, event : QMouseEvent):
+        if event.button() == Qt.MouseButton.LeftButton:
+            topLeft = self.cropRubberBand.mapToGlobal(self.cropRubberBand.geometry().topLeft())
+            if QRect(topLeft, self.cropRubberBand.size()).contains(event.globalPos()):
+                self.isDragging = True
+                self.currentPosition = event.pos() - self.cropRubberBand.pos()
+
+    def mouseMoveEvent(self, event : QMouseEvent):
+        if self.isDragging:
+            # topLeft = self.imageForEditLabel.mapTo(self.imageForEditLabel.parent(), self.cropRubberBand.geometry().topLeft())
+            # # bottomRight = self.imageForEditLabel.mapTo(self.imageForEditLabel.parent(), self.cropRubberBand.geometry().bottomRight())
+            # print(self.imageForEditLabel.geometry(), topLeft)
+            # if self.imageForEditLabel.geometry().contains(topLeft):
+            new_pos = event.pos() - self.currentPosition
+            # print(self.imageForEditLabel.geometry(), self.cropRubberBand.geometry())
+            self.cropRubberBand.move(new_pos)
+            # else:
+            #     topLeft = self.imageForEditLabel.geometry().topLeft()
+            #     print("coming")
+
+    def mouseReleaseEvent(self, event : QMouseEvent):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.isDragging = False
     pass

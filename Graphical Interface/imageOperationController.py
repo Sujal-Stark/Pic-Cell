@@ -5,12 +5,16 @@ from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.imageColorEnhancer import ColorImage
 from ImageManupulation.deformer import ImageDeformer
 from ImageManupulation.maskGenerator import Masks
+# from cropFrameWidget import CropWidget
+
 from PIL import Image
+from PyQt5.QtWidgets import QWidget, QTreeWidgetItem
+# from PyQt5.QtCore import QPoint, Qt
+# from PyQt5.QtGui import QMouseEvent
 
-from PyQt5.QtWidgets import QTreeWidgetItem
-
-class OperationFramework:
+class OperationFramework(QWidget):
     def __init__(self) -> None:
+        super().__init__()
         self.treeChildItem : QTreeWidgetItem
         self.imageObject : Image.Image
         self.fileAdjustment = FrameAdjustment()
@@ -18,6 +22,7 @@ class OperationFramework:
         self.imageColoring = ColorImage()
         self.imageDeforming = ImageDeformer()
         self.imageFrames = Masks()
+        # self.editRubberWidget  : CropWidget
         return
     
     def signalManager(self, treeChild : QTreeWidgetItem, valuePackage : dict, signalValue : object):
@@ -37,7 +42,12 @@ class OperationFramework:
             if parentItem.text(0) == "Adjust":
                 self.fileAdjustment.getImageObject(self.imageObject)
                 if subOperation == "Crop":
-                    return self.fileAdjustment.imageCrop(choice = signalValue)
+                    # w,h = self.fileAdjustment.imageCrop(choice = signalValue)
+                    # self.editRubberWidget.setFixedSize(w,h)
+                    # self.editRubberWidget
+                    # self.editRubberWidget.show()
+                    # return self.imageObject
+                    pass
                 elif subOperation == "Resize":
                     return self.fileAdjustment.resizeImage(resize_choice = signalValue)
                 elif subOperation == "Resample":

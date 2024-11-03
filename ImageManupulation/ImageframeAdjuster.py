@@ -23,12 +23,14 @@ class FrameAdjustment:
         "Vertical Flip" : {}
     }
     
-
+    width = 0
+    height = 0
     #interchanges the image with different classes
     def getImageObject(self,image:Image.Image):
         try:
             #the instance variable is set to given image
             self.image = image
+            self.width, self.height = self.image.size
         except OSError as osError:
             return f"Cant Open the image -> {osError}"
         except MemoryError as memoryError:
@@ -39,7 +41,8 @@ class FrameAdjustment:
     #predefined reductions
     #16:9 convention
     def __get16isto9(self)->tuple:
-        actualWidth , actualHeight = self.image.size
+        if self.width != 0 and self.height != 0:
+            actualWidth , actualHeight = self.width, self.height
         if (actualWidth/16)>(actualHeight/9):
             reducedWidth,reducedHeight=((actualWidth-(16*(actualHeight/9)))/2),0
         elif (actualWidth/16)<(actualHeight/9):
@@ -50,7 +53,8 @@ class FrameAdjustment:
     
     #16:9 convention
     def __get9isto16(self)->tuple:
-        actualWidth , actualHeight = self.image.size
+        if self.width != 0 and self.height != 0:
+            actualWidth , actualHeight = self.width, self.height
         if (actualWidth/9)>(actualHeight/16):
             reducedWidth,reducedHeight=((actualWidth-(9*(actualHeight/16)))/2),0
         elif (actualWidth/9)<(actualHeight/16):
@@ -61,7 +65,8 @@ class FrameAdjustment:
     
     #1:1 convention
     def __get1isto1(self)->tuple:
-        actualWidth , actualHeight = self.image.size
+        if self.width != 0 and self.height != 0:
+            actualWidth , actualHeight = self.width, self.height
         if (actualWidth>actualHeight):
             reducedWidth,reducedHeight = ((actualWidth-actualHeight)/2),0
         elif actualWidth<actualHeight:
@@ -72,7 +77,8 @@ class FrameAdjustment:
     
     #4:3 convention
     def __get4isto3(self)->tuple:
-        actualWidth , actualHeight = self.image.size
+        if self.width != 0 and self.height != 0:
+            actualWidth , actualHeight = self.width, self.height
         if (actualWidth/4)>(actualHeight/3):
             reducedWidth,reducedHeight = ((actualWidth-(4*(actualHeight/3)))/2),0
         elif (actualWidth/4)<(actualHeight/3):
@@ -83,7 +89,8 @@ class FrameAdjustment:
     
     #3:4  convention
     def __get3isto4(self)->tuple:
-        actualWidth , actualHeight = self.image.size
+        if self.width != 0 and self.height != 0:
+            actualWidth , actualHeight = self.width, self.height
         if ((actualWidth/3)>(actualHeight/4)):
             reducedWidth,reducedHeight = ((actualWidth-(3*(actualHeight/4)))/2),0
         elif (actualWidth/3)<(actualHeight/4):
@@ -92,60 +99,54 @@ class FrameAdjustment:
             reducedWidth,reducedHeight = 0,0
         return (reducedWidth,reducedHeight)
     
-    # resize the image 
-    def imageCrop(self, choice : int)->None:
-        # actual image size
-        width,height = self.image.size
-        
-        #for custom input
-        if choice == 1:
-            horizontal_shift = int(input("Horizontal shift:\t"))
-            vertical_shift = int(input("Vertical shift:\t"))
-            
-            if horizontal_shift >width or vertical_shift > height:
-                horizontal_shift,vertical_shift = width,height
-                
-            image = self.image.crop((horizontal_shift,vertical_shift,width-horizontal_shift, height-vertical_shift))
-            
+    # resize the image
+    def sendCropDimention(self, choice : int)->None:
+        if self.width != 0 and self.height != 0:
+            width , height = self.width, self.height
         #for 1 : 1 convention
-        elif choice == 2:
+        if choice == 2:
             _size1isto1 = self.__get1isto1()
             width_reduction,height_reduction = _size1isto1
-            image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
+            return (width_reduction,height_reduction,width-width_reduction,height - height_reduction)
 
         #for 4 : 3 convention
         elif choice == 3:
             _size4isto3 = self.__get4isto3()
             width_reduction,height_reduction = _size4isto3
-            image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
+            return (width_reduction,height_reduction,width-width_reduction,height - height_reduction)
             
         # for 3 : 4 convention
         elif choice == 4:
             _size3isto4 = self.__get3isto4()
             width_reduction,height_reduction = _size3isto4
-            image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
+            return (width_reduction,height_reduction,width-width_reduction,height - height_reduction)
 
         #for 16:9 convension
         elif choice == 5:
             _size16isto9 = self.__get16isto9()
             width_reduction, height_reduction = _size16isto9
-            image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height -height_reduction))
+            return (width_reduction,height_reduction,width-width_reduction,height - height_reduction)
+
             
         #for 9 : 16 convention
         elif choice == 6:
             _size9isto16 = self.__get9isto16()
             width_reduction, height_reduction = _size9isto16
-            image = self.image.crop((width_reduction,height_reduction,width-width_reduction,height - height_reduction))
-
-        # after all adjustments final iamge is stored as class variable
-        self.image = image
-        return self.image
+            return (width_reduction,height_reduction,width-width_reduction,height - height_reduction)
+    
+    def cropImage(self, cropParameter:list):
+        if cropParameter[2] <= self.width and cropParameter[3] <= self.height:
+            image = self.image
+            image = image.crop(cropParameter)
+            self.image = image
+            return self.image
+        else:
+            return self.image
     
     #resize the image
     def resizeImage(self, resize_choice :int)->Image.Image:
         image = self.image #local image variable
         width,height = self.image.size
-
         if resize_choice == 1:
             image = self.image.resize((int(input("Enter Width:\t")),int(input("Enter height:\t"))))
             
