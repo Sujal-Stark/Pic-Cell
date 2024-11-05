@@ -1,7 +1,7 @@
 # important Libraries
 from PyQt5.QtGui import QMouseEvent, QPixmap, QImage, QPainter
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider, QRubberBand
-from PyQt5.QtCore import Qt, QTimer, QPoint, QRect
+from PyQt5.QtCore import Qt, QTimer, QPoint, QRect, QSize
 from threading import Thread
 from PIL import Image
 import sys, os
@@ -72,6 +72,9 @@ class EditingActionManager(QWidget):
         self.cropRubberBand.close() # initially the image is closed
         self.isDragging = False # helps to check is mouse is moving or not
         self.currentPosition = QPoint() # position differnce between top left cropRubberBand and mouse position
+        self.reResizable = False # flag for resizing the rubberband widget
+        self.cornerThreshold = 50 # distance in pixels to detect corner proximity
+        self.aspectRatio = 0
         return
     
     def createLabels(self):
@@ -209,6 +212,7 @@ class EditingActionManager(QWidget):
         self.clearAdvancementLayer()
         self.addTreeItems(item = treeItem)
         self.addSpecialMethodsToGrid(treeItem = treeItem)
+        self.cropRubberBand.close()
         return
 
     def clearEditSpectrum(self):
@@ -361,6 +365,7 @@ class EditingActionManager(QWidget):
             self.clearEditSpectrum()
             self.editingTreeBody.collapseAll()
             self.imageForEditLabel.show()
+            self.cropRubberBand.close()
             self.innerEditSpectrumLayout.addWidget(QLabel("Editing choice will show up here"), 0, 0, alignment = Qt.AlignmentFlag.AlignCenter)
             return "Closed Successfully"
     
@@ -517,27 +522,44 @@ class EditingActionManager(QWidget):
         self.cropRubberBand.move(a,b)
         self.cropRubberBand.show()
 
+    # helps to find the edges of CropRubberband
+    def isCornerReached(self, pos : QPoint):
+        """Check if the given position is near any corner of the rubber band."""
+        self.aspectRatio = self.cropRubberBand.width()/self.cropRubberBand.height()
+        rect = self.cropRubberBand.geometry()
+        corner_rect = QRect(rect.right() - 50, rect.bottom() - 50, 100, 100)
+        return corner_rect.contains(QWidget(self.cropRubberBand.parent()).mapFromGlobal(pos))
+
     def mousePressEvent(self, event : QMouseEvent):
         if event.button() == Qt.MouseButton.LeftButton:
-            topLeft = self.cropRubberBand.mapToGlobal(self.cropRubberBand.geometry().topLeft())
-            if QRect(topLeft, self.cropRubberBand.size()).contains(event.globalPos()):
-                self.isDragging = True
-                self.currentPosition = event.pos() - self.cropRubberBand.pos()
+            localPosition = self.cropRubberBand.parent().mapFromGlobal(event.globalPos())
+            if self.cropRubberBand.geometry().contains(localPosition):
+                if self.isCornerReached(event.globalPos()):
+                    self.reResizable = True
+                    self.currentPosition = event.globalPos()
+                else:
+                    self.isDragging = True
+                    self.currentPosition = event.pos() - self.cropRubberBand.pos()
 
     def mouseMoveEvent(self, event : QMouseEvent):
         if self.isDragging:
-            # topLeft = self.imageForEditLabel.mapTo(self.imageForEditLabel.parent(), self.cropRubberBand.geometry().topLeft())
-            # # bottomRight = self.imageForEditLabel.mapTo(self.imageForEditLabel.parent(), self.cropRubberBand.geometry().bottomRight())
-            # print(self.imageForEditLabel.geometry(), topLeft)
-            # if self.imageForEditLabel.geometry().contains(topLeft):
             new_pos = event.pos() - self.currentPosition
-            # print(self.imageForEditLabel.geometry(), self.cropRubberBand.geometry())
             self.cropRubberBand.move(new_pos)
-            # else:
-            #     topLeft = self.imageForEditLabel.geometry().topLeft()
-            #     print("coming")
+        if self.reResizable:
+            newPosition = self.cropRubberBand.mapFromGlobal(event.globalPos())
+            if newPosition.x() >= newPosition.y() * self.aspectRatio:
+                new_width = newPosition.x()
+                new_height = new_width//self.aspectRatio
+            else:
+                new_height = newPosition.y()
+                new_width = int(new_height * self.aspectRatio)
+            self.cropRubberBand.setFixedSize(int(new_width), int(new_height))
+            # Update the start position to the current position for continuous resizing
+            self.currentPosition = event.globalPos()
 
     def mouseReleaseEvent(self, event : QMouseEvent):
         if event.button() == Qt.MouseButton.LeftButton:
             self.isDragging = False
+            self.reResizable = False
+            self.currentPosition = None
     pass
