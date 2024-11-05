@@ -1,6 +1,7 @@
 # builtin libraries
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem, QPushButton, QFrame, QLabel, QLineEdit, QComboBox
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
 from PIL import Image
 import os
 
@@ -10,6 +11,7 @@ class FileWindow(QDialog):
         self.setWindowTitle("File Explorer")
         self.setGeometry(0,0,400,300)
         self.masterLayout = QVBoxLayout(self)
+        self.preViewLayout = None
         self.loadFileWindowUi()
         self.setProperties()
         self.createResponse()
@@ -30,12 +32,17 @@ class FileWindow(QDialog):
         return
     
     def loadFileWindowUi(self):
+        self.universalHolderLayout = QHBoxLayout()
+        self.motherLayout = QVBoxLayout()
         self.windowButtonLayout = QHBoxLayout()
         self.windowInnerButtonLayout = QHBoxLayout()
         self.fileOpenerLayout = QVBoxLayout()
         self.fileOpenerInnerLayout = QHBoxLayout()
         self.fileSaveAndOpenLayout = QVBoxLayout()
         self.fileExtenstionsetterLayout = QVBoxLayout()
+
+        self.masterLayout.addLayout(self.universalHolderLayout)
+        self.universalHolderLayout.addLayout(self.motherLayout)
 
         self.windowButtonFrame = QFrame()
         self.windowButtonFrame.setFrameShape(QFrame.Shape.Panel)
@@ -46,13 +53,13 @@ class FileWindow(QDialog):
         self.exploreFiles = QLabel("Explore Files")
         self.previousButton = QPushButton("Back")
 
-        self.masterLayout.addLayout(self.windowButtonLayout)
+        self.motherLayout.addLayout(self.windowButtonLayout)
         self.windowInnerButtonLayout.addWidget(self.forwardButton, alignment = Qt.AlignmentFlag.AlignLeft)
         self.windowInnerButtonLayout.addWidget(self.exploreFiles, alignment = Qt.AlignmentFlag.AlignCenter)
         self.windowInnerButtonLayout.addWidget(self.previousButton, alignment = Qt.AlignmentFlag.AlignRight)
 
         self.fileListWidget = QListWidget()
-        self.masterLayout.addWidget(self.fileListWidget)
+        self.motherLayout.addWidget(self.fileListWidget)
         self.fileListWidget.addItems(["Files",R"C:\\", R"D:\\", R"F:\\"])
 
         self.fileOpenerFrame = QFrame()
@@ -69,7 +76,7 @@ class FileWindow(QDialog):
         self.fileOpenerInnerLayout.addWidget(self.fileOpenButton, alignment = Qt.AlignmentFlag.AlignRight)
 
         self.fileSaveAndOpenLayout.addLayout(self.fileOpenerInnerLayout)
-        self.masterLayout.addLayout(self.fileOpenerLayout)
+        self.motherLayout.addLayout(self.fileOpenerLayout)
         return
     
     def storeCurrentPath(self, directory:str):
@@ -116,6 +123,7 @@ class FileWindow(QDialog):
                 if currentText.split(".")[-1] in ["png", "jpeg", "jfif", "jpg"]:
                     self.iamgeObjectPath = os.path.join(self.currentPathName, currentText)
                     self.ImageFileNameEditor.setText(currentText)
+                    self.showPreviewPixmap()
                     self.currentImageInformation = self.createImageInformation(currentText)
                     return
         
@@ -186,6 +194,37 @@ class FileWindow(QDialog):
             self.setWindowTitle("Save image in machine")
         self.ImageFileNameEditor.setText("")
         self.show()
+        return
+    
+    def addImageHolderLayout(self):
+        if self.preViewLayout == None:
+            self.preViewLayout = QVBoxLayout() # opens the Image in this layout
+            self.universalHolderLayout.addLayout(self.preViewLayout)
+            self.preViewHolderFrame = QFrame()
+            self.preViewLayout.addWidget(self.preViewHolderFrame)
+            self.preViewHolderFrame.setFixedSize(200,200)
+            self.previewHolderLabel = QLabel("Preview")
+            self.previewHolderInnerLayout = QVBoxLayout()
+            self.preViewHolderFrame.setLayout(self.previewHolderInnerLayout)
+            self.previewHolderInnerLayout.addWidget(self.previewHolderLabel, alignment = Qt.AlignmentFlag.AlignCenter)
+        return
+    
+    def removeImageHolderLayout(self):
+        if self.preViewLayout:
+            self.universalHolderLayout.removeItem(self.preViewLayout)
+            self.preViewHolderFrame.deleteLater()
+            self.preViewLayout.deleteLater()
+            self.previewHolderInnerLayout.deleteLater()
+            self.previewHolderLabel.deleteLater()
+            self.preViewLayout = None
+
+    def showPreviewPixmap(self):
+        if self.iamgeObjectPath and self.preViewLayout:
+            self.previewHolderLabel.hide()
+            previewPixmap = QPixmap(self.iamgeObjectPath)
+            previewPixmap = previewPixmap.scaled(self.preViewHolderFrame.width(), self.preViewHolderFrame.height(), aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
+            self.previewHolderLabel.setPixmap(previewPixmap)
+            self.previewHolderLabel.show()
         return
     pass
     

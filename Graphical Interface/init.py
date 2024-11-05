@@ -149,7 +149,14 @@ class MasterWindow(QMainWindow):
         return
     
     def createSeondWindow(self):
-        self.newFileWindow.show()
+        if self.tabScreen.currentIndex() == 0:
+            self.newFileWindow.setFixedSize(400,300)
+            self.newFileWindow.removeImageHolderLayout()
+            self.newFileWindow.show()
+        elif self.tabScreen.currentIndex() == 1:
+            self.newFileWindow.setFixedSize(600,300)
+            self.newFileWindow.addImageHolderLayout()
+            self.newFileWindow.show()
         return
     
     def openImageFromMainWindow(self):
