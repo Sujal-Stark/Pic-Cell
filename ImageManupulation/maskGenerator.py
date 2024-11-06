@@ -4,27 +4,27 @@ class Masks:
     frameOptions = ["Rectangle Layer", "Rombous", "Ellipse", "Circle", "Double Circle", "Left Diagonal", "Right Diagonal", "Five Section Rectangle", "Dead pool", "Star", "Left Frame", "Right Frame", "Step Size"] # editing options available
     subEditingTree = {
         "Rectangle Layer" : {
-            "Border" : {"minVal" : 10, "maxVal" : 200, "currentPosition" : 0, "change" : 5}
+            "Border" : {"minVal" : 10, "maxVal" : 200, "currentPosition" : 0, "change" : 25}
         },
         "Rombous" : {},
         "Ellipse" : {
-            "Border" : {"minVal" : 0, "maxVal" : 250, "currentPosition" : 10, "change" : 5}
+            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 2, "change" : 25}
         },
         "Circle" : {
-            "Border" : {"minVal" : 0, "maxVal" : 250, "currentPosition" : 10, "change" : 5}
+            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 10, "change" : 25}
         },
         "Double Circle" : {},
         "Left Diagonal" : {
-            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 10, "change" : 5}
+            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 10, "change" : 25}
         },
         "Right Diagonal" : {
-            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 10, "change" : 5}
+            "Border" : {"minVal" : 0, "maxVal" : 200, "currentPosition" : 10, "change" : 25}
         },
         "Left Frame" : {
-            "Border" : {"minVal" : 0, "maxVal" : 400, "currentPosition" : 10, "change" : 20}
+            "Border" : {"minVal" : 0, "maxVal" : 300, "currentPosition" : 10, "change" : 25}
         },
         "Right Frame" : {
-            "Border" : {"minVal" : 0, "maxVal" : 400, "currentPosition" : 10, "change" : 20}
+            "Border" : {"minVal" : 0, "maxVal" : 300, "currentPosition" : 10, "change" : 25}
         },
         "Star" : {},
         "Dead pool" : {},
