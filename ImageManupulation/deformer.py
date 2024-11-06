@@ -19,6 +19,7 @@ class ImageDeformer:
         },
         "Add Layer" : {
             "Layer number" : {"minVal" : 1, "maxVal" : 10, "currentPosition" : 5, "change" : 1},
+            "Padding" : {"minVal" : 10, "maxVal" : 100, "currentPosition" : 10, "change" : 10}
         },
         "Chess Like" : {
             "Box Length" : {"minVal" : 1, "maxVal" : 80, "currentPosition" : 20, "change" : 5}
@@ -29,7 +30,11 @@ class ImageDeformer:
             "Cycle value" : {"minVal" : 4, "maxVal" : 64, "currentPosition" : 32, "change" : 4}
         }
     }
-    
+
+    # constants
+    layerValue = 5
+    paddingValue = 10
+
     # provides user messege
     def getMessage(self):
         return self.userMessage
@@ -198,18 +203,30 @@ class ImageDeformer:
         return self.image
 
     # infiinite layer
-    def layerize(self, repeaterValue = 5):
+    def layerize(self, repeaterValue = 0, padding = 0):
         image = self.image # copying actual image object
-        widthRepeater, heightRepeater = image.size[0]//50, image.size[1]//50
-        repeater = widthRepeater if widthRepeater <= heightRepeater else heightRepeater
+        # holding and releasing the repeater value
+        if repeaterValue != 0:
+            self.layerValue = repeaterValue
+        else:
+            repeaterValue = self.layerValue
+        
+        #holding and releasing padding value
+        if padding != 0:
+            self.paddingValue = padding
+        else:
+            padding = self.paddingValue
+
         try:
             class DeformImplicator:
                 def getmesh(self, img : Image.Image):
                     width, height = img.size # image width, height 
                     meshes = [] # holds co ordinates
                     for i in range(repeaterValue):
-                        pad = 45 * i
-                        if i > repeater-1:
+                        pad = padding * i
+                        # if i > repeater-1:
+                        #     break
+                        if width < 2 * pad or height < 2 * pad:
                             break
                         meshes.append(
                             (

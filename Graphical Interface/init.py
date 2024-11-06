@@ -235,6 +235,9 @@ class MasterWindow(QMainWindow):
     
     def openEditSectionImage(self):
         self.tab2.imageToEdit = self.newFileWindow.iamgeObjectPath
+        self.newFileWindow.previewHolderLabel.hide()
+        self.newFileWindow.previewHolderLabel.setText("Preview")
+        self.newFileWindow.previewHolderLabel.show()
         self.methodInfo.setText(self.tab2.openImageInEditSection())
         self.newFileWindow.close()
         return

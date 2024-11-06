@@ -174,7 +174,11 @@ class OperationFramework(QWidget):
                         return self.imageDeforming.multiply()
                 elif subOperation == "Add Layer":
                     if signalValue != None:
-                        return self.imageDeforming.layerize(repeaterValue = signalValue)
+                        keyList = list(signalValue.keys())
+                        if keyList[0] == "Layer number":
+                            return self.imageDeforming.layerize(repeaterValue = signalValue[keyList[0]])
+                        elif keyList[0] == "Padding":
+                            return self.imageDeforming.layerize(padding = signalValue[keyList[0]])
                     else:
                         return self.imageDeforming.layerize()
                 elif subOperation == "Chess Like":
