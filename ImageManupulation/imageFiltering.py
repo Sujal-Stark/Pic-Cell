@@ -9,7 +9,7 @@ class FilterImage:
         "Grey Scale" : {},
         "Posterize" : {},
         "Gaussian Blur" : {
-            "Blur Strength" : {"minVal" : 0, "maxVal" : 100, "currentPosition" : 10, "change" : 1}
+            "Blur Strength" : {"minVal" : 0, "maxVal" : 100, "currentPosition" : 10, "change" : 10}
         },
         "Edge Enhance" : {"Edge Enhance" : 1 , "Maximum Edge Enhance" : 2},
         "Sharpen" : {
@@ -24,11 +24,11 @@ class FilterImage:
         },
         "Emboss" : {},
         "Box Blur" : {
-            "Blur Strength" : {"minVal" : 0, "maxVal" : 100, "currentPosition" : 2, "change" : 1}
+            "Blur Strength" : {"minVal" : 0, "maxVal" : 100, "currentPosition" : 2, "change" : 10}
         },
         "Unsharp" : {
-            "radius" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 2, "change" : 1},
-            "Threshold" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 2, "change" : 1}
+            "radius" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 0, "change" : 1},
+            "Threshold" : {"minVal" : 0, "maxVal" : 10, "currentPosition" : 0, "change" : 1}
         }
     }
     #interchanges the image with different classes
@@ -264,18 +264,23 @@ class FilterImage:
         return self.image
 
     # unsharp mask
-    def imageUnsharpMask(self, radius_choice : int = 2, threshold_choice : int = 2):
+    def imageUnsharpMask(self, radius_choice : int = 0, threshold_choice : int = 0):
         # copying the image
         image = self.image
 
+        # holding and restoring the choices
         if threshold_choice != 0:
             self._newThresHold = threshold_choice
+        else:
+            threshold_choice = self._newThresHold
         if radius_choice != 0:
             self._newRadius = radius_choice
+        else:
+            radius_choice = self._newRadius
 
         #process
         try:
-            image =image.convert('RGB').filter(ImageFilter.UnsharpMask(radius=self._newRadius, threshold = self._newThresHold))
+            image =image.convert('RGB').filter(ImageFilter.UnsharpMask(radius = radius_choice, threshold = threshold_choice))
         # excetion handleing
         except IOError as ioError:
             return f"Can't write the image file -> {ioError}"

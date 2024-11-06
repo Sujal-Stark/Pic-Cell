@@ -147,12 +147,12 @@ class OperationFramework(QWidget):
                     else:
                         return self.imageFiltering.boxBlurImage()
                 elif subOperation == "Unsharp":
-                    keyList = list(signalValue.keys())
                     if signalValue != None:
+                        keyList = list(signalValue.keys())
                         if "radius" == keyList[0]:
-                            return self.imageFiltering.imageUnsharpMask(radius_choice=signalValue["radius"])
+                            return self.imageFiltering.imageUnsharpMask(radius_choice=signalValue[keyList[0]])
                         elif "Threshold" == keyList[0]:
-                            return self.imageFiltering.imageUnsharpMask(threshold_choice= signalValue["Threshold"])
+                            return self.imageFiltering.imageUnsharpMask(threshold_choice= signalValue[keyList[0]])
                     else:
                         return self.imageFiltering.imageUnsharpMask()
             if parentItem.text(0) == "Deform Image":
