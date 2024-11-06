@@ -18,6 +18,9 @@ class ColorImage:
         }
     }
 
+    # constants
+    custom_color = (255,255,255) # custom color which can be used to colorise manually
+
     #interchanges the image with different classes
     def getImageObject(self,image:Image.Image):
         try:
@@ -63,12 +66,15 @@ class ColorImage:
         return color_list[index]
     
     # changes the color
-    def changeColor(self, colorChoice : int):
+    def changeColor(self, colorChoice : int = 0):
         #copying current image
         image = self.image
         try: # operaion
             if colorChoice != 0:
                 image = ImageOps.colorize(image.convert('L'), black = 'black',white=self._colorList(colorChoice-1))
+            else:
+                if self.custom_color:
+                    image = ImageOps.colorize(image.convert('L'), black = 'black', white = self.custom_color)
         except MemoryError as memoryError:
             return f"Memory Error Occurred-> {memoryError}"
         except ValueError as valueError:
@@ -80,7 +86,7 @@ class ColorImage:
         return self.image
     
     # color Filter
-    def addColorLayer(self, choice : int):
+    def addColorLayer(self, choice : int = 0):
         #copying current image
         image = self.image
 
@@ -89,7 +95,10 @@ class ColorImage:
             if choice != 0:
                 # color layer creation
                 layer = Image.new(mode='RGBA',size=image.size,color = self._RGBAcolorList(index = choice-1))
-                image = ImageChops.blend(layer,image.convert('RGBA'),alpha=2) # blending
+            else:
+                if self.custom_color:
+                    layer = Image.new(mode='RGBA', size=image.size, color=self.custom_color)
+            image = ImageChops.blend(layer,image.convert('RGBA'),alpha=2) # blending
         except MemoryError as memoryError:
             return f"Insufficient Memory -> {memoryError}"
         except ValueError as valueError:
