@@ -5,12 +5,10 @@ from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.imageColorEnhancer import ColorImage
 from ImageManupulation.deformer import ImageDeformer
 from ImageManupulation.maskGenerator import Masks
-# from cropFrameWidget import CropWidget
 
 from PIL import Image
 from PyQt5.QtWidgets import QWidget, QTreeWidgetItem
-# from PyQt5.QtCore import QPoint, Qt
-# from PyQt5.QtGui import QMouseEvent
+from PyQt5.QtGui import QColor
 
 class OperationFramework(QWidget):
     def __init__(self) -> None:
@@ -22,7 +20,6 @@ class OperationFramework(QWidget):
         self.imageColoring = ColorImage()
         self.imageDeforming = ImageDeformer()
         self.imageFrames = Masks()
-        # self.editRubberWidget  : CropWidget
         return
     
     def signalManager(self, treeChild : QTreeWidgetItem, valuePackage : dict, signalValue : object):
@@ -41,14 +38,7 @@ class OperationFramework(QWidget):
         if parentItem:
             if parentItem.text(0) == "Adjust":
                 self.fileAdjustment.getImageObject(self.imageObject)
-                if subOperation == "Crop":
-                    # w,h = self.fileAdjustment.imageCrop(choice = signalValue)
-                    # self.editRubberWidget.setFixedSize(w,h)
-                    # self.editRubberWidget
-                    # self.editRubberWidget.show()
-                    # return self.imageObject
-                    pass
-                elif subOperation == "Resize":
+                if subOperation == "Resize":
                     return self.fileAdjustment.resizeImage(resize_choice = signalValue)
                 elif subOperation == "Resample":
                     return self.fileAdjustment.changeResampleType(resample_choice = signalValue)
@@ -229,3 +219,59 @@ class OperationFramework(QWidget):
                     else:
                         return self.imageFrames.style_seven_mask()
         return self.imageObject
+    
+    def provideColor(self, parentMethod: str, methodName : str, givenColor : QColor):
+        if parentMethod == "Color Enhance":
+            self.imageColoring.getImageObject(self.imageObject)
+            keyMethods = list(self.imageColoring.subEditingTree.keys())
+            if methodName == keyMethods[0]:
+                self.imageColoring.custom_color = givenColor.getRgb()
+                return self.imageColoring.changeColor()
+            elif methodName == keyMethods[1]:
+                self.imageColoring.custom_color = (givenColor.red(), givenColor.green(), givenColor.blue(), givenColor.alpha())
+                return self.imageColoring.addColorLayer()
+            return self.imageObject
+        
+        elif parentMethod == "Frames":
+            customColor = (givenColor.red(), givenColor.green(), givenColor.blue(), givenColor.alpha())
+            self.imageFrames.getImageObject(self.imageObject)
+            keyMethods = list(self.imageFrames.subEditingTree.keys())
+            if methodName == keyMethods[0]:
+                return self.imageFrames.layeredRectangle(chosenColor = customColor)
+            
+            elif methodName == keyMethods[1]:
+                return self.imageFrames.rombousMask(chosenColor = customColor)
+            
+            elif methodName == keyMethods[2]:
+                return self.imageFrames.ellipticalMask(chosenColor = customColor)
+            
+            elif methodName == keyMethods[3]:
+                return self.imageFrames.circularMask(chosenColor = customColor)
+            
+            elif methodName == keyMethods[4]:
+                return self.imageFrames.doubleCircleMask(chosenColor = customColor)
+            
+            elif methodName == keyMethods[5]:
+                return self.imageFrames.style_one_mask(chosenColor = customColor)
+            
+            elif methodName == keyMethods[6]:
+                return self.imageFrames.style_five_mask(chosenColor = customColor)
+            
+            elif methodName == keyMethods[7]:
+                return self.imageFrames.style_six_mask(chosenColor = customColor)
+            
+            elif methodName == keyMethods[8]:
+                return self.imageFrames.style_seven_mask(chosenColor = customColor)
+            
+            elif methodName == keyMethods[9]:
+                return self.imageFrames.starShape(chosenColor = customColor)
+            
+            elif methodName == keyMethods[10]:
+                return self.imageFrames.style_three_mask()
+            
+            elif methodName == keyMethods[11]:
+                return self.imageFrames.style_two_mask(chosenColor = customColor)
+            
+            elif methodName == keyMethods[12]:
+                return self.imageFrames.style_eight_mask(chosenColor = customColor)
+            return self.imageObject

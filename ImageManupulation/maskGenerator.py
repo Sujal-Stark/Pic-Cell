@@ -35,37 +35,90 @@ class Masks:
     def getImageObject(self, img : Image.Image) -> None:
         self.image = img
         self.width, self.height = img.size
-        self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=(255,255,255,255))
         return
     
-    # buffer objects
-    bufferGroundLayer = Image.new(mode = "RGBA", size = (0,0), color = (255,255,255,255))
+    # self.buffer objects
+    custom_color = (255, 255, 255, 255) # color of the frames
+    bufferGroundLayer = Image.new(mode = "RGBA", size = (0, 0), color = (255,255,255,255))
+
+    # constants
+    layerRectangleModifier = 0
+    elipticalMaskModifier = 10
+    circularMaskModifier = 10
+    leftDiagonalModifier = 10
+    rightDiagonalModifier = 10
+    leftLayoutModifier = 10
+    rightLayoutModifier = 10
 
     # rectangle layer
-    def layeredRectangle(self, modifier : int = 0) -> Image.Image:
+    def layeredRectangle(self, modifier : int = 0, chosenColor : tuple = None) -> Image.Image:
+        # stores and reuse the modifier value
+        if modifier == 0:
+            modifier = self.layerRectangleModifier
+        else:
+            self.layerRectangleModifier = modifier
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+              
         drawObject = ImageDraw.Draw(self.groundLayer)
         modifier1 = modifier + 10
         modifier2 = modifier + 20
         modifier3 = modifier + 30
         if self.width >= 2 * modifier3 and self.height >= 2 * modifier3:
             drawObject.rectangle((modifier1,modifier1 ,self.width-modifier1,self.height-modifier1),fill=(0,0,0,0))
-            drawObject.rectangle((modifier2,modifier2,self.width-modifier2,self.height-modifier2),(255,255,255,255))
+            drawObject.rectangle((modifier2,modifier2,self.width-modifier2,self.height-modifier2),self.custom_color)
             drawObject.rectangle((modifier3,modifier3,self.width-modifier3,self.height-modifier3),fill=(0,0,0,0))
         return self.groundLayer
     
     # creating roumbous mask
-    def rombousMask(self) -> Image.Image:
+    def rombousMask(self, chosenColor : tuple = None) -> Image.Image:
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+        
         ImageDraw.Draw(self.groundLayer).polygon((0,self.height/2, self.width/2,self.height, self.width,self.height/2, self.width/2,0),fill=(0,0,0,0))
         return self.groundLayer
     
     # Elliptical mask
-    def ellipticalMask(self, modifier : int =10) -> Image.Image:
+    def ellipticalMask(self, modifier : int =10, chosenColor : tuple = None) -> Image.Image:
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+        
+        # stores and releases the previous value
+        if modifier == 10:
+            modifier = self.elipticalMaskModifier
+        else:
+            self.elipticalMaskModifier = modifier
+
         if (modifier <= self.width-modifier) and (modifier <= self.height-modifier):
             ImageDraw.Draw(self.groundLayer).ellipse((modifier,modifier,self.width-modifier,self.height-modifier),fill=(0,0,0,0))
         return self.groundLayer
     
     # Circular mask
-    def circularMask(self, modifier : int = 10) -> Image.Image:
+    def circularMask(self, modifier : int = 10, chosenColor : tuple = None) -> Image.Image:
+        if modifier == 10:
+            modifier = self.circularMaskModifier
+        else:
+            self.circularMaskModifier = modifier
+        
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+
         pad = abs(self.width-self.height)/2
         if self.width > self.height:
             if (2*(pad + modifier) <= self.width) and (2 * pad <= self.height):
@@ -78,7 +131,14 @@ class Masks:
         return self.groundLayer
     
     # Double circle mask
-    def doubleCircleMask(self) -> Image.Image:
+    def doubleCircleMask(self, chosenColor : tuple = None) -> Image.Image:
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+        
         drawObject = ImageDraw.Draw(self.groundLayer)
         if self.width>self.height:
             pad = self.width-self.height
@@ -93,7 +153,18 @@ class Masks:
         return self.groundLayer
     
     # style 1 : Left diagonal
-    def style_one_mask(self, modifier : int = 10) -> Image.Image:
+    def style_one_mask(self, modifier : int = 10, chosenColor : tuple = None) -> Image.Image:
+        if modifier == 10:
+            modifier = self.leftDiagonalModifier
+        else:
+            self.leftDiagonalModifier = modifier
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+        
         width3, height3 = self.width/3, self.height/3
         drawObject = ImageDraw.Draw(self.groundLayer)
         if modifier <= width3 and modifier <= height3:
@@ -107,7 +178,14 @@ class Masks:
             return self.bufferGroundLayer
     
     # style 2 : five section rectangle
-    def style_two_mask(self) -> Image.Image:
+    def style_two_mask(self, chosenColor : tuple = None) -> Image.Image:
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+
         qwidth = 2*(self.width/3)
         lwidth, lheight = (self.width/3), (self.height/2)
         drawObject = ImageDraw.Draw(self.groundLayer)
@@ -162,7 +240,14 @@ class Masks:
         return self.groundLayer
     
     # style 4 : star
-    def starShape(self) -> Image.Image:
+    def starShape(self, chosenColor : tuple = None) -> Image.Image:
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+        
         width10, height10 = self.width/10, self.height/10 # smallest units of widtyh and height req here
         drawObject = ImageDraw.Draw(self.groundLayer)
         centre = (5*width10, 5*height10)
@@ -184,7 +269,18 @@ class Masks:
         return self.groundLayer
     
     # style 5 : right diagonal
-    def style_five_mask(self, modifier : int = 10) -> Image.Image:
+    def style_five_mask(self, modifier : int = 10, chosenColor : tuple = None) -> Image.Image:
+        if modifier == 10:
+            modifier = self.rightDiagonalModifier
+        else:
+            self.rightDiagonalModifier = modifier
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+        
         drawObject = ImageDraw.Draw(im = self.groundLayer)
         width3, height3 = self.width/3, self.height/3 # 1/3 of the width, height
         if modifier <= width3 and modifier <= height3:
@@ -198,7 +294,19 @@ class Masks:
             return self.bufferGroundLayer
     
     # style 6 : left layOut
-    def style_six_mask(self, modifier : int = 10) -> Image.Image:
+    def style_six_mask(self, modifier : int = 10, chosenColor : tuple = None) -> Image.Image:
+        if modifier == 10:
+            modifier = self.leftLayoutModifier
+        else:
+            self.leftLayoutModifier = modifier
+        
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+        
         drawObject = ImageDraw.Draw(im = self.groundLayer)
         quarterWidth =  2 * self.width/3 # 2/3 of the width
         if (modifier <= quarterWidth) and (quarterWidth - modifier >= self.width/3):
@@ -209,7 +317,19 @@ class Masks:
         return self.groundLayer
     
     # style 7 : right layOut
-    def style_seven_mask(self, modifier : int = 10) -> Image.Image:
+    def style_seven_mask(self, modifier : int = 10, chosenColor : tuple = None) -> Image.Image:
+        if modifier == 10:
+            modifier = self.rightLayoutModifier
+        else:
+            self.rightLayoutModifier = modifier
+        
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+        
         drawObject = ImageDraw.Draw(im = self.groundLayer)
         width3 =  self.width/3 # 1/3 of the width
         if (modifier + width3 <= 2*width3):
@@ -220,15 +340,21 @@ class Masks:
         return self.groundLayer
     
     # style 8
-    def style_eight_mask(self) -> Image.Image:
+    def style_eight_mask(self, chosenColor : tuple = None) -> Image.Image:
+        # stores the previous color of frames
+        if chosenColor:
+            self.custom_color = chosenColor # when new color is available
+            self.groundLayer = Image.new(mode="RGBA", size=(self.width, self.height), color=self.custom_color)
+        else: # if new color is not available
+            self.groundLayer = Image.new(mode="RGBA", size=self.image.size, color = self.custom_color)
+        
         drawObject = ImageDraw.Draw(im = self.groundLayer)
         widthFraction, heightFraction = self.width/6, self.height/6 # divides the width and height in smaller units
         for i in range(6):
             drawObject.polygon(xy = ((i * widthFraction+10, 10), (i * widthFraction + 10, (6 - i) * heightFraction - 10), ((i + 1) * widthFraction + 10, (6 - i) * heightFraction - 10), ((i + 1) * widthFraction + 10, 10)), fill = (0, 0, 0 ,0))
-        drawObject.polygon(xy = ((self.width - 10,0), (self.width - 10, heightFraction), (self.width, heightFraction), (self.width, 0)), fill = (255, 255, 255, 255))
+        drawObject.polygon(xy = ((self.width - 10,0), (self.width - 10, heightFraction), (self.width, heightFraction), (self.width, 0)), fill = self.custom_color)
         for i in range(6):
-            drawObject.line(xy = ((i * widthFraction + 10, 0), (i * widthFraction + 10, (6-i) * heightFraction)), fill=(255, 255, 255, 200),width = 2)
-            drawObject.line(xy=((0,i*heightFraction-10),((6-i)*widthFraction+10,i*heightFraction-10)),fill=(255,255,255,200),width=2)
+            drawObject.line(xy = ((i * widthFraction + 10, 0), (i * widthFraction + 10, (6-i) * heightFraction)), fill= self.custom_color ,width = 2)
+            drawObject.line(xy=((0,i*heightFraction-10),((6-i)*widthFraction+10,i*heightFraction-10)),fill=self.custom_color,width=2)
         return self.groundLayer
-
     pass

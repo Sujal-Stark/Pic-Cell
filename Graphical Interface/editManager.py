@@ -2,6 +2,7 @@
 from PyQt5.QtGui import QMouseEvent, QPixmap, QImage, QPainter
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider, QRubberBand
 from PyQt5.QtCore import Qt, QTimer, QPoint, QRect, QSize
+from PyQt5.QtGui import QColor
 from threading import Thread
 from PIL import Image
 import sys, os
@@ -52,7 +53,7 @@ class EditingActionManager(QWidget):
     
     def addProperties(self):
         self.filewinowForSave = FileWindow() # file window is used to open or save image
-        self.currentColor = ""
+        self.currentColor = QColor(255,255,255,255)
         self.imageToEdit = "" # the name of the image which is about to get edit
         self.imageSize = (850, 600) # the size of the panel where the image must be shown
         self.ORIGINALSIZE = (850, 600) # this value is same but its like a constant
@@ -75,6 +76,7 @@ class EditingActionManager(QWidget):
         self.reResizable = False # flag for resizing the rubberband widget
         self.cornerThreshold = 50 # distance in pixels to detect corner proximity
         self.aspectRatio = 0
+        self.openColorPickerForFrames = False # addresses the color picker to work for frames
         return
     
     def createLabels(self):
@@ -90,8 +92,13 @@ class EditingActionManager(QWidget):
         return
     
     def createColorPicker(self):
-        self.currentColor = QColorDialog.getColor()
-        return
+        self.colorDialog = QColorDialog() # initialising the color dialog
+        self.colorDialog.setOption(QColorDialog.ShowAlphaChannel, True) # initialising alpha chanel
+        self.currentColor = self.colorDialog.getColor() # getting the current color
+        if self.editingTreeBody.currentItem():
+            if self.editingTreeBody.currentItem().text(0) in Masks.subEditingTree.keys():
+                self.colorAddresser(self.currentColor)
+        return self.currentColor
     
     def createFrames(self):
         self.imageViewingFrame = QFrame()
@@ -213,6 +220,10 @@ class EditingActionManager(QWidget):
         self.addTreeItems(item = treeItem)
         self.addSpecialMethodsToGrid(treeItem = treeItem)
         self.cropRubberBand.close()
+        if treeItem.text(0) == "Frames":
+            self.openColorPickerForFrames = True
+        else:
+            self.openColorPickerForFrames = False
         return
 
     def clearEditSpectrum(self):
@@ -288,7 +299,11 @@ class EditingActionManager(QWidget):
                     i += 1
                     j = 0
                 currentButton = QPushButton(key)
-                currentButton.clicked.connect(self.performImageOperation)
+                if key == "Custom" and self.editingTreeBody.currentItem().text(0) in ColorImage.subEditingTree.keys():
+                    print("i am here")
+                    currentButton.clicked.connect(self.performColorOperaion)
+                else:
+                    currentButton.clicked.connect(self.performImageOperation)
                 self.innerEditSpectrumLayout.addWidget(currentButton, i, j)
                 j += 1
             self.innerEditSpectrumLayout.setVerticalSpacing(1)
@@ -456,6 +471,37 @@ class EditingActionManager(QWidget):
                 self.imageObject = self.newImageObject
             self.showPixmap(self.newImageObject)
         return "Succeed"
+    
+    def performColorOperaion(self):
+        sender = self.sender() # identifies which object sent signal
+        if self.imageObject: # if imageobject exits
+            if sender: # if the signal is valid
+                if isinstance(sender, QPushButton):
+                    if sender.text() == "Custom":
+                        currentColor = self.createColorPicker() # color choosing
+                        # for color image operation
+                        if self.editingTreeBody.currentItem().text(0) in ColorImage.subEditingTree.keys():
+                            targetMethod = self.editingTreeBody.currentItem().text(0)
+                            parentMethod = self.editingTreeBody.currentItem().parent().text(0)
+                            self.operationManager.imageObject = self.convertPixMaptoImage(self.imageObject)
+                            editedPILImage = self.operationManager.provideColor(parentMethod = parentMethod, methodName = targetMethod, givenColor = currentColor)
+            # conversion and showing image
+            self.newImageObject = self.convertImagetoPixMap(pilImage = editedPILImage)
+            self.showPixmap(self.newImageObject) # showing the edited picture
+            return
+
+    # operates for the direct color access  
+    def colorAddresser(self, colorObject : QColor):
+        # provide color to operation manager for masks class
+        if self.editingTreeBody.currentItem().text(0) in Masks.subEditingTree.keys():
+            targetMethod = self.editingTreeBody.currentItem().text(0) # sub method
+            targetParent = self.editingTreeBody.currentItem().parent().text(0) # method
+            self.operationManager.imageObject = self.convertPixMaptoImage(self.imageObject)
+            editedImage = self.operationManager.provideColor(parentMethod = targetParent, methodName = targetMethod, givenColor = colorObject)
+            self.newImageObject = self.convertImagetoPixMap(editedImage)
+            self.newImageObject = self.overLayPixmapObjects(self.imageObject, self.newImageObject)
+        self.showPixmap(self.newImageObject)
+        return
     
     def undoOperation(self):
         if self.imageObject == None:
