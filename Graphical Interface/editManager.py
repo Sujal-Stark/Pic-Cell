@@ -76,7 +76,6 @@ class EditingActionManager(QWidget):
         self.cornerThreshold = 50 # distance in pixels to detect corner proximity
         self.aspectRatio = 0
         self.toggleHideLeftFlag = True
-        self.toggleHideRightFlag = True
         return
     
     def createLabels(self):
