@@ -50,6 +50,7 @@ class MasterWindow(QMainWindow):
         self.zoomInOption.triggered.connect(self.scaleUPImage)
         self.zoomOutOption.triggered.connect(self.scaleDownImage)
         self.OriginalSize.triggered.connect(self.originalScale)
+        self.toggleHideLeftBar.triggered.connect(self.tab2.toggleHideLeft)
 
         self.undoMethod.triggered.connect(self.tab2.undoOperation)
         self.redoMethod.triggered.connect(self.tab2.redoOperation)
@@ -98,7 +99,10 @@ class MasterWindow(QMainWindow):
         self.theme = QAction("toggle Theme", self)
         self.theme.setCheckable(True)
         self.theme.setChecked(True)
-        self.viewMenu.addActions([self.zoomInOption, self.zoomOutOption, self.OriginalSize, self.theme])
+        self.toggleHideLeftBar = QAction("Hide left bar(Toggle)", self)
+        self.toggleHideLeftBar.setShortcut(Qt.Key.Key_F1)
+        
+        self.viewMenu.addActions([self.zoomInOption, self.zoomOutOption, self.OriginalSize, self.theme, self.toggleHideLeftBar])
         self.setMenuBar(self.bar)
         return
     

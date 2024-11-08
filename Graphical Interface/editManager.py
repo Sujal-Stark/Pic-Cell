@@ -17,7 +17,6 @@ from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.maskGenerator import Masks
 from imageOperationController import OperationFramework
 from pixmapLinker import PixmapLinker, Node
-# from cropFrameWidget import CropWidget
 
 class EditingActionManager(QWidget):
     def __init__(self) -> None:
@@ -76,7 +75,8 @@ class EditingActionManager(QWidget):
         self.reResizable = False # flag for resizing the rubberband widget
         self.cornerThreshold = 50 # distance in pixels to detect corner proximity
         self.aspectRatio = 0
-        self.openColorPickerForFrames = False # addresses the color picker to work for frames
+        self.toggleHideLeftFlag = True
+        self.toggleHideRightFlag = True
         return
     
     def createLabels(self):
@@ -115,7 +115,7 @@ class EditingActionManager(QWidget):
         return
     
     def createLayouts(self):
-        self.editingZoneLayout = QHBoxLayout()
+        self.editingZoneLayout = QGridLayout()
 
         self.editOptionPanel = QVBoxLayout()
         self.innerEditOptionPanel = QVBoxLayout()
@@ -162,14 +162,14 @@ class EditingActionManager(QWidget):
         return
     
     def constructInterface(self):
-        self.editSectionMasterLayout.addLayout(self.editingZoneLayout, 95)
-        self.editSectionMasterLayout.addLayout(self.editControlLayout, 20)
+        self.editSectionMasterLayout.addLayout(self.editingZoneLayout, 90)
+        self.editSectionMasterLayout.addLayout(self.editControlLayout, 10)
 
-        self.editingZoneLayout.addLayout(self.editOptionPanel, 15)
+        self.editingZoneLayout.addLayout(self.editOptionPanel, 0, 0)
         self.editOptionPanel.addWidget(self.editOptionFrame)
         self.editOptionFrame.setLayout(self.innerEditOptionPanel)
 
-        self.editingZoneLayout.addLayout(self.imageViewingPanel, 85)
+        self.editingZoneLayout.addLayout(self.imageViewingPanel, 0, 1)
         self.imageViewingPanel.addWidget(self.editableImageField)
         self.editableImageField.setWidget(self.imageViewingFrame)
         self.imageViewingFrame.setLayout(self.innerImageViewingPanel)
@@ -195,6 +195,22 @@ class EditingActionManager(QWidget):
         self.innerAdvancementScrollArea.setLayout(self.sliderHolderLayout)
         self.sliderHolderLayout.addWidget(QLabel("Advancement Options"),alignment=Qt.AlignmentFlag.AlignCenter)
 
+    def toggleHideLeft(self):
+        if self.toggleHideLeftFlag:
+            self.editOptionPanel.setParent(None)
+            self.imageViewingPanel.setParent(None)
+            self.editableImageField.setFixedSize(self.editableImageField.width() + 200, 610)
+            self.editingZoneLayout.addLayout(self.imageViewingPanel, 0, 0)
+            self.toggleHideLeftFlag = False
+        else:
+            # self.editOptionPanel.setParent(self.editingZoneLayout)
+            self.imageViewingPanel.setParent(None)
+            self.editableImageField.setFixedSize(self.editableImageField.width() - 200,610)
+            self.editingZoneLayout.addLayout(self.editOptionPanel, 0, 0)
+            self.editingZoneLayout.addLayout(self.imageViewingPanel, 0, 1)
+            self.toggleHideLeftFlag = True
+        return
+    
     def addTreeItems(self, item : QTreeWidgetItem):
         parsedClass = item.text(0)
         editOptions = []
@@ -220,11 +236,6 @@ class EditingActionManager(QWidget):
         self.addTreeItems(item = treeItem)
         self.addSpecialMethodsToGrid(treeItem = treeItem)
         self.cropRubberBand.close()
-        if treeItem.text(0) == "Frames":
-            self.openColorPickerForFrames = True
-        else:
-            self.openColorPickerForFrames = False
-        return
 
     def clearEditSpectrum(self):
         for _ in range(self.innerEditSpectrumLayout.count()):
@@ -294,7 +305,7 @@ class EditingActionManager(QWidget):
         else:
             i, j = 0, 0
             for key in methodDict.keys():
-                limit = 1 if len(methodDict.keys())%2 == 0 else 0
+                limit = 0
                 if j > limit:
                     i += 1
                     j = 0
