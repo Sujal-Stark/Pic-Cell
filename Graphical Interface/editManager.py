@@ -17,6 +17,7 @@ from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.maskGenerator import Masks
 from imageOperationController import OperationFramework
 from pixmapLinker import PixmapLinker, Node
+from customCropWindow import CustomResizeWindow
 
 class EditingActionManager(QWidget):
     def __init__(self) -> None:
@@ -48,6 +49,7 @@ class EditingActionManager(QWidget):
         self.timeHolder.timeout.connect(self.showOriginal)
         self.viewOriginal.pressed.connect(self.buttonPressedAction)
         self.viewOriginal.released.connect(self.buttonRealeaseAction)
+        self.customResizeWindow.continueButton.clicked.connect(self.showPixmapFromResizeWindow)
         return
     
     def addProperties(self):
@@ -64,6 +66,7 @@ class EditingActionManager(QWidget):
         self.savingRequired = ["Rotate", "Horizontal Flip", "Vertical Flip"] # edit which needs to save automatically
         self.removeableWidgets = [] # widgets in spectrum and advancement that is needed to be removed
         self.pixmapConnector = PixmapLinker() # pixmap linkedlist variable
+        self.customResizeWindow = CustomResizeWindow()
         self.linker = None # undo and redo operator
         self.firstCallFlag : bool # first undo initiation flag
         self.timeHolder = QTimer() # helps to show original Image for the time
@@ -153,7 +156,7 @@ class EditingActionManager(QWidget):
     
     def editingTree(self):
         self.editingTreeBody = QTreeWidget()
-        self.editingTreeBody.setColumnCount(1)
+        self.clearEditSpectrum()
         self.editingTreeBody.setHeaderLabel("Editing Body")
         editSections = ["Adjust", "Filters", "Color Enhance", "Deform Image", "Frames", "Collage"]
         for editSection in editSections:
@@ -310,8 +313,9 @@ class EditingActionManager(QWidget):
                     j = 0
                 currentButton = QPushButton(key)
                 if key == "Custom" and self.editingTreeBody.currentItem().text(0) in ColorImage.subEditingTree.keys():
-                    print("i am here")
                     currentButton.clicked.connect(self.performColorOperaion)
+                elif key == "Custom" and self.editingTreeBody.currentItem().text(0) in FrameAdjustment.subEditingTree.keys():
+                    currentButton.clicked.connect(self.getCustomResized)
                 else:
                     currentButton.clicked.connect(self.performImageOperation)
                 self.innerEditSpectrumLayout.addWidget(currentButton, i, j)
@@ -326,7 +330,6 @@ class EditingActionManager(QWidget):
                 self.valuePackage = {}
                 # image adjustments
                 if treeItem.parent().text(0) == "Adjust":
-                    # self.operationManager.editRubberWidget = self.cropRubberBand
                     self.valuePackage = FrameAdjustment.subEditingTree[treeItem.text(0)]
                     self.fillEditSpectrum(self.valuePackage)
                 
@@ -436,6 +439,21 @@ class EditingActionManager(QWidget):
         backGround.drawPixmap(0, 0, overLayPixmap)
         return resultPixmap
     
+    # fucntion to create reisizeImage with custom inputs
+    def getCustomResized(self):
+        if self.imageObject:
+            self.customResizeWindow.getImageObject(self.convertPixMaptoImage(self.imageObject))
+            self.customResizeWindow.show()
+            return
+        
+    def showPixmapFromResizeWindow(self):
+        if self.imageObject:
+            editedPILImage = self.customResizeWindow.continueAction()
+            if isinstance(editedPILImage, Image.Image):
+                self.newImageObject = self.convertImagetoPixMap(editedPILImage)
+                self.showPixmap(self.newImageObject)
+
+
     def performImageOperation(self, signalValue : object = None):
         if self.editingTreeBody.currentItem() != None and self.imageObject != None:
             currentButton1 : QPushButton = self.innerEditSpectrumLayout.sender() # operaional button
