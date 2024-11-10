@@ -22,7 +22,7 @@ class OperationFramework(QWidget):
         self.imageFrames = Masks()
         return
     
-    def signalManager(self, treeChild : QTreeWidgetItem, valuePackage : dict, signalValue : object):
+    def signalManager(self, treeChild : QTreeWidgetItem, valuePackage : dict, signalValue : object = None):
         self.treeChildItem = treeChild
         parentItem = self.treeChildItem.parent()
         subOperation = self.treeChildItem.text(0)
@@ -104,7 +104,11 @@ class OperationFramework(QWidget):
     def multivalueOperation(self, subOperation : str, signalValue:object):
         parentItem = self.treeChildItem.parent()
         if parentItem:
-            if parentItem.text(0) == "Filters":
+            if parentItem.text(0) == "Adjust":
+                self.fileAdjustment.getImageObject(self.imageObject)
+                if subOperation == "Rotate":
+                    return self.fileAdjustment.imageRotate(rotationAngle=signalValue)
+            elif parentItem.text(0) == "Filters":
                 self.imageFiltering.getImageObject(self.imageObject)
                 if subOperation == "Auto contrast":
                     if signalValue != None:

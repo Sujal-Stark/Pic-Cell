@@ -314,8 +314,10 @@ class EditingActionManager(QWidget):
                 currentButton = QPushButton(key)
                 if key == "Custom" and self.editingTreeBody.currentItem().text(0) in ColorImage.subEditingTree.keys():
                     currentButton.clicked.connect(self.performColorOperaion)
-                elif key == "Custom" and self.editingTreeBody.currentItem().text(0) in FrameAdjustment.subEditingTree.keys():
+                elif key == "Custom" and self.editingTreeBody.currentItem().text(0) == "Resize":
                     currentButton.clicked.connect(self.getCustomResized)
+                elif key == "Custom" and self.editingTreeBody.currentItem().text(0) == "Rotate":
+                    currentButton.clicked.connect(self.getCustomRotation)
                 else:
                     currentButton.clicked.connect(self.performImageOperation)
                 self.innerEditSpectrumLayout.addWidget(currentButton, i, j)
@@ -475,10 +477,9 @@ class EditingActionManager(QWidget):
                         pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.valuePackage, self.valuePackage[currentButton1.text()])
 
             elif signalValue == None:
-                    pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.valuePackage, None)
+                    pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.valuePackage)
 
             elif isinstance(sender, QSlider):
-                print(QSlider(sender).sliderPosition())
                 self.operationManager.treeChildItem = self.editingTreeBody.currentItem()
                 subOperation = self.editingTreeBody.currentItem().text(0)
                 signalValue = self.modifySignalValueForMultipleSignal(key = sender.objectName(), signal =signalValue)
@@ -496,7 +497,8 @@ class EditingActionManager(QWidget):
             if self.editingTreeBody.currentItem().parent().text(0) == "Frames":
                 self.newImageObject = self.overLayPixmapObjects(self.imageObject, self.newImageObject)
             elif (self.editingTreeBody.currentItem().text(0) in self.savingRequired):
-                self.imageObject = self.newImageObject
+                if self.editingTreeBody.currentItem().text(0) != "Rotate" or sender.objectName() != "Custom_Rotation":
+                    self.imageObject = self.newImageObject
             self.showPixmap(self.newImageObject)
         return "Succeed"
     
@@ -537,11 +539,12 @@ class EditingActionManager(QWidget):
         if self.linker == None:
             # copies the real pixmap connectors head with the linker
             if self.pixmapConnector.head != None and self.firstCallFlag:
-                self.linker = self.pixmapConnector.head
-                self.linker = self.linker.nextNode
-                self.imageObject = self.linker.image
-                self.showPixmap(self.linker.image)
-                self.firstCallFlag = False
+                if self.pixmapConnector.head:
+                    self.linker = self.pixmapConnector.head
+                    self.linker = self.linker.nextNode
+                    self.imageObject = self.linker.image
+                    self.showPixmap(self.linker.image)
+                    self.firstCallFlag = False
         else:
             if self.linker.nextNode:
                 self.linker = self.linker.nextNode
@@ -553,10 +556,11 @@ class EditingActionManager(QWidget):
     def redoOperation(self):
         if self.imageObject == None:
             return
-        if self.linker.previousNode:
-            self.linker : Node = self.linker.previousNode
-            self.imageObject = self.linker.image
-            self.showPixmap(self.linker.image)
+        if self.linker:
+            if self.linker.previousNode:
+                self.linker : Node = self.linker.previousNode
+                self.imageObject = self.linker.image
+                self.showPixmap(self.linker.image)
         return
     
     def keepEdit(self):
@@ -636,4 +640,21 @@ class EditingActionManager(QWidget):
             self.isDragging = False
             self.reResizable = False
             self.currentPosition = None
+    
+    def getCustomRotation(self):
+        self.clearAdvancementLayer()
+        newSlider = QSlider()
+        newSlider.setFixedWidth(180)
+        newSlider.setRange(0, 360)
+        newSlider.setOrientation(Qt.Orientation.Horizontal)
+        newSlider.setSliderPosition(0)
+        newSlider.setTickInterval(30)
+        newSlider.setObjectName("Custom_Rotation")
+        newSlider.setTickPosition(QSlider.TicksBelow)
+        newSlider.valueChanged.connect(self.performImageOperation)
+        newLabel = QLabel("Angle")
+        self.sliderHolderLayout.addWidget(newLabel, alignment = Qt.AlignmentFlag.AlignLeft)
+        self.sliderHolderLayout.addWidget(newSlider, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.removeableWidgets.append(newLabel)
+        self.removeableWidgets.append(newSlider)
     pass

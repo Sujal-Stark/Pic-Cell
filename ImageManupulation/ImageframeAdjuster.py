@@ -147,11 +147,8 @@ class FrameAdjustment:
     def resizeImage(self, resize_choice :int)->Image.Image:
         image = self.image #local image variable
         width,height = self.image.size
-        if resize_choice == 1:
-            image = self.image.resize((int(input("Enter Width:\t")),int(input("Enter height:\t"))))
-            
         #1:1 convention
-        elif resize_choice == 2:
+        if resize_choice == 2:
             _resize1isto1 = self.__get1isto1()
             reduced_width,reduced_height  = 2*(int(_resize1isto1[0])),2*(int(_resize1isto1[1]))
             image = self.image.resize((width-reduced_width,height-reduced_height))
@@ -196,15 +193,16 @@ class FrameAdjustment:
         return self.image
 
     #rotate an image
-    def imageRotate(self, rotationSignal : int) -> None:
+    def imageRotate(self, rotationSignal : int = None, rotationAngle : int = None) -> None:
         image = self.image
         angleVal = 0
-        if rotationSignal == 1:
-            pass
-        elif rotationSignal == 2:
-            angleVal = 90
-        elif rotationSignal == 3:
-            angleVal = -90
+        if rotationSignal:
+            if rotationSignal == 2:
+                angleVal = 90
+            elif rotationSignal == 3:
+                angleVal = -90
+        elif rotationAngle:
+            angleVal = rotationAngle
         try:
             image = self.image.rotate(angle = angleVal,expand= True)
         except ValueError:
