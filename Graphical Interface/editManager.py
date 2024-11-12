@@ -79,6 +79,7 @@ class EditingActionManager(QWidget):
         self.cornerThreshold = 50 # distance in pixels to detect corner proximity
         self.aspectRatio = 0
         self.toggleHideLeftFlag = True
+        self.manualCropSignal = False
         return
     
     def createLabels(self):
@@ -470,7 +471,7 @@ class EditingActionManager(QWidget):
                 # invoking operation manager to perform editng
                 if len(self.valuePackage.keys()) > 0:
                     if self.editingTreeBody.currentItem().text(0) == "Crop":
-                        self.getCropDimention(self.valuePackage[currentButton1.text()])
+                        self.getCropDimention(self.valuePackage[currentButton1.text()], sender.text())
                         pilImageEdited = self.convertPixMaptoImage(self.imageObject)
                         # signalValue = self
                     else:
@@ -592,13 +593,17 @@ class EditingActionManager(QWidget):
             self.showPixmap(self.imageObject)
             return
         
-    def getCropDimention(self, signal):
+    def getCropDimention(self, signal, text : str):
         self.frameAdjustment = FrameAdjustment()
         self.frameAdjustment.getImageObject(self.convertPixMaptoImage(self.imageObject))
-        a,b,c,d = self.frameAdjustment.sendCropDimention(signal)
-        self.cropRubberBand.setFixedSize(c-a, d-b)
-        self.cropRubberBand.move(a,b)
-        self.cropRubberBand.show()
+        if text != "Custom":
+            a,b,c,d = self.frameAdjustment.sendCropDimention(signal)
+            self.cropRubberBand.setFixedSize(c-a, d-b)
+            self.cropRubberBand.move(a,b)
+            self.cropRubberBand.show()
+        else:
+            self.manualCropSignal = True
+        return
 
     # helps to find the edges of CropRubberband
     def isCornerReached(self, pos : QPoint):
@@ -611,19 +616,27 @@ class EditingActionManager(QWidget):
     def mousePressEvent(self, event : QMouseEvent):
         if event.button() == Qt.MouseButton.LeftButton:
             localPosition = self.cropRubberBand.parent().mapFromGlobal(event.globalPos())
-            if self.cropRubberBand.geometry().contains(localPosition):
-                if self.isCornerReached(event.globalPos()):
-                    self.reResizable = True
-                    self.currentPosition = event.globalPos()
-                else:
-                    self.isDragging = True
-                    self.currentPosition = event.pos() - self.cropRubberBand.pos()
+            if self.manualCropSignal == False:
+                if self.cropRubberBand.geometry().contains(localPosition):
+                    if self.isCornerReached(event.globalPos()):
+                        self.reResizable = True
+                        self.currentPosition = event.globalPos()
+                    else:
+                        self.isDragging = True
+                        self.currentPosition = event.pos() - self.cropRubberBand.pos()
+            else:
+                self.currentPosition = self.imageForEditLabel.mapFromGlobal(event.globalPos())
 
     def mouseMoveEvent(self, event : QMouseEvent):
-        if self.isDragging:
+        if self.manualCropSignal:
+            mousePos = self.imageForEditLabel.mapFromGlobal(event.globalPos())
+            diff = mousePos - self.currentPosition
+            self.cropRubberBand.setGeometry(QRect(self.currentPosition, QSize(diff.x(), diff.y())))
+            self.cropRubberBand.show()
+        elif self.isDragging:
             new_pos = event.pos() - self.currentPosition
             self.cropRubberBand.move(new_pos)
-        if self.reResizable:
+        elif self.reResizable:
             newPosition = self.cropRubberBand.mapFromGlobal(event.globalPos())
             if newPosition.x() >= newPosition.y() * self.aspectRatio:
                 new_width = newPosition.x()
@@ -640,6 +653,7 @@ class EditingActionManager(QWidget):
             self.isDragging = False
             self.reResizable = False
             self.currentPosition = None
+            self.manualCropSignal = False
     
     def getCustomRotation(self):
         self.clearAdvancementLayer()
