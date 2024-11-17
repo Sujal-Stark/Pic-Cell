@@ -15,6 +15,7 @@ class FileWindow(QDialog):
         self.loadFileWindowUi()
         self.setProperties()
         self.createResponse()
+        self.addStyleSheet()
         return
     
     def createResponse(self):
@@ -226,6 +227,64 @@ class FileWindow(QDialog):
             self.previewHolderLabel.setPixmap(previewPixmap)
             self.previewHolderLabel.show()
         return
+    
+    def addStyleSheet(self):
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: #18122b;
+                border-radius: 0px;
+            }
+            QPushButton {
+                border: 1px outset #4f4e4f;
+                background-color: #190140;
+                color: white;
+                border-radius: 10px;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                border: 1px outset #4f4e4f;
+                background-color: #280180;
+                color: white;
+                border-radius: 10px;
+                padding: 5px;
+            }
+            QFrame {
+                border: 2px outset #4f4e4f;
+                background-color: #020f17;
+                border-radius: 10px;
+                padding : 1px;
+            }
+            QFrame:hover {
+                border: 2px outset #4f4e4f;
+                background-color: #020f1c;
+                border-radius: 10px;
+                padding : 1px;
+            }
+            QLabel {
+                background-color : #190140;
+                font-size: 12px;
+                color: #ffffff;
+                padding : 2px;
+                border-radius : 5px;
+            }
+            QLabel:hover {
+                background-color : #280180;
+                font-size: 12px;
+                color: #ffffff;
+                padding : 2px;
+                border-radius : 5px;
+            }
+            QListWidget{
+                border: 2px outset #4f4e4f;
+                color : #ffffff;
+                font : 14px;
+                background-color: #020f1c;
+                border-radius: 10px;
+                padding : 1px;
+            }
+            """
+        )
     pass
     
 if __name__ == '__main__':

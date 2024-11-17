@@ -5,6 +5,7 @@ from galleryView import GalleryWindow
 from fileWindow import FileWindow
 from threading import Thread
 from editManager import EditingActionManager
+import os
 
 class MasterWindow(QMainWindow):
     def __init__(self)-> None:
@@ -18,6 +19,7 @@ class MasterWindow(QMainWindow):
         self.LoadUI()
         self.assignProperties()
         self.eventManager()
+        self.addStyledSheet()
         self.show()
         return
     
@@ -245,6 +247,53 @@ class MasterWindow(QMainWindow):
         self.methodInfo.setText(self.tab2.openImageInEditSection())
         self.newFileWindow.close()
         return
+    
+    def addStyledSheet(self):
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: #18122b;
+                border-radius: 0px;
+            }
+            QFrame {
+                border: 1px outset #4f4e4f;
+                background-color: #01031c;
+            }
+            QLabel {
+                background-color : #190140;
+                font-size: 12px;
+                color: #ffffff;
+                padding : 2px;
+                border-radius : 10px;
+            }
+            QLabel:hover {
+                background-color : #280180;
+                font-size: 12px;
+                color: #ffffff;
+                padding : 2px;
+                border-radius : 10px;
+            }
+            QMenuBar {
+                background-color : #3f018f;
+                color : #ffffff;
+                font-size : 14px;
+                border : 1px outset #4f4e4f;
+            }
+            QMenuBar::item {
+                background-color: #3f018f;
+                color: #ffffff;
+            }
+            QMenuBar::item:selected{
+                background-color: #6004d6;
+                color: #000000;
+            }
+            QTabBar::Tab {
+                background-color: #5902c9;
+                padding: 4px;
+                color : #ffffff;
+            }
+            """
+        )
     pass
 
 if __name__ == '__main__':

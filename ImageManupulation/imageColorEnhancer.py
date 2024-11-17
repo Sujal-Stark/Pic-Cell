@@ -34,7 +34,8 @@ class ColorImage:
             return "Succeed"
     
     #total colors available for user
-    def _colorList(self, index : int) -> tuple:
+    @staticmethod
+    def _colorList(index : int) -> tuple:
         colors = [
             (255,0,0), (0, 255, 0), (0, 0, 255), (0, 255, 255), 
             (255, 0, 255), (255, 255, 0),(255, 165, 0), (128, 0, 128),
@@ -44,7 +45,8 @@ class ColorImage:
         return colors[index]
     
     #total RGBA colors available for user
-    def _RGBAcolorList(self, index : int) -> tuple:
+    @staticmethod
+    def _RGBAcolorList(index : int) -> tuple:
         color_list = [
         (255, 0, 0, 0),  # Red
         (0, 255, 0, 128),  # Green

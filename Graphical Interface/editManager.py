@@ -23,6 +23,7 @@ class EditingActionManager(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self.editSectionMasterLayout = QHBoxLayout(self)
+        self.setObjectName("EditPanel")
         self.loadUi()
         self.addResponse()
         self.performImageOperation()
@@ -39,6 +40,7 @@ class EditingActionManager(QWidget):
         self.editingTree()
         self.constructInterface()
         self.addWidgetAttributes()
+        self.addStyleSheet()
         return
     
     def addResponse(self):
@@ -143,12 +145,12 @@ class EditingActionManager(QWidget):
 
         self.editableImageField = QScrollArea()
         self.editableImageField.setWidgetResizable(True)
-        self.editableImageField.setFixedSize(860,610)
+        self.editableImageField.setFixedSize(860,600)
         # self.cropRubberBand.setParent(self)
 
         self.editSpectrumScrollArea = QScrollArea()
         self.editSpectrumScrollArea.setWidgetResizable(True)
-        self.editSpectrumScrollArea.setFixedSize(230,330)
+        self.editSpectrumScrollArea.setFixedSize(230,320)
 
         self.innerAdvancementScrollArea = QScrollArea()
         self.innerAdvancementScrollArea.setWidgetResizable(True)
@@ -157,6 +159,7 @@ class EditingActionManager(QWidget):
     
     def editingTree(self):
         self.editingTreeBody = QTreeWidget()
+        self.editingTreeBody.setFixedSize(190,580)
         self.clearEditSpectrum()
         self.editingTreeBody.setHeaderLabel("Editing Body")
         editSections = ["Adjust", "Filters", "Color Enhance", "Deform Image", "Frames", "Collage"]
@@ -197,6 +200,7 @@ class EditingActionManager(QWidget):
         self.innerAdvancementLayout.addWidget(self.chooseColorLabel, alignment = Qt.AlignmentFlag.AlignBottom)
         self.innerAdvancementScrollArea.setLayout(self.sliderHolderLayout)
         self.sliderHolderLayout.addWidget(QLabel("Advancement Options"),alignment=Qt.AlignmentFlag.AlignCenter)
+        return
 
     def toggleHideLeft(self):
         if self.toggleHideLeftFlag:
@@ -671,4 +675,70 @@ class EditingActionManager(QWidget):
         self.sliderHolderLayout.addWidget(newSlider, alignment = Qt.AlignmentFlag.AlignCenter)
         self.removeableWidgets.append(newLabel)
         self.removeableWidgets.append(newSlider)
+        return
+    
+    def addStyleSheet(self):
+        self.setStyleSheet(
+            """
+            #EditPanel {
+                background-color: #01031c;
+                border: 2px solid #3498db;
+                border-radius: 10px;
+                padding: 15px;
+            }
+            QPushButton {
+                border: 1px outset #4f4e4f;
+                background-color: #190140;
+                color: white;
+                border-radius: 10px;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                border: 1px outset #4f4e4f;
+                background-color: #280180;
+                color: white;
+                border-radius: 10px;
+                padding: 5px;
+            }
+            QFrame {
+                border: 2px outset #4f4e4f;
+                background-color: #020f17;
+                border-radius: 10px;
+                padding : 1px;
+            }
+            QFrame:hover {
+                border: 2px outset #4f4e4f;
+                background-color: #020f1c;
+                border-radius: 10px;
+                padding : 1px;
+            }
+            QLabel {
+                background-color : #190140;
+                font-size: 12px;
+                color: #ffffff;
+                padding : 2px;
+                border-radius : 5px;
+            }
+            QLabel:hover {
+                background-color : #280180;
+                font-size: 12px;
+                color: #ffffff;
+                padding : 2px;
+                border-radius : 5px;
+            }
+            QTreeWidget {
+                border: 2px solid #4f4e4f;
+                border-radius: 15px;
+                font-size: 14px;
+                color: #dedfe0;
+            }
+            QTreeWidget::item:hover{
+                background-color #5a06ba: 
+                border: 2px solid #4f4e4f;
+                border-radius: 15px;
+                font-size: 14px;
+                color: #ffffff;
+            }
+            """
+        )
     pass
