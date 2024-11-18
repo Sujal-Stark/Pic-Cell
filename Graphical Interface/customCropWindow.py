@@ -213,7 +213,12 @@ class CustomResizeWindow(QWidget):
             }
             QComboBox{
                 background-color : #ffffff;
-                color : 000000;
+                color : #000000;
+                font : 12px;
+            }
+            QComboBox : QAbstractItemView {
+                background-color : #ffffff;
+                color : #000000;
                 font : 12px;
             }
             """

@@ -203,7 +203,7 @@ class FileWindow(QDialog):
             self.universalHolderLayout.addLayout(self.preViewLayout)
             self.preViewHolderFrame = QFrame()
             self.preViewLayout.addWidget(self.preViewHolderFrame)
-            self.preViewHolderFrame.setFixedSize(200,200)
+            self.preViewHolderFrame.setFixedSize(200,280)
             self.previewHolderLabel = QLabel("Preview")
             self.previewHolderInnerLayout = QVBoxLayout()
             self.preViewHolderFrame.setLayout(self.previewHolderInnerLayout)
@@ -275,6 +275,11 @@ class FileWindow(QDialog):
                 padding : 2px;
                 border-radius : 5px;
             }
+            QLineEdit{
+                background-color : #ffffff;
+                color : 000000;
+                font : 12px;
+            }
             QListWidget{
                 border: 2px outset #4f4e4f;
                 color : #ffffff;
@@ -282,6 +287,16 @@ class FileWindow(QDialog):
                 background-color: #020f1c;
                 border-radius: 10px;
                 padding : 1px;
+            }
+            QComboBox{
+                background-color : #ffffff;
+                color : #000000;
+                font : 12px;
+            }
+            QComboBox : QAbstractItemView {
+                background-color : #ffffff;
+                color : #000000;
+                font : 12px;
             }
             """
         )
