@@ -225,7 +225,6 @@ class TextEditorAssembly(QWidget):
             }
             QPushButton{
                 border : 1px outset #4f4e4f;
-                font-style : Comic-Sans-Ms;
                 background-color : #190140;
                 color : #ffffff;
             }

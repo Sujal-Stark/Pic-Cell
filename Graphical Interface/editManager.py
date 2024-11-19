@@ -2,7 +2,7 @@
 from PyQt5.QtGui import QMouseEvent, QPixmap, QImage, QPainter
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider, QRubberBand
 from PyQt5.QtCore import Qt, QTimer, QPoint, QRect, QSize
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QFont
 from threading import Thread
 from PIL import Image
 import sys, os
@@ -55,6 +55,8 @@ class EditingActionManager(QWidget):
         return
     
     def addProperties(self):
+        self.comicSansFontLarger = QFont("Comic Sans MS", 16)
+        self.comicSansFont = QFont("Comic Sans MS", 10)
         self.filewinowForSave = FileWindow() # file window is used to open or save image
         self.currentColor = QColor(255,255,255,255)
         self.imageToEdit = "" # the name of the image which is about to get edit
@@ -86,14 +88,21 @@ class EditingActionManager(QWidget):
     
     def createLabels(self):
         self.imageForEditLabel = QLabel("Edit Your Image here")
+        self.imageForEditLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.imageForEditLabel.setFixedSize(300,40)
+        self.imageForEditLabel.setFont(self.comicSansFontLarger)
         self.cropRubberBand.setParent(self.imageForEditLabel)
         self.specialEditOptions = QLabel("Editing choice will show up here")
+        self.specialEditOptions.setFont(self.comicSansFont)
         return
     
     def createButtons(self):
         self.chooseColorLabel = QPushButton("Choose color")
+        self.chooseColorLabel.setFont(self.comicSansFont)
         self.setEdit = QPushButton("Set")
+        self.setEdit.setFont(self.comicSansFont)
         self.viewOriginal = QPushButton("View Original")
+        self.viewOriginal.setFont(self.comicSansFont)
         return
     
     def createColorPicker(self):
@@ -150,15 +159,16 @@ class EditingActionManager(QWidget):
 
         self.editSpectrumScrollArea = QScrollArea()
         self.editSpectrumScrollArea.setWidgetResizable(True)
-        self.editSpectrumScrollArea.setFixedSize(230,320)
+        self.editSpectrumScrollArea.setFixedSize(230,280)
 
         self.innerAdvancementScrollArea = QScrollArea()
         self.innerAdvancementScrollArea.setWidgetResizable(True)
-        self.innerAdvancementScrollArea.setFixedSize(210, 160)
+        self.innerAdvancementScrollArea.setFixedSize(210, 180)
         return
     
     def editingTree(self):
         self.editingTreeBody = QTreeWidget()
+        self.editingTreeBody.setFont(self.comicSansFont)
         self.editingTreeBody.setFixedSize(190,580)
         self.clearEditSpectrum()
         self.editingTreeBody.setHeaderLabel("Editing Body")
@@ -317,6 +327,8 @@ class EditingActionManager(QWidget):
                     i += 1
                     j = 0
                 currentButton = QPushButton(key)
+                currentButton.setFixedHeight(40)
+                currentButton.setFont(self.comicSansFontLarger)
                 if key == "Custom" and self.editingTreeBody.currentItem().text(0) in ColorImage.subEditingTree.keys():
                     currentButton.clicked.connect(self.performColorOperaion)
                 elif key == "Custom" and self.editingTreeBody.currentItem().text(0) == "Resize":
@@ -694,20 +706,20 @@ class EditingActionManager(QWidget):
                 padding: 5px;
             }
             QPushButton:hover {
-                border: 1px outset #4f4e4f;
-                background-color: #280180;
-                color: white;
+                border : 2px outset #4f4e50;
+                background-color: #6edefa;
+                color: #000000;
                 border-radius: 10px;
                 padding: 5px;
             }
             QFrame {
-                border: 2px outset #4f4e4f;
+                border: 1px outset #4f4e4f;
                 background-color: #020f17;
                 border-radius: 10px;
                 padding : 1px;
             }
             QFrame:hover {
-                border: 2px outset #4f4e4f;
+                border: 2px outset #4f4e50;
                 background-color: #020f1c;
                 border-radius: 10px;
                 padding : 1px;
