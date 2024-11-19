@@ -1,7 +1,7 @@
 # builtin libraries
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem, QPushButton, QFrame, QLabel, QLineEdit, QComboBox
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QFont
 from PIL import Image
 import os
 
@@ -12,8 +12,9 @@ class FileWindow(QDialog):
         self.setGeometry(0,0,400,300)
         self.masterLayout = QVBoxLayout(self)
         self.preViewLayout = None
-        self.loadFileWindowUi()
         self.setProperties()
+        self.createWidgets()
+        self.loadFileWindowUi()
         self.createResponse()
         self.addStyleSheet()
         return
@@ -24,12 +25,50 @@ class FileWindow(QDialog):
         self.previousButton.clicked.connect(self.previousDirectory)
         return
     
+    def createWidgets(self):
+        self.forwardButton = QPushButton("Forward") # forward
+        self.forwardButton.setFixedSize(100,30)
+        self.forwardButton.setFont(self.comicSansFont)
+        self.exploreFiles = QLabel("Explore Files") # title
+        self.exploreFiles.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.exploreFiles.setFixedSize(100, 25)
+        self.exploreFiles.setFont(self.comicSansFont)
+        self.previousButton = QPushButton("Back") # backword
+        self.previousButton.setFixedSize(100,30)
+        self.previousButton.setFont(self.comicSansFont)
+        self.fileListWidget = QListWidget() # file list
+        self.fileListWidget.setFont(self.comicSansFont)
+        self.ImageFileNameEditor = QLineEdit() # input
+        self.ImageFileNameEditor.setFixedSize(240, 25)
+        self.ImageFileNameEditor.setFont(self.comicSansFont)
+        self.fileOpenButton = QPushButton("Open") # open
+        self.fileOpenButton.setFixedSize(100,30)
+        self.fileOpenButton.setFont(self.comicSansFont)
+        self.fileSaveButton = QPushButton("Save") # save
+        self.fileSaveButton.setFixedSize(100,30)
+        self.fileSaveButton.setFont(self.comicSansFont)
+        self.fileExtensionListWidget = QComboBox() # extension box
+        self.fileExtensionListWidget.setFixedHeight(25)
+        self.fileExtensionListWidget.setFont(self.comicSansFont)
+        self.fileExtensionListWidget.view().setStyleSheet(
+            """
+            QAbstractItemView{
+                border: 2px outset #4f4e50;
+                background-color : #190140;
+                color : #ffffff;
+                font : 12px;
+            }
+            """
+        )
+        return
     def setProperties(self):
         self.currentPathName = ""
         self.iteratedDirectoryList = []
         self.iamgeObjectPath = None
         self.iamgeObjectListPath = []
         self.currentImageInformation = None
+        self.comicSansFontLarger = QFont("Comic Sans MS", 16)
+        self.comicSansFont = QFont("Comic Sans MS", 12)
         return
     
     def loadFileWindowUi(self):
@@ -50,16 +89,11 @@ class FileWindow(QDialog):
         self.windowButtonLayout.addWidget(self.windowButtonFrame)
         self.windowButtonFrame.setLayout(self.windowInnerButtonLayout)
 
-        self.forwardButton = QPushButton("Forward")
-        self.exploreFiles = QLabel("Explore Files")
-        self.previousButton = QPushButton("Back")
-
         self.motherLayout.addLayout(self.windowButtonLayout)
         self.windowInnerButtonLayout.addWidget(self.forwardButton, alignment = Qt.AlignmentFlag.AlignLeft)
         self.windowInnerButtonLayout.addWidget(self.exploreFiles, alignment = Qt.AlignmentFlag.AlignCenter)
         self.windowInnerButtonLayout.addWidget(self.previousButton, alignment = Qt.AlignmentFlag.AlignRight)
 
-        self.fileListWidget = QListWidget()
         self.motherLayout.addWidget(self.fileListWidget)
         self.fileListWidget.addItems(["Files",R"C:\\", R"D:\\", R"F:\\"])
 
@@ -67,11 +101,6 @@ class FileWindow(QDialog):
         self.fileOpenerFrame.setFrameShape(QFrame.Shape.Panel)
         self.fileOpenerLayout.addWidget(self.fileOpenerFrame)
         self.fileOpenerFrame.setLayout(self.fileSaveAndOpenLayout)
-
-        self.ImageFileNameEditor = QLineEdit()
-        self.ImageFileNameEditor.setFixedWidth(260)
-        self.fileOpenButton = QPushButton("Open")
-        self.fileSaveButton = QPushButton("Save")
 
         self.fileOpenerInnerLayout.addWidget(self.ImageFileNameEditor, alignment = Qt.AlignmentFlag.AlignCenter)
         self.fileOpenerInnerLayout.addWidget(self.fileOpenButton, alignment = Qt.AlignmentFlag.AlignRight)
@@ -187,7 +216,6 @@ class FileWindow(QDialog):
             self.fileOpenerInnerLayout.addWidget(self.fileSaveButton, alignment = Qt.AlignmentFlag.AlignCenter)
             self.fileOpenButton.deleteLater()
             self.fileOpenButton = None
-            self.fileExtensionListWidget = QComboBox()
             self.fileExtensionListWidget.setFixedWidth(self.ImageFileNameEditor.width())
             self.fileExtensionListWidget.addItems([".png", ".jpeg", ".jfif", ".jpg"])
             self.fileExtenstionsetterLayout.addWidget(self.fileExtensionListWidget, alignment = Qt.AlignmentFlag.AlignCenter)
@@ -205,6 +233,8 @@ class FileWindow(QDialog):
             self.preViewLayout.addWidget(self.preViewHolderFrame)
             self.preViewHolderFrame.setFixedSize(200,280)
             self.previewHolderLabel = QLabel("Preview")
+            self.previewHolderLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.previewHolderLabel.setFixedSize(180,260)
             self.previewHolderInnerLayout = QVBoxLayout()
             self.preViewHolderFrame.setLayout(self.previewHolderInnerLayout)
             self.previewHolderInnerLayout.addWidget(self.previewHolderLabel, alignment = Qt.AlignmentFlag.AlignCenter)
@@ -233,46 +263,42 @@ class FileWindow(QDialog):
             """
             QWidget {
                 background-color: #18122b;
-                border-radius: 0px;
+                border-radius: 5px;
             }
             QPushButton {
                 border: 1px outset #4f4e4f;
                 background-color: #190140;
                 color: white;
-                border-radius: 10px;
-                padding: 5px;
+                border-radius: 5px;
             }
             QPushButton:hover {
-                border: 1px outset #4f4e4f;
+                border: 2px outset #4f4e50;
                 background-color: #280180;
                 color: white;
-                border-radius: 10px;
-                padding: 5px;
+                border-radius: 5px;
             }
             QFrame {
-                border: 2px outset #4f4e4f;
+                border: 1px outset #4f4e4f;
                 background-color: #020f17;
-                border-radius: 10px;
-                padding : 1px;
+                border-radius: 5px;
             }
             QFrame:hover {
-                border: 2px outset #4f4e4f;
+                border: 2px outset #4f4e50;
                 background-color: #020f1c;
-                border-radius: 10px;
-                padding : 1px;
+                border-radius: 5px;
             }
             QLabel {
+                border: 1px outset #4f4e4f;
                 background-color : #190140;
                 font-size: 12px;
                 color: #ffffff;
-                padding : 2px;
                 border-radius : 5px;
             }
             QLabel:hover {
+                border: 2px outset #4f4e50;
                 background-color : #280180;
                 font-size: 12px;
                 color: #ffffff;
-                padding : 2px;
                 border-radius : 5px;
             }
             QLineEdit{
@@ -281,7 +307,15 @@ class FileWindow(QDialog):
                 font : 12px;
             }
             QListWidget{
-                border: 2px outset #4f4e4f;
+                border: 1px outset #4f4e4f;
+                color : #ffffff;
+                font : 14px;
+                background-color: #020f1c;
+                border-radius: 10px;
+                padding : 1px;
+            }
+            QListWidget:hover{
+                border: 2px outset #4f4e50;
                 color : #ffffff;
                 font : 14px;
                 background-color: #020f1c;
@@ -289,11 +323,7 @@ class FileWindow(QDialog):
                 padding : 1px;
             }
             QComboBox{
-                background-color : #ffffff;
-                color : #000000;
-                font : 12px;
-            }
-            QComboBox : QAbstractItemView {
+                border: 1px outset #4f4e4f;
                 background-color : #ffffff;
                 color : #000000;
                 font : 12px;
