@@ -1,7 +1,7 @@
 # important libraries
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QFrame, QScrollArea
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QFont
 from fileWindow import FileWindow
 import os
 
@@ -28,6 +28,8 @@ class GalleryWindow(QWidget):
         self.imageLabelList = []
         self.imageNormalSize = (1050,600)
         self.originalSize = (1050, 600)
+        self.comicSansFontLarger = QFont("Comic Sans MS", 16)
+        self.comicSansFont = QFont("Comic Sans MS", 12)
         return
 
     def loadGalleryUI(self):
@@ -82,14 +84,19 @@ class GalleryWindow(QWidget):
 
     def createGalleryLabels(self):
         self.galleryImageLabel = QLabel("Your Image will show up here")
+        self.galleryImageLabel.setFixedSize(200, 40)
         self.galleryImageLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.galleryImageLabel.setFont(self.comicSansFont)
 
         self.gridViewLabel = QLabel("Other Images")
+        self.gridViewLabel.setFixedSize(150,40)
+        self.gridViewLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.gridViewLabel.setFont(self.comicSansFont)
         self.labelList.append(self.gridViewLabel)
-        self.gridViewLabel.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         self.imageInformationLabel = QLabel("Picture Information")
-        self.imageInformationLabel.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.imageInformationLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.imageInformationLabel.setFont(self.comicSansFont)
         return
     
     def constructGalleryInterface(self):
@@ -125,6 +132,7 @@ class GalleryWindow(QWidget):
             qImageObject = QPixmap(self.imageToShow)
             qImageObject = qImageObject.scaled(self.imageNormalSize[0], self.imageNormalSize[1], aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
             self.galleryImageLabel.hide()
+            self.galleryImageLabel.setFixedSize(qImageObject.width(), qImageObject.height())
             self.galleryImageLabel.setPixmap(qImageObject)
             self.galleryImageLabel.show()
         else:
@@ -146,6 +154,8 @@ class GalleryWindow(QWidget):
                         widgetInItem.deleteLater()
                 self.imageGrid.update()
                 otherImagesLabel = QLabel("Other Images")
+                otherImagesLabel.setFixedSize(100,40)
+                otherImagesLabel.setFont(self.comicSansFont)
                 otherImagesLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.imageGrid.addWidget(otherImagesLabel, 0, 0)
                 return "Succeed"
@@ -203,6 +213,7 @@ class GalleryWindow(QWidget):
             self.galleryImageLabel.hide()
             self.imageInformationLabel.hide()
 
+            self.galleryImageLabel.setFixedSize(200,40)
             self.galleryImageLabel.setText("Your Image will show up here")
             self.imageInformationLabel.setText("Image Information")
 
@@ -251,20 +262,20 @@ class GalleryWindow(QWidget):
                 border-radius: 10px;
                 padding: 5px;
             }
-
             QFrame {
-                border: 2px outset #4f4e4f;
+                border: 1px outset #4f4e4f;
                 background-color: #020f17;
                 border-radius: 15px;
                 padding : 1px;
             }
             QFrame:hover {
-                border: 2px outset #4f4e4f;
+                border: 2px outset #4f4e50;
                 background-color: #020f1c;
                 border-radius: 15px;
                 padding : 1px;
             }
             QLabel {
+                border: 1px outset #4f4e4f;
                 background-color : #190140;
                 font-size: 12px;
                 color: #ffffff;
@@ -272,6 +283,7 @@ class GalleryWindow(QWidget):
                 border-radius : 10px;
             }
             QLabel:hover {
+                border: 2px outset #4f4e50;
                 background-color : #280180;
                 font-size: 12px;
                 color: #ffffff;
