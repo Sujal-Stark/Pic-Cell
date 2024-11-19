@@ -383,6 +383,7 @@ class EditingActionManager(QWidget):
     
     def showPixmap(self, imageObject : QPixmap):
         self.imageForEditLabel.hide()
+        self.imageForEditLabel.setFixedSize(imageObject.width(), imageObject.height())
         self.imageForEditLabel.setPixmap(imageObject)
         self.imageForEditLabel.show()
     
@@ -395,6 +396,7 @@ class EditingActionManager(QWidget):
             self.ORIGINALIMAGEOBJECT = self.imageObject
             self.pixmapConnector.createhead(self.imageObject)
             self.firstCallFlag = True
+            self.imageForEditLabel.setFixedSize(self.imageObject.width(), self.imageObject.height())
             self.imageForEditLabel.setPixmap(self.imageObject)
             self.imageForEditLabel.show()
             return "Opened Successfully"
@@ -407,6 +409,7 @@ class EditingActionManager(QWidget):
             self.newImageObject = None
             self.ORIGINALIMAGEOBJECT = None
             self.imageForEditLabel.hide()
+            self.imageForEditLabel.setFixedSize(300,40)
             self.imageForEditLabel.setText("Edit Your Image here")
             self.clearAdvancementLayer()
             self.clearEditSpectrum()
@@ -700,7 +703,7 @@ class EditingActionManager(QWidget):
             }
             QPushButton {
                 border: 1px outset #4f4e4f;
-                background-color: #190140;
+                background-color: #020f1c;
                 color: white;
                 border-radius: 10px;
                 padding: 5px;
