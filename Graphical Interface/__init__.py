@@ -5,6 +5,7 @@ from galleryView import GalleryWindow
 from fileWindow import FileWindow
 from threading import Thread
 from editManager import EditingActionManager
+from PyQt5.QtGui import QFont
 import os
 
 class MasterWindow(QMainWindow):
@@ -16,8 +17,8 @@ class MasterWindow(QMainWindow):
         self.mainWidget = QWidget()
         self.setCentralWidget(self.mainWidget)
         self.masterLayout = QVBoxLayout(self.mainWidget)
-        self.LoadUI()
         self.assignProperties()
+        self.LoadUI()
         self.eventManager()
         self.addStyledSheet()
         self.show()
@@ -61,14 +62,19 @@ class MasterWindow(QMainWindow):
     def assignProperties(self):
         self.newFileWindow = FileWindow()
         self.outputInfo = ""
+        self.comicSansFontLarger = QFont("Comic Sans MS", 16)
+        self.comicSansFont = QFont("Comic Sans MS", 12)
         return
     
     
     def createMenubar(self):
         self.bar = QMenuBar(self)
         self.fileMenu = QMenu("File")
+        self.fileMenu.setFont(self.comicSansFont)
         self.editMenu = QMenu("Edit")
+        self.editMenu.setFont(self.comicSansFont)
         self.viewMenu = QMenu("View")
+        self.viewMenu.setFont(self.comicSansFont)
         self.bar.addMenu(self.fileMenu)
         self.bar.addMenu(self.editMenu)
         self.bar.addMenu(self.viewMenu)
