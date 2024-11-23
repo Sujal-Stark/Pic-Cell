@@ -22,15 +22,17 @@ class OperationFramework(QWidget):
         self.imageFrames = Masks()
         return
     
-    def signalManager(self, treeChild : QTreeWidgetItem, valuePackage : dict, signalValue : object = None):
+    def signalManager(self, treeChild : QTreeWidgetItem, signalValue : object = None, multivalueOperaion : bool = False):
         self.treeChildItem = treeChild
         parentItem = self.treeChildItem.parent()
         subOperation = self.treeChildItem.text(0)
-        print(len(valuePackage.keys()))
-        if signalValue != None:
-            return self.performAction(parentItem, subOperation, signalValue)
-        elif signalValue == None:
-            return self.singleOperations(parentItem, subOperation)
+        if multivalueOperaion == False:
+            if signalValue != None:
+                return self.performAction(parentItem, subOperation, signalValue)
+            elif signalValue == None:
+                return self.singleOperations(parentItem, subOperation)
+        elif multivalueOperaion:
+            return self.multivalueOperation(subOperation=subOperation, signalValue=signalValue)
         else:
             return
         

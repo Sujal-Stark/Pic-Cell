@@ -68,6 +68,7 @@ class EditingActionManager(QWidget):
         self.newImageObject : QPixmap = None # shows unsaved edits
         self.operationManager = OperationFramework() # framework that connects edit option with GUI
         self.savingRequired = ["Rotate", "Horizontal Flip", "Vertical Flip"] # edit which needs to save automatically
+        self.signalValue = None # stores the current signal value
         self.removeableWidgets = [] # widgets in spectrum and advancement that is needed to be removed
         self.pixmapConnector = PixmapLinker() # pixmap linkedlist variable
         self.customResizeWindow = CustomResizeWindow()
@@ -84,6 +85,15 @@ class EditingActionManager(QWidget):
         self.aspectRatio = 0
         self.toggleHideLeftFlag = True
         self.manualCropSignal = False
+        self.finalEditMeta = {
+            "parent" : "",
+            "child" : "",
+            "signalValue" : "",
+            "color" : (),
+            "multivalue" : False
+        }# stores data for final Edit
+        self.colorVal = ()
+        self.multivalueOperation = False
         return
     
     def createLabels(self):
@@ -220,7 +230,6 @@ class EditingActionManager(QWidget):
             self.editingZoneLayout.addLayout(self.imageViewingPanel, 0, 0)
             self.toggleHideLeftFlag = False
         else:
-            # self.editOptionPanel.setParent(self.editingZoneLayout)
             self.imageViewingPanel.setParent(None)
             self.editableImageField.setFixedSize(self.editableImageField.width() - 200,610)
             self.editingZoneLayout.addLayout(self.editOptionPanel, 0, 0)
@@ -248,6 +257,21 @@ class EditingActionManager(QWidget):
         editOptions.clear()
         return
     
+    # stores all the meta data 
+    def storeMeta(self):
+        if self.editingTreeBody.currentItem().parent():
+            self.finalEditMeta["parent"] = self.editingTreeBody.currentItem().parent().text(0)
+            self.finalEditMeta["child"] = self.editingTreeBody.currentItem().text(0)
+        else:
+            self.finalEditMeta["parent"] = ""
+            self.finalEditMeta["child"] = ""
+        self.finalEditMeta["signalValue"] = self.signalValue
+        self.finalEditMeta["color"] = self.colorVal
+        self.finalEditMeta["multivalue"] = self.multivalueOperation
+        # print(self.finalEditMeta)
+        return
+
+
     def treeBodyItemclicked(self, treeItem : QTreeWidgetItem):
         self.clearAdvancementLayer()
         self.addTreeItems(item = treeItem)
@@ -494,22 +518,26 @@ class EditingActionManager(QWidget):
                         pilImageEdited = self.convertPixMaptoImage(self.imageObject)
                         # signalValue = self
                     else:
-                        pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.valuePackage, self.valuePackage[currentButton1.text()])
+                        self.signalValue = self.valuePackage[currentButton1.text()]
+                        pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.valuePackage[currentButton1.text()])
 
             elif signalValue == None:
-                    pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.valuePackage)
+                    pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem())
 
             elif isinstance(sender, QSlider):
-                self.operationManager.treeChildItem = self.editingTreeBody.currentItem()
                 subOperation = self.editingTreeBody.currentItem().text(0)
                 signalValue = self.modifySignalValueForMultipleSignal(key = sender.objectName(), signal =signalValue)
-                pilImageEdited = self.operationManager.multivalueOperation(subOperation, signalValue)
+                self.signalValue = signalValue
+                self.multivalueOperation = True
+                self.finalEditMeta["multivalue"] = self.multivalueOperation
+                pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.signalValue, self.multivalueOperation)
             
             # Initial edit for slider value operations
             elif isinstance(sender, QTreeWidget):
-                self.operationManager.treeChildItem = self.editingTreeBody.currentItem()
-                subOperation = self.editingTreeBody.currentItem().text(0)
-                pilImageEdited = self.operationManager.multivalueOperation(subOperation, None)
+                self.multivalueOperation = True
+                subOperation = self.editingTreeBody.currentItem()
+                self.finalEditMeta["multivalue"] = self.multivalueOperation
+                pilImageEdited = self.operationManager.signalManager(subOperation, None, self.multivalueOperation)
 
             # conversion and showing image
             self.newImageObject = self.convertImagetoPixMap(pilImage = pilImageEdited)
@@ -528,13 +556,13 @@ class EditingActionManager(QWidget):
             if sender: # if the signal is valid
                 if isinstance(sender, QPushButton):
                     if sender.text() == "Custom":
-                        currentColor = self.createColorPicker() # color choosing
+                        self.colorVal = self.createColorPicker() # color choosing
                         # for color image operation
                         if self.editingTreeBody.currentItem().text(0) in ColorImage.subEditingTree.keys():
                             targetMethod = self.editingTreeBody.currentItem().text(0)
                             parentMethod = self.editingTreeBody.currentItem().parent().text(0)
                             self.operationManager.imageObject = self.convertPixMaptoImage(self.imageObject)
-                            editedPILImage = self.operationManager.provideColor(parentMethod = parentMethod, methodName = targetMethod, givenColor = currentColor)
+                            editedPILImage = self.operationManager.provideColor(parentMethod, targetMethod, self.colorVal)
             # conversion and showing image
             self.newImageObject = self.convertImagetoPixMap(pilImage = editedPILImage)
             self.showPixmap(self.newImageObject) # showing the edited picture
@@ -547,6 +575,7 @@ class EditingActionManager(QWidget):
             targetMethod = self.editingTreeBody.currentItem().text(0) # sub method
             targetParent = self.editingTreeBody.currentItem().parent().text(0) # method
             self.operationManager.imageObject = self.convertPixMaptoImage(self.imageObject)
+            self.colorVal = colorObject.getRgb()
             editedImage = self.operationManager.provideColor(parentMethod = targetParent, methodName = targetMethod, givenColor = colorObject)
             self.newImageObject = self.convertImagetoPixMap(editedImage)
             self.newImageObject = self.overLayPixmapObjects(self.imageObject, self.newImageObject)
@@ -588,7 +617,8 @@ class EditingActionManager(QWidget):
             if self.editingTreeBody.currentItem().text(0) == "Crop":
                 topLeftBand = self.imageForEditLabel.mapTo(self.imageForEditLabel, self.cropRubberBand.geometry().topLeft())
                 rectBand = QRect(topLeftBand, self.cropRubberBand.size())
-                self.newImageObject = self.convertImagetoPixMap(self.frameAdjustment.cropImage(list(rectBand.getCoords())))
+                self.signalValue = list(rectBand.getCoords())
+                self.newImageObject = self.convertImagetoPixMap(self.frameAdjustment.cropImage(self.signalValue))
                 self.cropRubberBand.close()
                 self.showPixmap(self.newImageObject)
             self.imageObject = self.newImageObject
@@ -596,6 +626,12 @@ class EditingActionManager(QWidget):
                 self.linker = self.pixmapConnector.addPixmap(self.linker, self.imageObject)
             else:
                 self.pixmapConnector.head = self.pixmapConnector.addPixmap(self.pixmapConnector.head, self.imageObject)
+            self.storeMeta()
+            self.signalValue = None
+            self.multivalueOperation = False
+            self.colorVal = ()
+            return
+
 
     def showOriginal(self):
         if self.ORIGINALIMAGEOBJECT:
@@ -621,6 +657,7 @@ class EditingActionManager(QWidget):
             self.cropRubberBand.move(a,b)
             self.cropRubberBand.show()
         else:
+            self.cropRubberBand.close()
             self.manualCropSignal = True
         return
 
@@ -638,16 +675,27 @@ class EditingActionManager(QWidget):
             if self.manualCropSignal == False:
                 if self.cropRubberBand.geometry().contains(localPosition):
                     if self.isCornerReached(event.globalPos()):
+                        self.setCursor(Qt.CursorShape.ClosedHandCursor)
                         self.reResizable = True
                         self.currentPosition = event.globalPos()
                     else:
-                        self.isDragging = True
-                        self.currentPosition = event.pos() - self.cropRubberBand.pos()
+                        if not self.cropRubberBand.isVisible():
+                            self.setCursor(Qt.CursorShape.ArrowCursor)
+                            self.isDragging = True
+                            self.currentPosition = event.pos() - self.cropRubberBand.pos()
+                        else:
+                            self.cropRubberBand.close()
+                            self.setCursor(Qt.CursorShape.ArrowCursor)
+                            self.isDragging = True
+                            self.currentPosition = event.pos() - self.cropRubberBand.pos()
+                            self.cropRubberBand.show()
             else:
+                self.setCursor(Qt.CursorShape.CrossCursor)
                 self.currentPosition = self.imageForEditLabel.mapFromGlobal(event.globalPos())
 
     def mouseMoveEvent(self, event : QMouseEvent):
         if self.manualCropSignal:
+            self.cropRubberBand.show()
             mousePos = self.imageForEditLabel.mapFromGlobal(event.globalPos())
             diff = mousePos - self.currentPosition
             self.cropRubberBand.setGeometry(QRect(self.currentPosition, QSize(diff.x(), diff.y())))
@@ -673,6 +721,7 @@ class EditingActionManager(QWidget):
             self.reResizable = False
             self.currentPosition = None
             self.manualCropSignal = False
+            self.setCursor(Qt.CursorShape.ArrowCursor)
     
     def getCustomRotation(self):
         self.clearAdvancementLayer()
