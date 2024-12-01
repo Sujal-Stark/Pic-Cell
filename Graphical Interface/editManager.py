@@ -437,6 +437,8 @@ class EditingActionManager(QWidget):
             self.imageForEditLabel.setText("Edit Your Image here")
             self.clearAdvancementLayer()
             self.clearEditSpectrum()
+            self.linker = None
+            self.pixmapConnector.head = None
             self.editingTreeBody.collapseAll()
             self.imageForEditLabel.show()
             self.cropRubberBand.close()
@@ -590,8 +592,9 @@ class EditingActionManager(QWidget):
             if self.pixmapConnector.head != None and self.firstCallFlag:
                 if self.pixmapConnector.head:
                     self.linker = self.pixmapConnector.head
-                    self.linker = self.linker.nextNode
-                    self.imageObject = self.linker.image
+                    if self.linker.nextNode.image:
+                        self.linker = self.linker.nextNode
+                        self.imageObject = self.linker.image
                     self.showPixmap(self.linker.image)
                     self.firstCallFlag = False
         else:
