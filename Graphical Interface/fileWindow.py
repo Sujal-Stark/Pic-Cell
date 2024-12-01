@@ -3,7 +3,9 @@ from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QLi
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QFont
 from PIL import Image
+from icecream import ic
 import os
+import psutil
 
 class FileWindow(QDialog):
     def __init__(self) -> None:
@@ -12,6 +14,7 @@ class FileWindow(QDialog):
         self.setGeometry(0,0,400,300)
         self.masterLayout = QVBoxLayout(self)
         self.preViewLayout = None
+        ic.disable()
         self.setProperties()
         self.createWidgets()
         self.loadFileWindowUi()
@@ -95,7 +98,7 @@ class FileWindow(QDialog):
         self.windowInnerButtonLayout.addWidget(self.previousButton, alignment = Qt.AlignmentFlag.AlignRight)
 
         self.motherLayout.addWidget(self.fileListWidget)
-        self.fileListWidget.addItems(["Files",R"C:\\", R"D:\\", R"F:\\"])
+        self.fileListWidget.addItems(["Files"] + self.getDiskList())
 
         self.fileOpenerFrame = QFrame()
         self.fileOpenerFrame.setFrameShape(QFrame.Shape.Panel)
@@ -113,7 +116,19 @@ class FileWindow(QDialog):
         if directory not in self.iteratedDirectoryList and directory.endswith("\\"):
             self.iteratedDirectoryList.append(self.currentPathName)
             return
-        
+
+    # finds out the disks in the machine
+    def getDiskList(self) -> list:
+        '''
+        Lists out the available disks in the machine percentage of usage
+        '''
+        disks = psutil.disk_partitions()
+        diskList = []
+        for disk in disks:
+            diskList.append(disk[0])
+        ic(diskList)
+        return diskList
+      
     def refillFileListWidget(self):
         '''
             This funnction is responsible for adding all the folders and the image file names in the file list. This adds the Folders first then it add all the images in the respective directory.
@@ -176,7 +191,7 @@ class FileWindow(QDialog):
             currentIndex = self.iteratedDirectoryList.index(self.currentPathName)
             if currentIndex == 0:
                 self.fileListWidget.clear()
-                self.fileListWidget.addItems(["Files",R"C:\\", R"D:\\", R"F:\\"])
+                self.fileListWidget.addItems(["Files"] + self.getDiskList())
                 return "Reached to the primary directory"
             elif currentIndex > 0:
                 self.currentPathName = self.iteratedDirectoryList[currentIndex-1]
