@@ -6,6 +6,7 @@ from fileWindow import FileWindow
 from threading import Thread
 from editManager import EditingActionManager
 from PyQt5.QtGui import QFont
+from icecream import ic
 import os
 
 class MasterWindow(QMainWindow):
@@ -42,6 +43,7 @@ class MasterWindow(QMainWindow):
     
     def eventManager(self):
         self.newFileWindow.fileOpenButton.clicked.connect(self.openImageFromMainWindow)
+        self.openFile.triggered.connect(self.createSeondWindow)
         self.closeFile.triggered.connect(self.closeImageObject)
         self.loadOtherImages.triggered.connect(self.connectImageGridWithFiles)
         self.saveImage.triggered.connect(self.tab2.saveImageInMachine)
@@ -70,10 +72,70 @@ class MasterWindow(QMainWindow):
     def createMenubar(self):
         self.bar = QMenuBar(self)
         self.fileMenu = QMenu("File")
+        self.fileMenu.setStyleSheet(
+            """
+                QMenu {
+                    background-color : #2d0273;
+                    font-size: 14px;
+                    color: #ffffff;
+                    padding : 2px;
+                    border-radius : 10px;
+                }
+                QMenu::item:selected {
+                    background-color: #4a90e2;
+                    color: black
+                }
+                QMenu::separator {
+                    height: 1px;
+                    background: #5a5a5a;
+                    margin: 5px;
+                }
+            """
+        )
         self.fileMenu.setFont(self.comicSansFont)
         self.editMenu = QMenu("Edit")
+        self.editMenu.setStyleSheet(
+            """
+                QMenu {
+                    background-color : #2d0273;
+                    font-size: 14px;
+                    color: #ffffff;
+                    padding : 2px;
+                    border-radius : 10px;
+                }
+                QMenu::item:selected {
+                    background-color: #4a90e2;
+                    color: black
+                }
+                QMenu::separator {
+                    height: 1px;
+                    background: #5a5a5a;
+                    margin: 5px;
+                }
+            """
+        )
         self.editMenu.setFont(self.comicSansFont)
         self.viewMenu = QMenu("View")
+        self.viewMenu.setStyleSheet(
+            """
+                QMenu {
+                    background-color : #2d0273;
+                    font-size: 14px;
+                    color: #ffffff;
+                    padding : 2px;
+                    border-radius : 10px;
+                }
+                QMenu::item:selected {
+                    background-color: #4a90e2;
+                    color: black
+                }
+                QMenu::separator {
+                    height: 1px;
+                    background: #5a5a5a;
+                    margin: 5px;
+                }
+            """
+        )
         self.viewMenu.setFont(self.comicSansFont)
         self.bar.addMenu(self.fileMenu)
         self.bar.addMenu(self.editMenu)
@@ -81,7 +143,7 @@ class MasterWindow(QMainWindow):
 
         self.openFile = QAction("Open", self)
         self.openFile.setShortcut("ctrl+o")
-        self.openFile.triggered.connect(self.createSeondWindow)
+        
         self.closeFile = QAction("Close", self)
         self.closeFile.setShortcut("ctrl+w")
         self.loadOtherImages = QAction("Load Other Images", self)
@@ -89,7 +151,11 @@ class MasterWindow(QMainWindow):
         self.saveImage = QAction("Save", self)
         self.saveImage.setShortcut("ctrl+s")
 
-        self.fileMenu.addActions([self.openFile, self.closeFile, self.loadOtherImages, self.saveImage])
+        self.fileMenu.addActions([self.openFile, self.closeFile])
+        self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.loadOtherImages)
+        self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.saveImage)
 
         self.undoMethod = QAction("Undo", self)
         self.undoMethod.setShortcut("ctrl+z")
@@ -110,7 +176,11 @@ class MasterWindow(QMainWindow):
         self.toggleHideLeftBar = QAction("Hide left bar(Toggle)", self)
         self.toggleHideLeftBar.setShortcut(Qt.Key.Key_F1)
         
-        self.viewMenu.addActions([self.zoomInOption, self.zoomOutOption, self.OriginalSize, self.theme, self.toggleHideLeftBar])
+        self.viewMenu.addActions([self.zoomInOption, self.zoomOutOption])
+        self.viewMenu.addSeparator()
+        self.viewMenu.addAction(self.OriginalSize)
+        self.viewMenu.addSeparator()
+        self.viewMenu.addActions([self.theme, self.toggleHideLeftBar])
         self.setMenuBar(self.bar)
         return
     
