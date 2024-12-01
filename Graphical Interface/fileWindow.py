@@ -19,7 +19,9 @@ class FileWindow(QDialog):
         self.createWidgets()
         self.loadFileWindowUi()
         self.createResponse()
-        self.addStyleSheet()
+        qss = self.readQssFile(r"Graphical Interface\fileWindow.qss")
+        if qss != "":
+            self.setStyleSheet(qss)
         return
     
     def createResponse(self):
@@ -273,78 +275,12 @@ class FileWindow(QDialog):
             self.previewHolderLabel.show()
         return
     
-    def addStyleSheet(self):
-        self.setStyleSheet(
-            """
-            QWidget {
-                background-color: #18122b;
-                border-radius: 5px;
-            }
-            QPushButton {
-                border: 1px outset #4f4e4f;
-                background-color: #190140;
-                color: white;
-                border-radius: 5px;
-            }
-            QPushButton:hover {
-                border: 2px outset #4f4e50;
-                background-color: #280180;
-                color: white;
-                border-radius: 5px;
-            }
-            QFrame {
-                border: 1px outset #4f4e4f;
-                background-color: #020f17;
-                border-radius: 5px;
-            }
-            QFrame:hover {
-                border: 2px outset #4f4e50;
-                background-color: #020f1c;
-                border-radius: 5px;
-            }
-            QLabel {
-                border: 1px outset #4f4e4f;
-                background-color : #190140;
-                font-size: 12px;
-                color: #ffffff;
-                border-radius : 5px;
-            }
-            QLabel:hover {
-                border: 2px outset #4f4e50;
-                background-color : #280180;
-                font-size: 12px;
-                color: #ffffff;
-                border-radius : 5px;
-            }
-            QLineEdit{
-                background-color : #ffffff;
-                color : 000000;
-                font : 12px;
-            }
-            QListWidget{
-                border: 1px outset #4f4e4f;
-                color : #ffffff;
-                font : 14px;
-                background-color: #020f1c;
-                border-radius: 10px;
-                padding : 1px;
-            }
-            QListWidget:hover{
-                border: 2px outset #4f4e50;
-                color : #ffffff;
-                font : 14px;
-                background-color: #020f1c;
-                border-radius: 10px;
-                padding : 1px;
-            }
-            QComboBox{
-                border: 1px outset #4f4e4f;
-                background-color : #ffffff;
-                color : #000000;
-                font : 12px;
-            }
-            """
-        )
+    def readQssFile(self, qssFile):
+        try:
+            with open(qssFile, 'r') as file:
+                return file.read()
+        except Exception:
+            return ""
     pass
     
 if __name__ == '__main__':

@@ -12,7 +12,9 @@ class GalleryWindow(QWidget):
         self.galleryMasterLayout = QHBoxLayout(self)
         self.galleryWindowProperty()
         self.loadGalleryUI()
-        self.addStyleSheet()
+        qss = self.windowView.readQssFile(r"Graphical Interface\galleryQss.qss")
+        if(qss != ""):
+            self.setStyleSheet(qss)
         return
     
     def galleryWindowProperty(self):
@@ -252,47 +254,6 @@ class GalleryWindow(QWidget):
                 return "Succeed"
             except ValueError:
                 return "Unable to open This Image"
-    
-    def addStyleSheet(self):
-        self.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #2b0070;
-                color: white;
-                border-radius: 10px;
-                padding: 5px;
-            }
-            QFrame {
-                border: 1px outset #4f4e4f;
-                background-color: #020f17;
-                border-radius: 15px;
-                padding : 1px;
-            }
-            QFrame:hover {
-                border: 2px outset #4f4e50;
-                background-color: #020f1c;
-                border-radius: 15px;
-                padding : 1px;
-            }
-            QLabel {
-                border: 1px outset #4f4e4f;
-                background-color : #190140;
-                font-size: 12px;
-                color: #ffffff;
-                padding : 2px;
-                border-radius : 10px;
-            }
-            QLabel:hover {
-                border: 2px outset #4f4e50;
-                background-color : #280180;
-                font-size: 12px;
-                color: #ffffff;
-                padding : 2px;
-                border-radius : 10px;
-            }
-            """
-        )
-    
     pass
 
 class ClickableLabel(QLabel):

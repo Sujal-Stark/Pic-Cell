@@ -333,7 +333,13 @@ class MasterWindow(QMainWindow):
             }
             QFrame {
                 border: 1px outset #4f4e4f;
-                background-color: #01031c;
+                background-color: #020f17;
+                padding : 2px;
+            }
+            QFrame:hover {
+                border: 2px outset #4f4e50;
+                background-color: #020f1c;
+                padding : 2px;
             }
             QLabel {
                 background-color : #190140;
