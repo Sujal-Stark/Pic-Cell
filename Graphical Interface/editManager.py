@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPus
 from PyQt5.QtCore import Qt, QTimer, QPoint, QRect, QSize
 from PyQt5.QtGui import QColor, QFont
 from threading import Thread
+from icecream import ic
 from PIL import Image
 import sys, os
 
@@ -452,16 +453,20 @@ class EditingActionManager(QWidget):
         return
     
     def saveImage(self):
-        fileName = self.filewinowForSave.ImageFileNameEditor.text()
-        extension = self.filewinowForSave.fileExtensionListWidget.currentText()
-        directory = self.filewinowForSave.currentPathName
+        '''takes input like user selected name and extension and saves it in the machine in the chosen directory'''
+        fileName = self.filewinowForSave.ImageFileNameEditor.text() # new file name set by user
+        extension = self.filewinowForSave.fileExtensionListWidget.currentText() # user chosen extension
+        directory = self.filewinowForSave.currentPathName # routed path to store the image
         if directory:
-            fullPath = os.path.join(directory, (fileName+extension))
-            if self.imageObject:
+            if fileName+extension in os.listdir(directory): # if the name name and extension exist before
+                fullPath = os.path.join(directory, (fileName + "_EDITED_" + extension))
+            else:
+                fullPath = os.path.join(directory, (fileName+extension))
+            if self.imageObject: # fina check if the image is not null
                 img = self.convertPixMaptoImage(self.imageObject)
-                img = img.convert('RGB')
+                img = img.convert('RGB') # image is stores at RGB
                 img.save(fullPath)
-                self.filewinowForSave.close()
+                self.filewinowForSave.close() # closing the window
         return
     def convertPixMaptoImage(self, imageObjectEditable : QPixmap) -> Image.Image:
         if self.imageObject:
@@ -594,13 +599,13 @@ class EditingActionManager(QWidget):
             if self.pixmapConnector.head != None and self.firstCallFlag:
                 if self.pixmapConnector.head:
                     self.linker = self.pixmapConnector.head
-                    if self.linker.nextNode.image:
+                    if self.linker.nextNode and self.linker.nextNode.image:
                         self.linker = self.linker.nextNode
                         self.imageObject = self.linker.image
                     self.showPixmap(self.linker.image)
                     self.firstCallFlag = False
         else:
-            if self.linker.nextNode:
+            if self.linker.nextNode and self.linker.image:
                 self.linker = self.linker.nextNode
                 self.imageObject = self.linker.image
                 self.showPixmap(self.linker.image)

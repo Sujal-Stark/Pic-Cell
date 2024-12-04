@@ -12,20 +12,6 @@ QPushButton:hover {
         border-radius: 10px;
         padding: 5px
 }
-QLabel {
-        background-color: #190140;
-        font-size: 12px;
-        color: #ffffff;
-        padding: 1px;
-        border-radius: 10px
-}
-
-QLabel:hover {
-        background-color: #280180;
-        color: #ffffff;
-        padding: 2px;
-        border-radius: 10px
-}
 QFrame {
         border: 1px outset #4f4e4f;
         background-color: #020f17;

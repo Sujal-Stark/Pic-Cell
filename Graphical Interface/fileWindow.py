@@ -14,7 +14,7 @@ class FileWindow(QDialog):
         self.setGeometry(0,0,400,300)
         self.masterLayout = QVBoxLayout(self)
         self.preViewLayout = None
-        ic.disable()
+        # ic.disable()
         self.setProperties()
         self.createWidgets()
         self.loadFileWindowUi()
@@ -151,7 +151,7 @@ class FileWindow(QDialog):
             self.iamgeObjectListPath.clear() # creates the previous directory Image object list
 
             for path in allPaths: # stores the image Files
-                for extension in [".png", ".jpeg", ".jfif", ".jpg"]:
+                for extension in [".png", ".jpeg", ".jfif", ".jpg", ".bmp"]:
                     if path.endswith(extension):
                         self.fileListWidget.addItem(path)
                         self.iamgeObjectListPath.append(path)
@@ -167,7 +167,7 @@ class FileWindow(QDialog):
                 self.currentPathName = os.path.join(self.currentPathName,currentText)
                 self.refillFileListWidget()
             else:
-                if currentText.split(".")[-1] in ["png", "jpeg", "jfif", "jpg"]:
+                if currentText.split(".")[-1] in ["png", "jpeg", "jfif", "jpg", "bmp"]:
                     self.iamgeObjectPath = os.path.join(self.currentPathName, currentText)
                     self.ImageFileNameEditor.setText(currentText)
                     self.showPreviewPixmap()
@@ -234,7 +234,7 @@ class FileWindow(QDialog):
             self.fileOpenButton.deleteLater()
             self.fileOpenButton = None
             self.fileExtensionListWidget.setFixedWidth(self.ImageFileNameEditor.width())
-            self.fileExtensionListWidget.addItems([".png", ".jpeg", ".jfif", ".jpg"])
+            self.fileExtensionListWidget.addItems([".png", ".jpeg", ".jfif", ".jpg",  ".gif", ".bmp", ".ppm", ".tiff"])
             self.fileExtenstionsetterLayout.addWidget(self.fileExtensionListWidget, alignment = Qt.AlignmentFlag.AlignCenter)
             self.fileSaveAndOpenLayout.addLayout(self.fileExtenstionsetterLayout)
             self.setWindowTitle("Save image in machine")
