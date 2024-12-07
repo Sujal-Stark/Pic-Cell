@@ -7,15 +7,18 @@
     <div class="poster">
         <h1>Pic cell</h1>
         <h4>Image editng is now Easy</h4>
-        <h2>How our app interface looks like</h2>
-        <a href="https://ibb.co/vvXsQBv"><img src="https://i.ibb.co/cXYbCvX/Screenshot-205.png" alt="Screenshot-205" border="0"></a><br /><a target='_blank' </a><br />
+        <h2>Gallery</h2>
+        <a href="https://ibb.co/vqQFqcf"><img src="https://i.ibb.co/zx7MxmC/Screenshot-46.png" alt="Screenshot-46" border="0"></a><br/>
     </div>
     <div class="Editor">
-        <h2>Editing Interface</h2>
-        <a href="https://ibb.co/TYd3nBh"><img src="https://i.ibb.co/7jLmTJy/App-Editing-Features.png" alt="App-Editing-Features" border="0"></a>
+        <h2>Editor</h2>
+        <a href="https://ibb.co/LRXcDmd"><img src="https://i.ibb.co/qj3cLKY/Screenshot-47.png" alt="Screenshot-47" border="0"></a></br/>
+        <hr>
+        <a href="https://imgbb.com/"><img src="https://i.ibb.co/5F6Hmxm/Screenshot-2024-12-07-225932.png" alt="Screenshot-2024-12-07-225932" border="0" width = "400px" height = "300px"></a>
+        <a href="https://imgbb.com/"><img src="https://i.ibb.co/WPcnx7c/Screenshot-2024-12-07-230020.png" alt="Screenshot-2024-12-07-230020" border="0"></a><br /><a target='_blank' href='https://imgbb.com/' width = "400px" height = "320px"></a>
     </div>
     <div class = "Edits">
-        <h2>Edits done by this app</h2>
+        <h2>Edited Pictures</h2>
         <a href="https://imgbb.com/"><img src="https://i.ibb.co/DrrS0pc/Ironman-Golden-Edit.png" alt="Ironman-Golden-Edit" border="0"></a>
     </div>
 </body>
