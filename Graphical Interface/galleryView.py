@@ -32,6 +32,7 @@ class GalleryWindow(QWidget):
         self.originalSize = (1050, 600)
         self.comicSansFontLarger = QFont("Comic Sans MS", 16)
         self.comicSansFont = QFont("Comic Sans MS", 12)
+        self.gridBusy = False # stops multiple times over loading of grid 
         return
 
     def loadGalleryUI(self):
@@ -197,6 +198,7 @@ class GalleryWindow(QWidget):
             return self.emptyImageGrid()
 
     def addImagesToGrid(self):
+        self.gridBusy = True
         if self.isGridEmpty:
             self.createImageLabel()
         else:
@@ -208,7 +210,7 @@ class GalleryWindow(QWidget):
                 i += 1
             self.imageGrid.addWidget(image, i, j)
             j += 1
-        return
+        return False
     
     def closeImageFromGallery(self):
         if self.imageToShow != None:

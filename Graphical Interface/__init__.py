@@ -262,10 +262,12 @@ class MasterWindow(QMainWindow):
         return
     
     def showGridObjects(self):
-            self.methodInfo.setText("Loading... Please Wait")
-            newThread = Thread(target = self.tab1.addImagesToGrid, args=())
-            newThread.start()
-            self.methodInfo.setText("Loaded Successfully")
+            if self.tab1.gridBusy == False:
+                self.methodInfo.setText("Loading... Please Wait")
+                self.tab1.gridBusy = self.tab1.addImagesToGrid()
+                self.methodInfo.setText("Loaded Successfully")
+            else:
+                self.methodInfo.setText("Grid is busy")
             return
 
     def openGalleryImage(self):
