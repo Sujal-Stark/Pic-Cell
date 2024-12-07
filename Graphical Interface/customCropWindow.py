@@ -14,7 +14,10 @@ class CustomResizeWindow(QWidget):
         self.image = None
         self.createUI()
         self.createResponse()
-        self.addStyleSheet()
+        qss = self.readQssFile(r"Graphical Interface\customCropWindow.qss")
+        if qss != "":
+            self.setStyleSheet(qss)
+        return
         return
     
     def setWidthHeightOptions(self):
@@ -75,9 +78,37 @@ class CustomResizeWindow(QWidget):
     def createComBoBox(self):
         self.widthComboBox = QComboBox()
         self.widthComboBox.setObjectName("widthComboBox")
+        self.widthComboBox.setFixedWidth(65)
+        self.widthComboBox.setStyleSheet(
+            """
+            QAbstractItemView{
+                border: 2px outset #4f4e50;
+                background-color : #190140;
+                color : #ffffff;
+                font : 12px;
+            }
+            QScrollBar:vertical{
+                width: 10px;
+            }
+            """
+        )
 
         self.heightComboBox = QComboBox()
         self.heightComboBox.setObjectName("heightComboBox")
+        self.heightComboBox.setFixedWidth(65)
+        self.heightComboBox.setStyleSheet(
+            """
+            QAbstractItemView{
+                border: 2px outset #4f4e50;
+                background-color : #190140;
+                color : #ffffff;
+                font : 12px;
+            }
+             QScrollBar:vertical{
+                width: 10px;
+            }
+            """
+        )
         return
     
     def createButtons(self):
@@ -159,73 +190,16 @@ class CustomResizeWindow(QWidget):
     def continueAction(self):
         return self.getResizedImage(self.setOutput())
     
-    def addStyleSheet(self):
-        self.setStyleSheet(
-            """
-            QWidget {
-                background-color: #18122b;
-                border-radius: 0px;
-            }
-            QPushButton {
-                border: 1px outset #4f4e4f;
-                background-color: #190140;
-                color: white;
-                border-radius: 10px;
-                padding: 5px;
-            }
-            QPushButton:hover {
-                border: 1px outset #4f4e4f;
-                background-color: #280180;
-                color: white;
-                border-radius: 10px;
-                padding: 5px;
-            }
-            QFrame {
-                border: 2px outset #4f4e4f;
-                background-color: #020f17;
-                border-radius: 10px;
-                padding : 1px;
-            }
-            QFrame:hover {
-                border: 2px outset #4f4e4f;
-                background-color: #020f1c;
-                border-radius: 10px;
-                padding : 1px;
-            }
-            QLabel {
-                background-color : #190140;
-                font-size: 12px;
-                color: #ffffff;
-                padding : 2px;
-                border-radius : 5px;
-            }
-            QLabel:hover {
-                background-color : #280180;
-                font-size: 12px;
-                color: #ffffff;
-                padding : 2px;
-                border-radius : 5px;
-            }
-            QLineEdit{
-                background-color : #ffffff;
-                color : 000000;
-                font : 12px;
-            }
-            QComboBox{
-                background-color : #ffffff;
-                color : #000000;
-                font : 12px;
-            }
-            QComboBox : QAbstractItemView {
-                background-color : #ffffff;
-                color : #000000;
-                font : 12px;
-            }
-            """
-        )
+    def readQssFile(self, qssFile):
+        try:
+            with open(qssFile, 'r') as file:
+                return file.read()
+        except Exception:
+            return ""
+    pass
     
 if __name__ == '__main__':
     app = QApplication([])
-    resizeWindow = CustomResizeWindow(None, Image.open(R"C:\Users\SUJAL KHAN\Downloads\Avengers.png"))
+    resizeWindow = CustomResizeWindow()
     resizeWindow.show()
     app.exec_()
