@@ -16,6 +16,8 @@
         <hr>
         <a href="https://imgbb.com/"><img src="https://i.ibb.co/5F6Hmxm/Screenshot-2024-12-07-225932.png" alt="Screenshot-2024-12-07-225932" border="0" width = "400px" height = "300px"></a>
         <a href="https://imgbb.com/"><img src="https://i.ibb.co/WPcnx7c/Screenshot-2024-12-07-230020.png" alt="Screenshot-2024-12-07-230020" border="0"></a><br /><a target='_blank' href='https://imgbb.com/' width = "400px" height = "320px"></a>
+        <br>
+        <a href="https://imgbb.com/"><img src="https://i.ibb.co/VgM7Jrz/Screenshot-2024-12-08-000316.png" alt="Screenshot-2024-12-08-000316" border="0" width = "600px" height = "320px"></a>
     </div>
     <div class = "Edits">
         <h2>Edited Pictures</h2>
