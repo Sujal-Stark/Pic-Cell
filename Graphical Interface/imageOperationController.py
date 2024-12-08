@@ -5,12 +5,14 @@ from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.imageColorEnhancer import ColorImage
 from ImageManupulation.deformer import ImageDeformer
 from ImageManupulation.maskGenerator import Masks
+from icecream import ic
 
 from PIL import Image
 from PyQt5.QtWidgets import QWidget, QTreeWidgetItem
 from PyQt5.QtGui import QColor
 
 class OperationFramework(QWidget):
+    ORIGINALIMAGE : Image.Image = None # real image value to get set
     def __init__(self) -> None:
         super().__init__()
         self.treeChildItem : QTreeWidgetItem
@@ -32,10 +34,42 @@ class OperationFramework(QWidget):
             elif signalValue == None:
                 return self.singleOperations(parentItem, subOperation)
         elif multivalueOperaion:
-            return self.multivalueOperation(subOperation=subOperation, signalValue=signalValue)
+            return self.multivalueOperation(parentWidget = parentItem, subOperation=subOperation, signalValue=signalValue)
         else:
             return
-        
+    
+    def editfromParsedData(self, valueHashList : dict = None):
+        '''perform edits only on original image so that the resolution of the image may become intact'''
+        image = self.ORIGINALIMAGE # copying the original image to image
+        parent = valueHashList["parent"]
+        subEdit = valueHashList["child"]
+        signal = valueHashList["signalValue"]
+        color = valueHashList["color"]
+        if valueHashList["multivalue"]==False and color is None: # single value operations and no color access
+            if signal != None: # signal value 1
+                image = self.performAction(parentItem = parent, subOperation = subEdit, signalValue = signal)
+            elif signal == None: # signal value 0
+                if(parent.text(0) == "Frames"): # if frames are used then use overlay
+                    overlayImage = self.singleOperations(parentItem = parent, subOperation = subEdit)
+                    image = Image.alpha_composite(image.convert("RGBA"), overlayImage.resize(image.size).convert("RGBA"))
+                else: # other non value operations
+                    image = self.singleOperations(parentItem = parent, subOperation = subEdit)
+        elif valueHashList["multivalue"]  and color is None: # multivalue operations and no color access
+            if(parent.text(0) == "Frames"): # if frames are used then use loverlay
+                overlay = self.multivalueOperation(parentWidget = parent, subOperation = subEdit, signalValue = signal)
+                image = Image.alpha_composite(image.convert("RGBA"), overlay.resize(image.size).convert("RGBA"))
+            else: # other multivalue operations
+                image = self.multivalueOperation(parentWidget = parent, subOperation = subEdit, signalValue = signal)
+        elif isinstance(color, QColor): # QColor objects are used
+            if(parent.text(0)=="Frames"): # if frames are used then use overlay
+                colorOverlay = self.provideColor(parent.text(0), subEdit, color)
+                image = Image.alpha_composite(image.convert("RGBA"), colorOverlay.resize(image.size).convert("RGBA"))
+            else: # other operations
+                image = self.provideColor(parentMethod = parent.text(0), methodName = subEdit, givenColor = color)
+        if(image):
+            self.ORIGINALIMAGE = image
+        return self.ORIGINALIMAGE
+    
     def performAction(self, parentItem : QTreeWidgetItem, subOperation : str, signalValue:object) -> Image.Image:
         if parentItem:
             if parentItem.text(0) == "Adjust":
@@ -103,14 +137,13 @@ class OperationFramework(QWidget):
                     return self.imageFrames.style_eight_mask()
         return self.imageObject
     
-    def multivalueOperation(self, subOperation : str, signalValue:object):
-        parentItem = self.treeChildItem.parent()
-        if parentItem:
-            if parentItem.text(0) == "Adjust":
+    def multivalueOperation(self, parentWidget : QTreeWidgetItem, subOperation : str, signalValue:object):
+        if parentWidget:
+            if parentWidget.text(0) == "Adjust":
                 self.fileAdjustment.getImageObject(self.imageObject)
                 if subOperation == "Rotate":
                     return self.fileAdjustment.imageRotate(rotationAngle=signalValue)
-            elif parentItem.text(0) == "Filters":
+            elif parentWidget.text(0) == "Filters":
                 self.imageFiltering.getImageObject(self.imageObject)
                 if subOperation == "Auto contrast":
                     if signalValue != None:
@@ -151,7 +184,7 @@ class OperationFramework(QWidget):
                             return self.imageFiltering.imageUnsharpMask(threshold_choice= signalValue[keyList[0]])
                     else:
                         return self.imageFiltering.imageUnsharpMask()
-            if parentItem.text(0) == "Deform Image":
+            if parentWidget.text(0) == "Deform Image":
                 self.imageDeforming.getImageObject(self.imageObject)
                 if subOperation == "Horizontal Split":
                     if signalValue != None:
@@ -187,7 +220,7 @@ class OperationFramework(QWidget):
                         return self.imageDeforming.sinCurve(cycle = signalValue)
                     else:
                         return self.imageDeforming.sinCurve()
-            if parentItem.text(0) == "Frames":
+            if parentWidget.text(0) == "Frames":
                 self.imageFrames.getImageObject(self.imageObject)
                 if subOperation == "Rectangle Layer":
                     if signalValue != None:
@@ -228,6 +261,7 @@ class OperationFramework(QWidget):
     
     def provideColor(self, parentMethod: str, methodName : str, givenColor : QColor):
         if parentMethod == "Color Enhance":
+            ic(givenColor)
             self.imageColoring.getImageObject(self.imageObject)
             keyMethods = list(self.imageColoring.subEditingTree.keys())
             if methodName == keyMethods[0]:
@@ -239,6 +273,7 @@ class OperationFramework(QWidget):
             return self.imageObject
         
         elif parentMethod == "Frames":
+            ic(givenColor)
             customColor = (givenColor.red(), givenColor.green(), givenColor.blue(), givenColor.alpha())
             self.imageFrames.getImageObject(self.imageObject)
             keyMethods = list(self.imageFrames.subEditingTree.keys())

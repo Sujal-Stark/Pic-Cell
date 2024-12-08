@@ -68,6 +68,7 @@ class EditingActionManager(QWidget):
         self.valuePackage = {} # stores the edit option in edit spectrum and advancement Layout
         self.imageObject : QPixmap = None # Qpixmap object that is used everywhere
         self.ORIGINALIMAGEOBJECT = None # Qpixmap object that holds the original image
+        self.IMAGETOSAVE = None # does real time edit on final image
         self.newImageObject : QPixmap = None # shows unsaved edits
         self.operationManager = OperationFramework() # framework that connects edit option with GUI
         self.savingRequired = ["Rotate", "Horizontal Flip", "Vertical Flip"] # edit which needs to save automatically
@@ -89,13 +90,13 @@ class EditingActionManager(QWidget):
         self.toggleHideLeftFlag = True
         self.manualCropSignal = False
         self.finalEditMeta = {
-            "parent" : "",
+            "parent" : None,
             "child" : "",
             "signalValue" : "",
             "color" : (),
             "multivalue" : False
         }# stores data for final Edit
-        self.colorVal = ()
+        self.colorVal : QColor = None
         self.multivalueOperation = False
         return
     
@@ -263,15 +264,14 @@ class EditingActionManager(QWidget):
     # stores all the meta data 
     def storeMeta(self):
         if self.editingTreeBody.currentItem().parent():
-            self.finalEditMeta["parent"] = self.editingTreeBody.currentItem().parent().text(0)
+            self.finalEditMeta["parent"] = self.editingTreeBody.currentItem().parent()
             self.finalEditMeta["child"] = self.editingTreeBody.currentItem().text(0)
         else:
-            self.finalEditMeta["parent"] = ""
-            self.finalEditMeta["child"] = ""
+            self.finalEditMeta["parent"] = None
+            self.finalEditMeta["child"] = self.editingTreeBody.currentItem().text(0)
         self.finalEditMeta["signalValue"] = self.signalValue
         self.finalEditMeta["color"] = self.colorVal
         self.finalEditMeta["multivalue"] = self.multivalueOperation
-        # print(self.finalEditMeta)
         return
 
 
@@ -418,10 +418,12 @@ class EditingActionManager(QWidget):
         if self.imageToEdit != "":
             self.imageSize = self.ORIGINALSIZE
             self.imageObject = QPixmap(self.imageToEdit)
+            self.IMAGETOSAVE = Image.open(self.imageToEdit)
+            self.operationManager.ORIGINALIMAGE = self.IMAGETOSAVE
             self.imageForEditLabel.hide()
             self.imageObject = self.imageObject.scaled(self.imageSize[0], self.imageSize[1], aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
             self.ORIGINALIMAGEOBJECT = self.imageObject
-            self.pixmapConnector.createhead(self.imageObject)
+            self.pixmapConnector.createPixmappixmapHead(self.imageObject)
             self.firstCallFlag = True
             self.imageForEditLabel.setFixedSize(self.imageObject.width(), self.imageObject.height())
             self.imageForEditLabel.setPixmap(self.imageObject)
@@ -441,7 +443,7 @@ class EditingActionManager(QWidget):
             self.clearAdvancementLayer()
             self.clearEditSpectrum()
             self.linker = None
-            self.pixmapConnector.head = None
+            self.pixmapConnector.pixmapHead = None
             self.editingTreeBody.collapseAll()
             self.imageForEditLabel.show()
             self.cropRubberBand.close()
@@ -462,29 +464,34 @@ class EditingActionManager(QWidget):
                 fullPath = os.path.join(directory, (fileName + "_EDITED_" + extension))
             else:
                 fullPath = os.path.join(directory, (fileName+extension))
-            if self.imageObject: # fina check if the image is not null
-                img = self.convertPixMaptoImage(self.imageObject)
-                img = img.convert('RGB') # image is stores at RGB
-                img.save(fullPath)
+            if self.IMAGETOSAVE: # fina check if the image is not null
+                self.IMAGETOSAVE.convert('RGB').save(fullPath) # image is stores as RGB
+                self.IMAGETOSAVE = None
                 self.filewinowForSave.close() # closing the window
         return
+    
     def convertPixMaptoImage(self, imageObjectEditable : QPixmap) -> Image.Image:
+        '''convert's a QPixMap Image object into PIL image object'''
         if self.imageObject:
-            qImage = imageObjectEditable.toImage()
-            qImage = qImage.convertToFormat(QImage.Format.Format_RGBA8888)
-            width, height = qImage.width(), qImage.height()
-            imageData = qImage.constBits().asstring(width * height * 4)
-            return Image.frombytes("RGBA", (width, height), imageData, "raw", "RGBA", 0, 1)
-        return
+            try:
+                qImage = imageObjectEditable.toImage()
+                qImage = qImage.convertToFormat(QImage.Format.Format_RGBA8888)
+                width, height = qImage.width(), qImage.height()
+                imageData = qImage.constBits().asstring(width * height * 4)
+                return Image.frombytes("RGBA", (width, height), imageData, "raw", "RGBA", 0, 1)
+            except Exception:
+                return None
+        return None
     
     def convertImagetoPixMap(self, pilImage : Image.Image) -> str:
         try:
-            data = pilImage.convert("RGBA").tobytes("raw", "RGBA")
-            width, height = pilImage.size
-            qImage = QImage(data, width, height, QImage.Format.Format_RGBA8888)
-            self.newImageObject = QPixmap.fromImage(qImage)
-        except MemoryError:
-            return "Huge size of image"
+            if pilImage:
+                data = pilImage.convert("RGBA").tobytes("raw", "RGBA")
+                width, height = pilImage.size
+                qImage = QImage(data, width, height, QImage.Format.Format_RGBA8888)
+                self.newImageObject = QPixmap.fromImage(qImage)
+        except Exception:
+            return self.imageObject
         return self.newImageObject
     
     def overLayPixmapObjects(self, basePixmap : QPixmap, overLayPixmap : QPixmap) -> QPixmap:
@@ -500,15 +507,18 @@ class EditingActionManager(QWidget):
             self.customResizeWindow.getImageObject(self.convertPixMaptoImage(self.imageObject))
             self.customResizeWindow.show()
             return
-        
-    def showPixmapFromResizeWindow(self):
+
+    # shows the pixmap through showPixmap method after getting resized from rezise window    
+    def showPixmapFromResizeWindow(self) -> None:
+        '''Get's a pil image from customResizeWindow and shows after converting it into Pixmap'''
         if self.imageObject:
             editedPILImage = self.customResizeWindow.continueAction()
             if isinstance(editedPILImage, Image.Image):
                 self.newImageObject = self.convertImagetoPixMap(editedPILImage)
                 self.showPixmap(self.newImageObject)
+        return
 
-
+    # get's an signal value process it and perform multiple image operations
     def performImageOperation(self, signalValue : object = None):
         if self.editingTreeBody.currentItem() != None and self.imageObject != None:
             currentButton1 : QPushButton = self.innerEditSpectrumLayout.sender() # operaional button
@@ -518,14 +528,13 @@ class EditingActionManager(QWidget):
             if self.linker != None:
                 self.linker.previousNode = None
 
-            sender = self.sender()
+            sender = self.sender() # QButton or QTeeWigetItem or QSlider
             if isinstance(sender, QPushButton):
                 # invoking operation manager to perform editng
                 if len(self.valuePackage.keys()) > 0:
                     if self.editingTreeBody.currentItem().text(0) == "Crop":
                         self.getCropDimention(self.valuePackage[currentButton1.text()], sender.text())
                         pilImageEdited = self.convertPixMaptoImage(self.imageObject)
-                        # signalValue = self
                     else:
                         self.signalValue = self.valuePackage[currentButton1.text()]
                         pilImageEdited = self.operationManager.signalManager(self.editingTreeBody.currentItem(), self.valuePackage[currentButton1.text()])
@@ -583,8 +592,8 @@ class EditingActionManager(QWidget):
         if self.editingTreeBody.currentItem().text(0) in Masks.subEditingTree.keys():
             targetMethod = self.editingTreeBody.currentItem().text(0) # sub method
             targetParent = self.editingTreeBody.currentItem().parent().text(0) # method
+            self.colorVal = colorObject
             self.operationManager.imageObject = self.convertPixMaptoImage(self.imageObject)
-            self.colorVal = colorObject.getRgb()
             editedImage = self.operationManager.provideColor(parentMethod = targetParent, methodName = targetMethod, givenColor = colorObject)
             self.newImageObject = self.convertImagetoPixMap(editedImage)
             self.newImageObject = self.overLayPixmapObjects(self.imageObject, self.newImageObject)
@@ -595,10 +604,10 @@ class EditingActionManager(QWidget):
         if self.imageObject == None:
             return
         if self.linker == None:
-            # copies the real pixmap connectors head with the linker
-            if self.pixmapConnector.head != None and self.firstCallFlag:
-                if self.pixmapConnector.head:
-                    self.linker = self.pixmapConnector.head
+            # copies the real pixmap connectors pixmapHead with the linker
+            if self.pixmapConnector.pixmapHead != None and self.firstCallFlag:
+                if self.pixmapConnector.pixmapHead:
+                    self.linker = self.pixmapConnector.pixmapHead
                     if self.linker.nextNode and self.linker.nextNode.image:
                         self.linker = self.linker.nextNode
                         self.imageObject = self.linker.image
@@ -631,15 +640,17 @@ class EditingActionManager(QWidget):
                 self.newImageObject = self.convertImagetoPixMap(self.frameAdjustment.cropImage(self.signalValue))
                 self.cropRubberBand.close()
                 self.showPixmap(self.newImageObject)
+            self.storeMeta()
+            self.IMAGETOSAVE = self.operationManager.editfromParsedData(self.finalEditMeta)
+            self.IMAGETOSAVE.show()
             self.imageObject = self.newImageObject
-            if self.linker:
+            if self.linker: # saves the copy of current edit in linkedlist
                 self.linker = self.pixmapConnector.addPixmap(self.linker, self.imageObject)
             else:
-                self.pixmapConnector.head = self.pixmapConnector.addPixmap(self.pixmapConnector.head, self.imageObject)
-            self.storeMeta()
+                self.pixmapConnector.pixmapHead = self.pixmapConnector.addPixmap(self.pixmapConnector.pixmapHead, self.imageObject)
             self.signalValue = None
             self.multivalueOperation = False
-            self.colorVal = ()
+            self.colorVal = None
             return
 
 

@@ -128,7 +128,6 @@ class FileWindow(QDialog):
         diskList = []
         for disk in disks:
             diskList.append(disk[0])
-        ic(diskList)
         return diskList
       
     def refillFileListWidget(self):
