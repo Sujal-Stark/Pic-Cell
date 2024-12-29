@@ -14,7 +14,6 @@ class FileWindow(QDialog):
         self.setGeometry(0,0,400,300)
         self.masterLayout = QVBoxLayout(self)
         self.preViewLayout = None
-        # ic.disable()
         self.setProperties()
         self.createWidgets()
         self.loadFileWindowUi()
@@ -25,7 +24,7 @@ class FileWindow(QDialog):
         return
     
     def createResponse(self):
-        self.fileListWidget.currentItemChanged.connect(self.fileAccess)
+        self.fileListWidget.itemDoubleClicked.connect(self.fileAccess)
         self.forwardButton.clicked.connect(self.nextDirectory)
         self.previousButton.clicked.connect(self.previousDirectory)
         return
@@ -157,9 +156,7 @@ class FileWindow(QDialog):
         return
     
     def fileAccess(self):
-        '''
-            Use as PyQt slot. File access helps the file window to open the chosen directory if it is a Folder
-        '''
+        '''Use as PyQt slot. File access helps the file window to open the chosen directory if it is a Folder'''
         currentText = QListWidgetItem(self.fileListWidget.currentItem()).text()
         if currentText != "Files":
             if "." not in currentText:
