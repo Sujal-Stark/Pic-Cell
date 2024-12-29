@@ -48,7 +48,7 @@ class EditingActionManager(QWidget):
     
     def addResponse(self):
         self.editingTreeBody.itemClicked.connect(self.treeBodyItemclicked)
-        self.chooseColorLabel.clicked.connect(self.createColorPicker)
+        self.chooseColorButton.clicked.connect(self.createColorPicker)
         self.setEdit.clicked.connect(self.keepEdit)
         self.filewinowForSave.fileSaveButton.clicked.connect(self.saveImage)
         self.timeHolder.timeout.connect(self.showOriginal)
@@ -104,15 +104,35 @@ class EditingActionManager(QWidget):
         self.imageForEditLabel = QLabel("Edit Your Image here")
         self.imageForEditLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.imageForEditLabel.setFixedSize(300,40)
+        self.imageForEditLabel.setStyleSheet(
+            """QLabel{
+                background-color : #190140;
+                font-size: 12px;
+                color: #ffffff;
+                padding : 2px;
+                border-radius : 5px;
+            }
+            QLabel:hover{
+                background-color : #280180;
+                font-size: 12px;
+                color: #ffffff;
+                padding : 2px;
+                border-radius : 5px;
+            }
+            """
+        )
         self.imageForEditLabel.setFont(self.comicSansFontLarger)
         self.cropRubberBand.setParent(self.imageForEditLabel)
         self.specialEditOptions = QLabel("Editing choice will show up here")
+        self.specialEditOptions.setStyleSheet(
+            self.imageForEditLabel.styleSheet()
+        )
         self.specialEditOptions.setFont(self.comicSansFont)
         return
     
     def createButtons(self):
-        self.chooseColorLabel = QPushButton("Choose color")
-        self.chooseColorLabel.setFont(self.comicSansFont)
+        self.chooseColorButton = QPushButton("Choose color")
+        self.chooseColorButton.setFont(self.comicSansFont)
         self.setEdit = QPushButton("Set")
         self.setEdit.setFont(self.comicSansFont)
         self.viewOriginal = QPushButton("View Original")
@@ -221,9 +241,12 @@ class EditingActionManager(QWidget):
         self.editSpectrumLayout.addWidget(self.viewOriginal, alignment = Qt.AlignmentFlag.AlignTop)
         self.innerEditSpectrumLayout.addWidget(self.specialEditOptions, 0, 0, alignment= Qt.AlignmentFlag.AlignCenter)
         self.innerAdvancementLayout.addWidget(self.innerAdvancementScrollArea, alignment = Qt.AlignmentFlag.AlignTop)
-        self.innerAdvancementLayout.addWidget(self.chooseColorLabel, alignment = Qt.AlignmentFlag.AlignBottom)
+        self.innerAdvancementLayout.addWidget(self.chooseColorButton, alignment = Qt.AlignmentFlag.AlignBottom)
         self.innerAdvancementScrollArea.setLayout(self.sliderHolderLayout)
-        self.sliderHolderLayout.addWidget(QLabel("Advancement Options"),alignment=Qt.AlignmentFlag.AlignCenter)
+        AdvancementOptionLabel = QLabel("Advancement Options")
+        AdvancementOptionLabel.setFont(self.comicSansFont)
+        AdvancementOptionLabel.setStyleSheet(self.imageForEditLabel.styleSheet())
+        self.sliderHolderLayout.addWidget(AdvancementOptionLabel,alignment=Qt.AlignmentFlag.AlignCenter)
         return
 
     def toggleHideLeft(self):
