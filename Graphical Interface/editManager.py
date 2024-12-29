@@ -423,7 +423,7 @@ class EditingActionManager(QWidget):
             self.imageForEditLabel.hide()
             self.imageObject = self.imageObject.scaled(self.imageSize[0], self.imageSize[1], aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
             self.ORIGINALIMAGEOBJECT = self.imageObject
-            self.pixmapConnector.createPixmappixmapHead(self.imageObject)
+            self.pixmapConnector.createPixmappixmapHead(self.imageObject, self.IMAGETOSAVE)
             self.firstCallFlag = True
             self.imageForEditLabel.setFixedSize(self.imageObject.width(), self.imageObject.height())
             self.imageForEditLabel.setPixmap(self.imageObject)
@@ -602,32 +602,53 @@ class EditingActionManager(QWidget):
     
     def undoOperation(self):
         if self.imageObject == None:
-            return
-        if self.linker == None:
+            '''Perform Undo Operation and iterate through previously edited version'''
+            return # rundo operation can't be done if no image is selected in edit
+        if self.linker == None: # no Image is set by keepEdit method
             # copies the real pixmap connectors pixmapHead with the linker
-            if self.pixmapConnector.pixmapHead != None and self.firstCallFlag:
+            if self.pixmapConnector.pixmapHead and self.firstCallFlag: # works if pixmaphead Exists and operating undo
                 if self.pixmapConnector.pixmapHead:
-                    self.linker = self.pixmapConnector.pixmapHead
+                    self.linker = self.pixmapConnector.pixmapHead # copying current image object for iterating thorugh LL
                     if self.linker.nextNode and self.linker.nextNode.image:
                         self.linker = self.linker.nextNode
                         self.imageObject = self.linker.image
+                        self.newImageObject = self.linker.image
+                        self.IMAGETOSAVE = self.linker.PILImage
+                        if self.IMAGETOSAVE:
+                            self.IMAGETOSAVE.show()
+                        else:
+                            ic(self.IMAGETOSAVE)
                     self.showPixmap(self.linker.image)
                     self.firstCallFlag = False
         else:
-            if self.linker.nextNode and self.linker.image:
-                self.linker = self.linker.nextNode
-                self.imageObject = self.linker.image
-                self.showPixmap(self.linker.image)
+            if self.linker.nextNode:
+                if self.linker.image:
+                    ic("Nextnode")
+                    self.linker = self.linker.nextNode
+                    self.imageObject = self.linker.image
+                    self.newImageObject = self.linker.image
+                    self.IMAGETOSAVE = self.linker.PILImage
+                    # if self.IMAGETOSAVE:
+                    #         self.IMAGETOSAVE.show()
+                    # else:
+                    #     ic(self.IMAGETOSAVE)
+                    self.showPixmap(self.linker.image)
         return
 
     # shows the latest Image
     def redoOperation(self):
+        '''Perform Redo Operation and iterate through after the current edited version'''
         if self.imageObject == None:
             return
-        if self.linker:
-            if self.linker.previousNode:
+        if self.linker: # works if Connector exists
+            if self.linker.previousNode: # works till the last node at oposite direction
                 self.linker : Node = self.linker.previousNode
                 self.imageObject = self.linker.image
+                self.IMAGETOSAVE = self.linker.PILImage
+                # if(self.IMAGETOSAVE):
+                #     self.IMAGETOSAVE.show()
+                # else:
+                #     ic(self.IMAGETOSAVE)
                 self.showPixmap(self.linker.image)
         return
     
@@ -642,12 +663,12 @@ class EditingActionManager(QWidget):
                 self.showPixmap(self.newImageObject)
             self.storeMeta()
             self.IMAGETOSAVE = self.operationManager.editfromParsedData(self.finalEditMeta)
-            self.IMAGETOSAVE.show()
+            # self.IMAGETOSAVE.show()
             self.imageObject = self.newImageObject
             if self.linker: # saves the copy of current edit in linkedlist
                 self.linker = self.pixmapConnector.addPixmap(self.linker, self.imageObject)
             else:
-                self.pixmapConnector.pixmapHead = self.pixmapConnector.addPixmap(self.pixmapConnector.pixmapHead, self.imageObject)
+                self.pixmapConnector.pixmapHead = self.pixmapConnector.addPixmap(self.pixmapConnector.pixmapHead, self.imageObject, self.IMAGETOSAVE)
             self.signalValue = None
             self.multivalueOperation = False
             self.colorVal = None
