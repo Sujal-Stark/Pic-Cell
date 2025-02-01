@@ -11,6 +11,7 @@ class TextEditor:
     prev_color : list = None
     prev_textWidth : int = None
     prev_anchorPoint : int = None
+    prev_textOpacity : int = None
 
     prev_incrementFactor : int = None
     prev_outlineColor  : tuple = None
@@ -29,20 +30,32 @@ class TextEditor:
         "mb", # index = 7, mid bottom
         "rb", # index = 8, right bottom
     ]
+    
     # consturctor
     def __init__(self, image : Image.Image)->None:
         '''Takes the Current working Image as parameter to create one RGBA Transparent layer of it'''
-        self.baseLayer = Image.new(mode = "RGBA", size=image.size, color = (0, 0, 0, 0))
-        self.image = image
-        self.imWidth, self.imHeight = image.width, image.height
+        self.baseLayer = Image.new(mode = "RGBA", size=image.size, color = (0, 0, 0, 0)) # holds text editing
+        self.backgroundlayer = Image.new(mode = "RGBA", size=image.size, color = (0, 0, 0, 0)) # holds background editing
+        self.image = image # holds the original image
+        self.newLayer = None # holds the temporary text edit to show in window
+        self.boxLayer = None # holds the text box edit to show in window
+        self.imWidth, self.imHeight = self.image.size # holds the image dimentions
         return
 
+    def generateFinalEdit(self) -> Image.Image:
+        '''This method is responsible for generating the final image after text and text box editing'''
+        if self.boxLayer and self.newLayer: # if both layer are present
+            return Image.alpha_composite(im1 = self.boxLayer, im2 = self.newLayer)
+        elif self.newLayer: #only text layer can be rendered if no background layer is present
+            return self.newLayer
+    
     def editText(
-            self, text : str = None, position : tuple = None, size : int = None, color : list = None,
-            textWidth : int = None, anchor_tag : int = 4
-    ) -> list[Image.Image, ImageDraw.ImageDraw]:
-        newLayer = Image.new(mode = "RGBA", size=self.image.size, color = (0, 0, 0, 0))
-        drawObject = ImageDraw.Draw(newLayer)
+            self, text : str = None, position : tuple = None, size : int = None, color : list = None, textWidth : int = None, anchor_tag : int = 4,
+            TextOpacity : int = None
+    ) -> None:
+        self.newLayer = self.baseLayer.copy() # creates a new layer based upon the base layer
+        drawObject = ImageDraw.Draw(self.newLayer) # draw object to perform drawing operatation
+        
         if(position == None and self.prev_position == None): # position filter
             position = (self.baseLayer.width/2, self.baseLayer.height/2)
             self.prev_position = position
@@ -63,14 +76,26 @@ class TextEditor:
         else:
             self.prev_size = size
         
+        if(TextOpacity == None and self.prev_textOpacity == None): # text opacity filter
+            textOpacity = 255
+            self.prev_textOpacity = textOpacity
+        elif(TextOpacity and self.prev_textOpacity == None):
+            self.prev_textOpacity = TextOpacity
+        elif(TextOpacity == None and self.prev_textOpacity):
+            TextOpacity = self.prev_textOpacity
+        else:
+            self.prev_textOpacity = TextOpacity
+
         if(color == None and self.prev_color == None): # color filter
             color = [255, 255, 255, 255]
             self.prev_color = color
         elif(color and self.prev_color == None):
+            color = color + [TextOpacity]
             self.prev_color = color
         elif(color == None and self.prev_color):
             color = self.prev_color
         else:
+            color = color + [TextOpacity]
             self.prev_color = color
         
         if(textWidth == None and self.prev_textWidth == None): # textwidth filter
@@ -103,16 +128,15 @@ class TextEditor:
             print("Got some typing Problem")
         except OSError:
             print("got some problem to find files")
-        return [newLayer, drawObject]
 
     def editTextBox(
-            self, editToken : list[Image.Image, ImageDraw.ImageDraw], increment_Factor : int = None, outlineColor : list = None,
-            fillColor : list = None, opacity : int = None, lineWidth : int = None
-    ) -> list[Image.Image, ImageDraw.ImageDraw]:
-        tokenLayer : Image.Image = editToken[0]
-        tokenDrawObject : ImageDraw.ImageDraw = editToken[1]
+            self, increment_Factor : int = None, outlineColor : list = None,fillColor : list = None, opacity : int = None, lineWidth : int = None
+    ):
+        self.boxLayer : Image.Image = self.backgroundlayer.copy()
+        tokenDrawObject : ImageDraw.ImageDraw = ImageDraw.Draw(self.boxLayer)
+        
         if(increment_Factor == None and self.prev_incrementFactor == None): # increment factor
-            increment_Factor, self.prev_outlineColor = 0, 0
+            increment_Factor, self.prev_incrementFactor = 0, 0
         elif(increment_Factor and self.prev_incrementFactor == None):
             self.prev_incrementFactor = increment_Factor
         elif(increment_Factor == None and self.prev_incrementFactor):
@@ -143,13 +167,15 @@ class TextEditor:
             fillColor = [0,0,0,opacity]
             self.prev_fillColor = fillColor
         elif(fillColor and self.prev_fillColor == None):
+            fillColor = fillColor+[opacity]
             self.prev_fillColor = fillColor
         elif(fillColor == None and self.prev_fillColor):
             fillColor = self.prev_fillColor
         else:
+            fillColor = fillColor+[opacity]
             self.prev_fillColor = fillColor
         
-        if(lineWidth == None and self.prev_lineWidth == None):
+        if(lineWidth == None and self.prev_lineWidth == None): # line width
             lineWidth, self.prev_lineWidth = 1, 1
         elif(lineWidth and self.prev_lineWidth == None):
             self.prev_lineWidth = lineWidth
@@ -158,11 +184,18 @@ class TextEditor:
         else:
             self.prev_lineWidth = self.prev_lineWidth 
         
-        bbox = tokenDrawObject.textbbox(
-            xy = self.prev_position, text = self.prev_text, font = self.prev_font, anchor = self.anchorList[self.prev_anchorPoint]
-        )
-        tokenDrawObject.rectangle(xy = bbox, outline = outlineColor, width = lineWidth)
-        return  [tokenLayer, tokenDrawObject]
+        try:
+            bbox = tokenDrawObject.textbbox(
+                xy = self.prev_position, text = self.prev_text, font = self.prev_font, anchor = self.anchorList[self.prev_anchorPoint]
+            )
+            bbox = (bbox[0] - increment_Factor, bbox[1] - increment_Factor, bbox[2] + increment_Factor, bbox[3] + increment_Factor)
+            tokenDrawObject.rectangle(xy = tuple(bbox), fill = tuple(fillColor), outline = tuple( outlineColor), width = lineWidth)
+        except MemoryError:
+            print("System Run out of memory")
+        except TypeError:
+            print("Got mismatched typing")
+        except OSError:
+            print("unable to fetch the file")
     pass
 
 if __name__ == '__main__':
@@ -170,6 +203,8 @@ if __name__ == '__main__':
         r"D:\Gallery\PhotoSpace\downloaded pic\Phone WallPaper\e7dc3878-ed3a-4bd4-8bfa-3b5dc874ebec.jfif"
         )
     )
-    layerToken = textEditor.editText(text = "Sujal Khan", position = None ,size = 100, color = [255,0,0,255], textWidth=None, anchor_tag = None)
-    token2 = textEditor.editTextBox(layerToken)
-    token2[0].show()
+    textEditor.editText(text = "Sujal Khan", position = None ,size = 100, color = [255,0,255], textWidth=None, anchor_tag = None, TextOpacity = 120)
+    textEditor.editTextBox(increment_Factor = 50, outlineColor = [255,255,0,255], fillColor = [0, 255, 255], opacity = 120, lineWidth = 2)
+    image = textEditor.generateFinalEdit()
+    image.show()
+    pass
