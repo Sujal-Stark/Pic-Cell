@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QFrame, QScrollArea, QLabel, QPushButton, QLineEdit, QSlider
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QFrame, QScrollArea, QListWidget, QLabel, QPushButton, QLineEdit, QSlider
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 import sys
@@ -25,6 +25,7 @@ class TextEditorAssembly(QWidget):
         self.createframes()
         self.createLayouts()
         self.createScrollArea()
+        self.createListWidgets()
         self.createLineEdits()
         self.createButtons()
         self.createLabels()
@@ -92,10 +93,10 @@ class TextEditorAssembly(QWidget):
         self.selectButton.setFont(self.comicSansFont)
 
         # buttons for advancement section
-        self.backGroundButton = QPushButton("Set Back Ground") # background
+        self.backGroundButton = QPushButton("Add Background") # background
         self.backGroundButton.setFixedSize(250, 40)
         self.backGroundButton.setFont(self.comicSansFontLarger)
-        self.borderButton = QPushButton("Set Border") # border
+        self.borderButton = QPushButton("Add Border line") # border
         self.borderButton.setFixedSize(250, 40)
         self.borderButton.setFont(self.comicSansFontLarger)
         self.colorButton = QPushButton("Choose color") # color 
@@ -105,8 +106,20 @@ class TextEditorAssembly(QWidget):
         self.useButton.setFixedSize(250, 40)
         self.useButton.setFont(self.comicSansFontLarger)
 
+        # buttons for text editing options
+        self.colorPickerButton = QPushButton("Add Color")
+        self.colorPickerButton.setFixedSize(250, 40)
+        self.colorPickerButton.setFont(self.comicSansFontLarger)
+
         return
     
+    def createListWidgets(self):
+        self.anchorList = QListWidget() # stores all the anchor
+        self.anchorList.setFixedSize(250, 40)
+        self.anchorList.setFont(self.comicSansFontLarger)
+        self.anchorList.addItems(["Top Left", "Top Center", "Top Right", "Center Left", "Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right"])
+        pass
+
     def createLabels(self):
         self.panelLabel = QLabel("View Window") # holder 1
         self.panelLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -120,14 +133,20 @@ class TextEditorAssembly(QWidget):
         self.textLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.textLabel.setFixedSize(300,40)
         self.textLabel.setFont(self.comicSansFontLarger)
+        
+        # labels for text editing options
         self.sizeLabel = QLabel("Set Size") # size
         self.sizeLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.sizeLabel.setFixedSize(200, 25)
+        self.sizeLabel.setFixedSize(250, 40)
         self.sizeLabel.setFont(self.comicSansFontLarger)
-        self.rotateLabel = QLabel("Set Angle") # angle
-        self.rotateLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.rotateLabel.setFixedSize(200, 25)
-        self.rotateLabel.setFont(self.comicSansFontLarger)
+        self.textOpacity = QLabel("Opacity") # opacity
+        self.textOpacity.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.textOpacity.setFixedSize(250, 40)
+        self.textOpacity.setFont(self.comicSansFontLarger)
+        self.textWidth = QLabel("Width") # text width
+        self.textWidth.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.textWidth.setFixedSize(250, 40)
+        self.textWidth.setFont(self.comicSansFontLarger)
         return
     
     def createSliders(self):
@@ -137,13 +156,18 @@ class TextEditorAssembly(QWidget):
         self.sizeSlider.setOrientation(Qt.Orientation.Horizontal)
         self.sizeSlider.setFixedWidth(260)
         self.sizeSlider.setObjectName("sizeSlider")
-
-        self.rotationSlider = QSlider() # rotate slider
-        self.rotationSlider.setRange(0, 360)
-        self.rotationSlider.setSliderPosition(0)
-        self.rotationSlider.setOrientation(Qt.Orientation.Horizontal)
-        self.rotationSlider.setFixedWidth(260)
-        self.rotationSlider.setObjectName("rotationSlider")
+        self.textOpacitySlider = QSlider() # opacity slider
+        self.textOpacitySlider.setRange(0, 255)
+        self.textOpacitySlider.setSliderPosition(255)
+        self.textOpacitySlider.setOrientation(Qt.Orientation.Horizontal)
+        self.textOpacitySlider.setFixedWidth(260)
+        self.textOpacitySlider.setObjectName("textOpacitySlider")
+        self.textWidthSlider = QSlider() # text width slider
+        self.textWidthSlider.setRange(0, 10)
+        self.textWidthSlider.setSliderPosition(0)
+        self.textWidthSlider.setOrientation(Qt.Orientation.Horizontal)
+        self.textWidthSlider.setFixedWidth(260)
+        self.textWidthSlider.setObjectName("textWidthSlider")
         return
 
     def constructUI(self):
@@ -191,8 +215,12 @@ class TextEditorAssembly(QWidget):
         # control layout widgets
         self.innerControlLayout.addWidget(self.sizeLabel, alignment = Qt.AlignmentFlag.AlignCenter)
         self.innerControlLayout.addWidget(self.sizeSlider, alignment = Qt.AlignmentFlag.AlignCenter)
-        self.innerControlLayout.addWidget(self.rotateLabel, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.innerControlLayout.addWidget(self.rotationSlider, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerControlLayout.addWidget(self.textOpacity, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerControlLayout.addWidget(self.textOpacitySlider, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerControlLayout.addWidget(self.textWidth, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerControlLayout.addWidget(self.textWidthSlider, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerControlLayout.addWidget(self.colorPickerButton, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerControlLayout.addWidget(self.anchorList, alignment = Qt.AlignmentFlag.AlignCenter)
 
         # advancement layout widgets
         self.innerAdvanceControlLayout.addWidget(self.backGroundButton, alignment = Qt.AlignmentFlag.AlignCenter)
@@ -242,6 +270,11 @@ class TextEditorAssembly(QWidget):
             QLabel:hover{
                 border : 2px outset #4f4e50;
                 background-color : #191049;
+                color : #ffffff;
+            }
+            QListWidget{
+                border : 1px outset #4f4e4f;
+                background-color : #190140;
                 color : #ffffff;
             }
             """
