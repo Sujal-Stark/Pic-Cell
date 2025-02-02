@@ -7,7 +7,7 @@ class TextEditorAssembly(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Text Editor")
-        self.setFixedSize(640,540)
+        self.setFixedSize(640,650)
         self.textEditorMasterLayout = QVBoxLayout(self)
         self.addProperties()
         self.createUI()
@@ -18,7 +18,7 @@ class TextEditorAssembly(QWidget):
     
     def addProperties(self):
         self.comicSansFontLarger = QFont("Comic Sans MS", 16)
-        self.comicSansFont = QFont("Comic Sans MS", 12)
+        self.comicSansFont = QFont("Comic Sans MS", 10)
         return
     
     def createUI(self):
@@ -50,6 +50,9 @@ class TextEditorAssembly(QWidget):
 
         self.advanceControlLayout = QVBoxLayout()
         self.innerAdvanceControlLayout = QVBoxLayout()
+
+        self.finalizationActionHolderLayout = QHBoxLayout()
+        self.innerFinalizationActionHolderLayout = QHBoxLayout()
         return
 
     def createScrollArea(self):
@@ -58,17 +61,17 @@ class TextEditorAssembly(QWidget):
         self.viewPanelScrollArea.setWidgetResizable(True)
 
         self.controlScrollArea = QScrollArea()
-        self.controlScrollArea.setFixedSize(295,180)
+        self.controlScrollArea.setFixedSize(295,240)
         self.controlScrollArea.setWidgetResizable(True)
 
         self.advanceControlScrollArea = QScrollArea()
-        self.advanceControlScrollArea.setFixedSize(295,180)
+        self.advanceControlScrollArea.setFixedSize(295,240)
         self.advanceControlScrollArea.setWidgetResizable(True)
         return
 
     def createframes(self):
         self.textEditorMasterFrame = QFrame()
-        self.textEditorMasterFrame.setFixedSize(620,520)
+        self.textEditorMasterFrame.setFixedSize(620,630)
         self.textEditorMasterFrame.setFrameShape(QFrame.Shape.Panel)
 
         self.viewPanelFrame = QFrame()
@@ -79,6 +82,22 @@ class TextEditorAssembly(QWidget):
 
         self.advanceControlFrame = QFrame()
         self.advanceControlFrame.setFrameShape(QFrame.Shape.Panel)
+
+        self.finalizationActionHolderFrame = QFrame()
+        self.finalizationActionHolderFrame.setFrameShape(QFrame.Shape.Panel)
+
+        # lines
+        self.textPanelEditingPanelLine1 = QFrame()
+        self.textPanelEditingPanelLine1.setFrameShape(QFrame.Shape.HLine)
+        self.textPanelEditingPanelLine1.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.textBoxPanelLine = QFrame()
+        self.textBoxPanelLine.setFrameShape(QFrame.Shape.HLine)
+        self.textBoxPanelLine.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.textBoxBorderLine = QFrame()
+        self.textBoxBorderLine.setFrameShape(QFrame.Shape.HLine)
+        self.textBoxBorderLine.setFrameShadow(QFrame.Shadow.Sunken)
         return
     
     def createLineEdits(self):
@@ -93,31 +112,36 @@ class TextEditorAssembly(QWidget):
         self.selectButton.setFont(self.comicSansFont)
 
         # buttons for advancement section
-        self.backGroundButton = QPushButton("Add Background") # background
-        self.backGroundButton.setFixedSize(250, 40)
-        self.backGroundButton.setFont(self.comicSansFontLarger)
-        self.borderButton = QPushButton("Add Border line") # border
-        self.borderButton.setFixedSize(250, 40)
-        self.borderButton.setFont(self.comicSansFontLarger)
-        self.colorButton = QPushButton("Choose color") # color 
-        self.colorButton.setFixedSize(250, 40)
-        self.colorButton.setFont(self.comicSansFontLarger)
-        self.useButton = QPushButton("Use") # use
-        self.useButton.setFixedSize(250, 40)
-        self.useButton.setFont(self.comicSansFontLarger)
+        self.backGroundButton = QPushButton("Add Text Box") # background
+        self.backGroundButton.setFixedSize(250, 30)
+        self.backGroundButton.setFont(self.comicSansFont)
+        self.backGroundColorButton = QPushButton("Backgound Color") # background color
+        self.backGroundColorButton.setFixedSize(250, 30)
+        self.backGroundColorButton.setFont(self.comicSansFont)
+        self.colorButton = QPushButton("Border color") # color 
+        self.colorButton.setFixedSize(250, 30)
+        self.colorButton.setFont(self.comicSansFont)
 
         # buttons for text editing options
-        self.colorPickerButton = QPushButton("Add Color")
-        self.colorPickerButton.setFixedSize(250, 40)
-        self.colorPickerButton.setFont(self.comicSansFontLarger)
+        self.colorPickerButton = QPushButton("Use Color pallet") # color picker
+        self.colorPickerButton.setFixedSize(250, 30)
+        self.colorPickerButton.setFont(self.comicSansFont)
 
+        # Finalization tools
+        self.confirmButton = QPushButton("Confirm") # selects the edit to use in actual image
+        self.confirmButton.setFixedSize(200, 30)
+        self.confirmButton.setFont(self.comicSansFont)
+
+        self.cancellationButton = QPushButton("Cancel") # Cancel the edited text
+        self.cancellationButton.setFixedSize(200, 30)
+        self.cancellationButton.setFont(self.comicSansFont)
         return
     
     def createListWidgets(self):
         self.anchorList = QListWidget() # stores all the anchor
-        self.anchorList.setFixedSize(250, 40)
-        self.anchorList.setFont(self.comicSansFontLarger)
-        self.anchorList.addItems(["Top Left", "Top Center", "Top Right", "Center Left", "Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right"])
+        self.anchorList.setFixedSize(250, 25)
+        self.anchorList.setFont(self.comicSansFont)
+        self.anchorList.addItems(["Anchors", "Top Left", "Top Center", "Top Right", "Center Left", "Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right"])
         pass
 
     def createLabels(self):
@@ -127,26 +151,39 @@ class TextEditorAssembly(QWidget):
         self.panelLabel.setFont(self.comicSansFont)
         self.adjustmentLabel = QLabel("Adjustments") # holder 2
         self.adjustmentLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.adjustmentLabel.setFixedSize(600,25)
+        self.adjustmentLabel.setFixedSize(600, 25)
         self.adjustmentLabel.setFont(self.comicSansFont)
         self.textLabel = QLabel("Your TEXT will show up here") # text label
-        self.textLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.textLabel.setFixedSize(300,40)
-        self.textLabel.setFont(self.comicSansFontLarger)
+        self.textLabel.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.textLabel.setFont(self.comicSansFont)
         
         # labels for text editing options
         self.sizeLabel = QLabel("Set Size") # size
-        self.sizeLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.sizeLabel.setFixedSize(250, 40)
-        self.sizeLabel.setFont(self.comicSansFontLarger)
+        self.sizeLabel.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        self.sizeLabel.setFixedSize(100, 20)
+        self.sizeLabel.setFont(self.comicSansFont)
         self.textOpacity = QLabel("Opacity") # opacity
-        self.textOpacity.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.textOpacity.setFixedSize(250, 40)
-        self.textOpacity.setFont(self.comicSansFontLarger)
+        self.textOpacity.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        self.textOpacity.setFixedSize(100, 20)
+        self.textOpacity.setFont(self.comicSansFont)
         self.textWidth = QLabel("Width") # text width
-        self.textWidth.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.textWidth.setFixedSize(250, 40)
-        self.textWidth.setFont(self.comicSansFontLarger)
+        self.textWidth.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        self.textWidth.setFixedSize(100, 20)
+        self.textWidth.setFont(self.comicSansFont)
+
+        # labels for textbox editing options
+        self.boxSizeLabel = QLabel("Set Box Size") # box size
+        self.boxSizeLabel.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        self.boxSizeLabel.setFixedSize(100, 20)
+        self.boxSizeLabel.setFont(self.comicSansFont)
+        self.textBoxOpacityLabel = QLabel("Box Opacity") # box opacity
+        self.textBoxOpacityLabel.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        self.textBoxOpacityLabel.setFixedSize(100, 20)
+        self.textBoxOpacityLabel.setFont(self.comicSansFont)
+        self.textBoxBorderSizeLabel = QLabel("Border Size") # border size
+        self.textBoxBorderSizeLabel.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        self.textBoxBorderSizeLabel.setFixedSize(100, 20)
+        self.textBoxBorderSizeLabel.setFont(self.comicSansFont)
         return
     
     def createSliders(self):
@@ -154,20 +191,40 @@ class TextEditorAssembly(QWidget):
         self.sizeSlider.setRange(0, 1920)
         self.sizeSlider.setSliderPosition(0)
         self.sizeSlider.setOrientation(Qt.Orientation.Horizontal)
-        self.sizeSlider.setFixedWidth(260)
+        self.sizeSlider.setFixedWidth(250)
         self.sizeSlider.setObjectName("sizeSlider")
         self.textOpacitySlider = QSlider() # opacity slider
         self.textOpacitySlider.setRange(0, 255)
         self.textOpacitySlider.setSliderPosition(255)
         self.textOpacitySlider.setOrientation(Qt.Orientation.Horizontal)
-        self.textOpacitySlider.setFixedWidth(260)
+        self.textOpacitySlider.setFixedWidth(250)
         self.textOpacitySlider.setObjectName("textOpacitySlider")
         self.textWidthSlider = QSlider() # text width slider
         self.textWidthSlider.setRange(0, 10)
         self.textWidthSlider.setSliderPosition(0)
         self.textWidthSlider.setOrientation(Qt.Orientation.Horizontal)
-        self.textWidthSlider.setFixedWidth(260)
+        self.textWidthSlider.setFixedWidth(250)
         self.textWidthSlider.setObjectName("textWidthSlider")
+
+        # sliders for box editing options
+        self.boxSizeSlider = QSlider() # box size slider
+        self.boxSizeSlider.setRange(0, 1920) # will generate dynamically based upon image size
+        self.boxSizeSlider.setSliderPosition(0)
+        self.boxSizeSlider.setOrientation(Qt.Orientation.Horizontal)
+        self.boxSizeSlider.setFixedWidth(250)
+        self.boxSizeSlider.setObjectName("boxSizeSlider") # box opacity slider
+        self.textBoxOpacitySlider = QSlider()
+        self.textBoxOpacitySlider.setRange(0,255)
+        self.textBoxOpacitySlider.setSliderPosition(255)
+        self.textBoxOpacitySlider.setOrientation(Qt.Orientation.Horizontal)
+        self.textBoxOpacitySlider.setFixedWidth(250)
+        self.textBoxOpacitySlider.setObjectName("textBoxOpacitySlider")
+        self.textBoxBorderSize = QSlider() # border size slider
+        self.textBoxOpacitySlider.setRange(0, 10) # will generate dynamically based upon image size
+        self.textBoxBorderSize.setSliderPosition(0)
+        self.textBoxBorderSize.setOrientation(Qt.Orientation.Horizontal)
+        self.textBoxBorderSize.setFixedWidth(250)
+        self.textBoxBorderSize.setObjectName("textBoxBorderSize")
         return
 
     def constructUI(self):
@@ -177,6 +234,7 @@ class TextEditorAssembly(QWidget):
         self.innerTExtEditorMasterLayout.addLayout(self.viewZone) #zone1
         self.innerTExtEditorMasterLayout.addLayout(self.labelHolder2) # holder 2
         self.innerTExtEditorMasterLayout.addLayout(self.controlZone) # zone2
+        self.innerTExtEditorMasterLayout.addLayout(self.finalizationActionHolderLayout)
 
         self.viewZone.addLayout(self.viewPanel)
 
@@ -196,6 +254,9 @@ class TextEditorAssembly(QWidget):
         self.advanceControlLayout.addWidget(self.advanceControlScrollArea)
         self.advanceControlScrollArea.setWidget(self.advanceControlFrame)
         self.advanceControlFrame.setLayout(self.innerAdvanceControlLayout) # advancement layout
+
+        self.finalizationActionHolderLayout.addWidget(self.finalizationActionHolderFrame)
+        self.finalizationActionHolderFrame.setLayout(self.innerFinalizationActionHolderLayout)
         return
     
     def addWidgetAttributes(self):
@@ -213,20 +274,33 @@ class TextEditorAssembly(QWidget):
         self.inputLayout.addWidget(self.selectButton, alignment = Qt.AlignmentFlag.AlignCenter)
 
         # control layout widgets
-        self.innerControlLayout.addWidget(self.sizeLabel, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerControlLayout.addWidget(self.sizeLabel)
         self.innerControlLayout.addWidget(self.sizeSlider, alignment = Qt.AlignmentFlag.AlignCenter)
-        self.innerControlLayout.addWidget(self.textOpacity, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerControlLayout.addWidget(self.textOpacity)
         self.innerControlLayout.addWidget(self.textOpacitySlider, alignment = Qt.AlignmentFlag.AlignCenter)
-        self.innerControlLayout.addWidget(self.textWidth, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerControlLayout.addWidget(self.textWidth)
         self.innerControlLayout.addWidget(self.textWidthSlider, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerControlLayout.addWidget(self.textPanelEditingPanelLine1)
         self.innerControlLayout.addWidget(self.colorPickerButton, alignment = Qt.AlignmentFlag.AlignCenter)
         self.innerControlLayout.addWidget(self.anchorList, alignment = Qt.AlignmentFlag.AlignCenter)
 
         # advancement layout widgets
         self.innerAdvanceControlLayout.addWidget(self.backGroundButton, alignment = Qt.AlignmentFlag.AlignCenter)
-        self.innerAdvanceControlLayout.addWidget(self.borderButton, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerAdvanceControlLayout.addWidget(self.backGroundColorButton, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerAdvanceControlLayout.addWidget(self.boxSizeLabel)
+        self.innerAdvanceControlLayout.addWidget(self.boxSizeSlider, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerAdvanceControlLayout.addWidget(self.textBoxPanelLine)
+
+        self.innerAdvanceControlLayout.addWidget(self.textBoxBorderSizeLabel)
+        self.innerAdvanceControlLayout.addWidget(self.textBoxBorderSize, alignment = Qt.AlignmentFlag.AlignCenter)
         self.innerAdvanceControlLayout.addWidget(self.colorButton, alignment = Qt.AlignmentFlag.AlignCenter)
-        self.innerAdvanceControlLayout.addWidget(self.useButton, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerAdvanceControlLayout.addWidget(self.textBoxBorderLine)
+
+        self.innerAdvanceControlLayout.addWidget(self.textBoxOpacityLabel)
+        self.innerAdvanceControlLayout.addWidget(self.textBoxOpacitySlider, alignment = Qt.AlignmentFlag.AlignCenter)
+
+        self.innerFinalizationActionHolderLayout.addWidget(self.cancellationButton, alignment = Qt.AlignmentFlag.AlignLeft)
+        self.innerFinalizationActionHolderLayout.addWidget(self.confirmButton, alignment = Qt.AlignmentFlag.AlignRight)
         return
     
     def addStyleSheet(self):
@@ -262,20 +336,41 @@ class TextEditorAssembly(QWidget):
                 color : #000000;
             }
             QLabel{
-                border : 1px outset #4f4e4f;
-                font-style : Comic-Sans-Ms;
-                background-color : #190140;
                 color : #ffffff;
             }
             QLabel:hover{
-                border : 2px outset #4f4e50;
-                background-color : #191049;
                 color : #ffffff;
             }
             QListWidget{
                 border : 1px outset #4f4e4f;
                 background-color : #190140;
                 color : #ffffff;
+            }
+            QScrollBar:vertical {
+                border: 1px outset #4f4e4f;
+                background-color: #190140;
+                width: 12px;  /* Change width of vertical scrollbar */
+                margin: 2px 2px 2px 2px;
+            }
+            QScrollBar::handle:vertical {
+                background: #190140;
+                min-height: 12px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                background:  #4f4e4f;
+            }
+            QScrollBar:horizontal {
+                border: none;
+                background: #190140;
+                height: 12px;  /* Change height of horizontal scrollbar */
+                margin: 2px 2px 2px 2px;
+            }
+            QScrollBar::handle:horizontal {
+                background: #190140;
+                min-width: 12px;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                background:  #4f4e4f;
             }
             """
         )
