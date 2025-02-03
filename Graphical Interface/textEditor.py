@@ -1,19 +1,26 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QFrame, QScrollArea, QListWidget, QLabel, QPushButton, QLineEdit, QSlider
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
-import sys
+from PyQt5.QtGui import QFont, QPixmap, QImage
+from PIL import Image
+import sys, os
+sys.path.append(os.getcwd())
+
+# importing custom modules
+from ImageManupulation.TextEditor import TextEditor
 
 class TextEditorAssembly(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Text Editor")
-        self.setFixedSize(640,650)
+        self.setFixedSize(980,500)
         self.textEditorMasterLayout = QVBoxLayout(self)
         self.addProperties()
         self.createUI()
         self.constructUI()
         self.addWidgetAttributes()
         self.addStyleSheet()
+        w, h = self.viewPanelScrollArea.width(), self.viewPanelScrollArea.height()
+        self.textEditor = TextEditor(Image.new(mode="RGBA", size = (w, h), color = (0,0,0,255)))
         return
     
     def addProperties(self):
@@ -33,9 +40,11 @@ class TextEditorAssembly(QWidget):
         return
     
     def createLayouts(self):
-        self.innerTExtEditorMasterLayout = QVBoxLayout()
+        self.innerTExtEditorMasterLayout = QHBoxLayout()
 
         self.viewZone = QVBoxLayout()
+        self.masterControlLayout = QVBoxLayout()
+        self.masterControlInnerLayout = QVBoxLayout()
         self.controlZone = QHBoxLayout()
 
         self.viewPanel = QVBoxLayout()
@@ -57,25 +66,28 @@ class TextEditorAssembly(QWidget):
 
     def createScrollArea(self):
         self.viewPanelScrollArea = QScrollArea()
-        self.viewPanelScrollArea.setFixedSize(600,220)
+        self.viewPanelScrollArea.setFixedSize(300,400)
         self.viewPanelScrollArea.setWidgetResizable(True)
 
-        self.controlScrollArea = QScrollArea()
-        self.controlScrollArea.setFixedSize(295,240)
-        self.controlScrollArea.setWidgetResizable(True)
+        self.textControlScrollArea = QScrollArea()
+        self.textControlScrollArea.setFixedSize(295,350)
+        self.textControlScrollArea.setWidgetResizable(True)
 
-        self.advanceControlScrollArea = QScrollArea()
-        self.advanceControlScrollArea.setFixedSize(295,240)
-        self.advanceControlScrollArea.setWidgetResizable(True)
+        self.textBoxControlScrollArea = QScrollArea()
+        self.textBoxControlScrollArea.setFixedSize(295,350)
+        self.textBoxControlScrollArea.setWidgetResizable(True)
         return
 
     def createframes(self):
         self.textEditorMasterFrame = QFrame()
-        self.textEditorMasterFrame.setFixedSize(620,630)
+        self.textEditorMasterFrame.setFixedSize(960,480)
         self.textEditorMasterFrame.setFrameShape(QFrame.Shape.Panel)
 
         self.viewPanelFrame = QFrame()
         self.viewPanelFrame.setFrameShape(QFrame.Shape.Panel)
+
+        self.masterControlFrame = QFrame()
+        self.masterControlFrame.setFrameShape(QFrame.Shape.Panel)
 
         self.controlFrame = QFrame()
         self.controlFrame.setFrameShape(QFrame.Shape.Panel)
@@ -102,14 +114,15 @@ class TextEditorAssembly(QWidget):
     
     def createLineEdits(self):
         self.textInput = QLineEdit()
-        self.textInput.setFixedSize(350, 25)
+        self.textInput.setFixedSize(200, 25)
         self.textInput.setFont(self.comicSansFont)
         return
     
     def createButtons(self):
         self.selectButton = QPushButton("Select") # input button
-        self.selectButton.setFixedSize(240, 25)
+        self.selectButton.setFixedSize(100, 25)
         self.selectButton.setFont(self.comicSansFont)
+        self.selectButton.clicked.connect(self.getTextFromInputLine)
 
         # buttons for advancement section
         self.backGroundButton = QPushButton("Add Text Box") # background
@@ -147,7 +160,7 @@ class TextEditorAssembly(QWidget):
     def createLabels(self):
         self.panelLabel = QLabel("View Window") # holder 1
         self.panelLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.panelLabel.setFixedSize(600,25)
+        self.panelLabel.setFixedSize(300,25)
         self.panelLabel.setFont(self.comicSansFont)
         self.adjustmentLabel = QLabel("Adjustments") # holder 2
         self.adjustmentLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -193,18 +206,21 @@ class TextEditorAssembly(QWidget):
         self.sizeSlider.setOrientation(Qt.Orientation.Horizontal)
         self.sizeSlider.setFixedWidth(250)
         self.sizeSlider.setObjectName("sizeSlider")
+        self.sizeSlider.valueChanged.connect(self.signalListener)
         self.textOpacitySlider = QSlider() # opacity slider
         self.textOpacitySlider.setRange(0, 255)
         self.textOpacitySlider.setSliderPosition(255)
         self.textOpacitySlider.setOrientation(Qt.Orientation.Horizontal)
         self.textOpacitySlider.setFixedWidth(250)
         self.textOpacitySlider.setObjectName("textOpacitySlider")
+        self.textOpacitySlider.valueChanged.connect(self.signalListener)
         self.textWidthSlider = QSlider() # text width slider
         self.textWidthSlider.setRange(0, 10)
         self.textWidthSlider.setSliderPosition(0)
         self.textWidthSlider.setOrientation(Qt.Orientation.Horizontal)
         self.textWidthSlider.setFixedWidth(250)
         self.textWidthSlider.setObjectName("textWidthSlider")
+        self.textWidthSlider.valueChanged.connect(self.signalListener)
 
         # sliders for box editing options
         self.boxSizeSlider = QSlider() # box size slider
@@ -212,19 +228,22 @@ class TextEditorAssembly(QWidget):
         self.boxSizeSlider.setSliderPosition(0)
         self.boxSizeSlider.setOrientation(Qt.Orientation.Horizontal)
         self.boxSizeSlider.setFixedWidth(250)
-        self.boxSizeSlider.setObjectName("boxSizeSlider") # box opacity slider
-        self.textBoxOpacitySlider = QSlider()
+        self.boxSizeSlider.setObjectName("boxSizeSlider")
+        self.boxSizeSlider.valueChanged.connect(self.signalListener)
+        self.textBoxOpacitySlider = QSlider()# box opacity slider
         self.textBoxOpacitySlider.setRange(0,255)
         self.textBoxOpacitySlider.setSliderPosition(255)
         self.textBoxOpacitySlider.setOrientation(Qt.Orientation.Horizontal)
         self.textBoxOpacitySlider.setFixedWidth(250)
         self.textBoxOpacitySlider.setObjectName("textBoxOpacitySlider")
+        self.textBoxOpacitySlider.valueChanged.connect(self.signalListener)
         self.textBoxBorderSize = QSlider() # border size slider
-        self.textBoxOpacitySlider.setRange(0, 10) # will generate dynamically based upon image size
+        self.textBoxOpacitySlider.setRange(0, 255) # will generate dynamically based upon image size
         self.textBoxBorderSize.setSliderPosition(0)
         self.textBoxBorderSize.setOrientation(Qt.Orientation.Horizontal)
         self.textBoxBorderSize.setFixedWidth(250)
         self.textBoxBorderSize.setObjectName("textBoxBorderSize")
+        self.textBoxBorderSize.valueChanged.connect(self.signalListener)
         return
 
     def constructUI(self):
@@ -232,9 +251,13 @@ class TextEditorAssembly(QWidget):
         self.textEditorMasterFrame.setLayout(self.innerTExtEditorMasterLayout) # inner master
 
         self.innerTExtEditorMasterLayout.addLayout(self.viewZone) #zone1
-        self.innerTExtEditorMasterLayout.addLayout(self.labelHolder2) # holder 2
-        self.innerTExtEditorMasterLayout.addLayout(self.controlZone) # zone2
-        self.innerTExtEditorMasterLayout.addLayout(self.finalizationActionHolderLayout)
+        self.innerTExtEditorMasterLayout.addLayout(self.masterControlLayout)
+
+        self.masterControlLayout.addWidget(self.masterControlFrame)
+        self.masterControlFrame.setLayout(self.masterControlInnerLayout)
+        self.masterControlInnerLayout.addLayout(self.labelHolder2) # holder 2
+        self.masterControlInnerLayout.addLayout(self.controlZone) # zone2
+        self.masterControlInnerLayout.addLayout(self.finalizationActionHolderLayout)
 
         self.viewZone.addLayout(self.viewPanel)
 
@@ -247,12 +270,12 @@ class TextEditorAssembly(QWidget):
         self.controlZone.addLayout(self.controlLayout)
         self.controlZone.addLayout(self.advanceControlLayout)
 
-        self.controlLayout.addWidget(self.controlScrollArea)
-        self.controlScrollArea.setWidget(self.controlFrame)
+        self.controlLayout.addWidget(self.textControlScrollArea)
+        self.textControlScrollArea.setWidget(self.controlFrame)
         self.controlFrame.setLayout(self.innerControlLayout) # control layout
 
-        self.advanceControlLayout.addWidget(self.advanceControlScrollArea)
-        self.advanceControlScrollArea.setWidget(self.advanceControlFrame)
+        self.advanceControlLayout.addWidget(self.textBoxControlScrollArea)
+        self.textBoxControlScrollArea.setWidget(self.advanceControlFrame)
         self.advanceControlFrame.setLayout(self.innerAdvanceControlLayout) # advancement layout
 
         self.finalizationActionHolderLayout.addWidget(self.finalizationActionHolderFrame)
@@ -374,6 +397,61 @@ class TextEditorAssembly(QWidget):
             }
             """
         )
+
+    # interfacing
+    @staticmethod
+    def PILToPixmapConverter(pilImage : Image.Image):
+        '''Converts a PIL Image object to a pixmap object'''
+        try:
+            if(pilImage):
+                imageData = pilImage.convert("RGBA").tobytes("raw", "RGBA")
+                qImage = QImage(imageData, pilImage.width, pilImage.height, QImage.Format.Format_RGBA8888)
+                return QPixmap.fromImage(qImage)
+        except Exception:
+            pass
+
+    def addImageToViewPanel(self, pilImage : Image.Image):
+        try:
+            if (exhibitionPixMap := self.PILToPixmapConverter(pilImage = pilImage)):
+                self.textLabel.hide()
+                exhibitionPixMap = exhibitionPixMap.scaled(self.viewPanelScrollArea.width() - 10, self.viewPanelScrollArea.height() - 10, aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
+                self.textLabel.setFixedSize(exhibitionPixMap.size())
+                self.textLabel.setPixmap(exhibitionPixMap)
+                self.textLabel.show()
+        except Exception:
+            pass
+        return
+
+    def getTextFromInputLine(self):
+        '''Takes the input text from inputLine and creates an imageLayer containing text'''
+        if ((text := self.textInput.text()) != ""):
+            self.textEditor.editText(text = text)
+            pilImage = self.textEditor.generateFinalEdit()
+            self.addImageToViewPanel(pilImage = pilImage)
+            return
+
+    def signalListener(self, signal):
+        if(self.textInput.text() == ""): return
+        # slider action
+        if (self.sender().objectName() == self.sizeSlider.objectName()):
+            self.textEditor.editText(text = self.textInput.text(),size = signal)
+            self.addImageToViewPanel(self.textEditor.generateFinalEdit())
+        elif (self.sender().objectName() == self.textWidthSlider.objectName()):
+            print(self.sender().objectName(),signal)
+        elif (self.sender().objectName() == self.textOpacitySlider.objectName()):
+            print(self.sender().objectName(),signal)
+        elif (self.sender().objectName() == self.boxSizeSlider.objectName()):
+            print(signal)
+        elif (self.sender().objectName() == self.textBoxOpacitySlider.objectName()):
+            print(signal)
+        elif(self.sender().objectName() == self.textBoxBorderSize.objectName()):
+            print(signal)
+        else:
+            pass
+        
+        # button Action
+
+    pass
 
 if __name__ == '__main__':
     app = QApplication([])
