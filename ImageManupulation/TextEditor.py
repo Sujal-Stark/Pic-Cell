@@ -67,13 +67,15 @@ class TextEditor:
             self.prev_position = position
         
         if(size == None and self.prev_size == None): # size filter
-            size = 20
+            size = 50
             self.prev_size = 20
         elif(size and self.prev_size == None):
+            size = (1 if size <= 0 else size)
             self.prev_size = size
         elif(size == None and self.prev_size):
             size = self.prev_size
         else:
+            size = (1 if size <= 0 else size)
             self.prev_size = size
         
         if(TextOpacity == None and self.prev_textOpacity == None): # text opacity filter
@@ -124,8 +126,8 @@ class TextEditor:
             drawObject.text(
                 xy = position, text = text, font = font, fill = tuple(color), stroke_width=textWidth, anchor = self.anchorList[anchor_tag]
             )
-        except TypeError:
-            print("Got some typing Problem")
+        # except TypeError:
+        #     print("Got some typing Problem")
         except OSError:
             print("got some problem to find files")
 
