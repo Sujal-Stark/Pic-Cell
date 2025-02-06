@@ -132,12 +132,17 @@ class TextEditorAssembly(QWidget):
         self.backGroundButton = QPushButton("Add Text Box") # background
         self.backGroundButton.setFixedSize(250, 30)
         self.backGroundButton.setFont(self.comicSansFont)
+        self.backGroundButton.setObjectName("textBoxAdderBackgroundButton")
+        self.backGroundButton.clicked.connect(self.signalListener)
+
         self.backGroundColorButton = QPushButton("Backgound Color") # background color
         self.backGroundColorButton.setFixedSize(250, 30)
         self.backGroundColorButton.setFont(self.comicSansFont)
+        self.backGroundColorButton.setObjectName("BackGroundColorButton")
         self.colorButton = QPushButton("Border color") # color 
         self.colorButton.setFixedSize(250, 30)
         self.colorButton.setFont(self.comicSansFont)
+        self.colorButton.setObjectName("outlineColorButton")
 
         # buttons for text editing options
         self.colorPickerButton = QPushButton("Use Color pallet") # color picker
@@ -160,7 +165,9 @@ class TextEditorAssembly(QWidget):
         self.anchorList = QListWidget() # stores all the anchor
         self.anchorList.setFixedSize(250, 25)
         self.anchorList.setFont(self.comicSansFont)
+        self.anchorList.setObjectName("AnchorListWidget")
         self.anchorList.addItems(["Anchors", "Top Left", "Top Center", "Top Right", "Center Left", "Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right"])
+        self.anchorList.itemClicked.connect(self.signalListener)
         pass
 
     def createLabels(self):
@@ -235,21 +242,18 @@ class TextEditorAssembly(QWidget):
         self.boxSizeSlider.setOrientation(Qt.Orientation.Horizontal)
         self.boxSizeSlider.setFixedWidth(250)
         self.boxSizeSlider.setObjectName("boxSizeSlider")
-        self.boxSizeSlider.valueChanged.connect(self.signalListener)
         self.textBoxOpacitySlider = QSlider()# box opacity slider
         self.textBoxOpacitySlider.setRange(0,255)
         self.textBoxOpacitySlider.setSliderPosition(255)
         self.textBoxOpacitySlider.setOrientation(Qt.Orientation.Horizontal)
         self.textBoxOpacitySlider.setFixedWidth(250)
         self.textBoxOpacitySlider.setObjectName("textBoxOpacitySlider")
-        self.textBoxOpacitySlider.valueChanged.connect(self.signalListener)
         self.textBoxBorderSize = QSlider() # border size slider
         self.textBoxOpacitySlider.setRange(0, 255) # will generate dynamically based upon image size
         self.textBoxBorderSize.setSliderPosition(0)
         self.textBoxBorderSize.setOrientation(Qt.Orientation.Horizontal)
         self.textBoxBorderSize.setFixedWidth(250)
         self.textBoxBorderSize.setObjectName("textBoxBorderSize")
-        self.textBoxBorderSize.valueChanged.connect(self.signalListener)
         return
 
     def constructUI(self):
@@ -448,32 +452,50 @@ class TextEditorAssembly(QWidget):
 
     def signalListener(self, signal):
         if(self.textInput.text() == ""): return
+        objectName = self.sender().objectName()
         # slider action
-        if (self.sender().objectName() == self.sizeSlider.objectName()):
+        if (objectName == self.sizeSlider.objectName()):
             self.textEditor.editText(text = self.textInput.text(),size = signal)
             self.textEditFlag = True
-        elif (self.sender().objectName() == self.textWidthSlider.objectName()):
+        elif (objectName == self.textWidthSlider.objectName()):
             self.textEditor.editText(text= self.textInput.text(), textWidth = signal)
             self.textEditFlag = True
-        elif (self.sender().objectName() == self.textOpacitySlider.objectName()):
+        elif (objectName == self.textOpacitySlider.objectName()):
             self.textEditor.editText(text = self.textInput.text(), textOpacity = signal)
             self.textEditFlag = True
-        elif (self.sender().objectName() == self.boxSizeSlider.objectName()):
-            print(signal)
-        elif (self.sender().objectName() == self.textBoxOpacitySlider.objectName()):
-            print(signal)
-        elif(self.sender().objectName() == self.textBoxBorderSize.objectName()):
-            print(signal)
+        elif (objectName == self.boxSizeSlider.objectName()):
+            self.textEditor.editTextBox(increment_Factor = signal)
+        elif (objectName == self.textBoxOpacitySlider.objectName()):
+            self.textEditor.editTextBox(opacity = signal)
+        elif(objectName == self.textBoxBorderSize.objectName()):
+            self.textEditor.editTextBox(lineWidth = signal)
         else:
             pass
         
+        # list Widget Action
+        if (objectName == self.anchorList.objectName()):
+            if ((anchor := self.anchorList.currentItem().text()) != "Anchors"):
+                self.textEditor.editText(text=self.textInput.text(), anchor_tag = anchor)
+                self.textEditFlag = True
+        
         # button Action
-        if(self.sender().objectName() == self.colorPickerButton.objectName()):
+        if(objectName == self.colorPickerButton.objectName()):
             self.textEditor.editText(text = self.textInput.text(), color = list(QColorDialog.getColor().getRgb()[:3]))
-            self.textEditFlag = True
-        if self.textEditFlag:
-            self.addImageToViewPanel(self.textEditor.generateFinalEdit())
-            self.textEditFlag = False
+        elif(objectName == self.colorButton.objectName()):
+            self.textEditor.editTextBox(outlineColor = list(QColorDialog.getColor().getRgb()[:3]))
+        elif(objectName == self.backGroundColorButton.objectName()):
+            self.textEditor.editTextBox(fillColor = list(QColorDialog.getColor().getRgb()[:3]))
+        elif(objectName == self.backGroundButton.objectName()):
+            self.textEditor.editTextBox()
+            self.boxSizeSlider.valueChanged.connect(self.signalListener)
+            self.textBoxOpacitySlider.valueChanged.connect(self.signalListener)
+            self.textBoxBorderSize.valueChanged.connect(self.signalListener)
+            self.colorButton.clicked.connect(self.signalListener)
+            self.backGroundColorButton.clicked.connect(self.signalListener)
+            self.textBoxEditFlag = True
+
+        self.addImageToViewPanel(self.textEditor.generateFinalEdit())
+        self.textEditFlag = False
     pass
 
 if __name__ == '__main__':
