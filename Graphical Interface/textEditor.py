@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QFrame, QScrollArea, QListWidget, QLabel, QPushButton, QLineEdit, QSlider
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QPixmap, QImage
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QFrame, QScrollArea, QListWidget, QLabel, QPushButton, QLineEdit, QSlider, QShortcut
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QFont, QPixmap, QImage, QKeySequence
 from PIL import Image
 import sys, os
 sys.path.append(os.getcwd())
@@ -9,18 +9,18 @@ sys.path.append(os.getcwd())
 from ImageManupulation.TextEditor import TextEditor
 
 class TextEditorAssembly(QWidget):
-    def __init__(self) -> None:
+    def __init__(self, img : Image.Image) -> None:
         super().__init__()
         self.setWindowTitle("Text Editor")
         self.setFixedSize(980,500)
         self.textEditorMasterLayout = QVBoxLayout(self)
+        self.inputImage = img
         self.addProperties()
         self.createUI()
         self.constructUI()
         self.addWidgetAttributes()
         self.addStyleSheet()
-        w, h = self.viewPanelScrollArea.width(), self.viewPanelScrollArea.height()
-        self.textEditor = TextEditor(Image.new(mode="RGBA", size = (w, h), color = (0,0,0,255)))
+        self.textEditor = TextEditor(Image.new(mode="RGBA", size = self.inputImage.size, color = (0,0,0,255)))
         return
     
     def addProperties(self):
@@ -123,6 +123,7 @@ class TextEditorAssembly(QWidget):
         self.selectButton.setFixedSize(100, 25)
         self.selectButton.setFont(self.comicSansFont)
         self.selectButton.clicked.connect(self.getTextFromInputLine)
+        self.selectButton.setShortcut(QKeySequence("Return"))
 
         # buttons for advancement section
         self.backGroundButton = QPushButton("Add Text Box") # background
@@ -414,12 +415,17 @@ class TextEditorAssembly(QWidget):
         try:
             if (exhibitionPixMap := self.PILToPixmapConverter(pilImage = pilImage)):
                 self.textLabel.hide()
-                exhibitionPixMap = exhibitionPixMap.scaled(self.viewPanelScrollArea.width() - 10, self.viewPanelScrollArea.height() - 10, aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
                 self.textLabel.setFixedSize(exhibitionPixMap.size())
                 self.textLabel.setPixmap(exhibitionPixMap)
                 self.textLabel.show()
-        except Exception:
-            pass
+                QTimer.singleShot(
+                    1, lambda : self.viewPanelScrollArea.horizontalScrollBar().setValue(self.viewPanelScrollArea.horizontalScrollBar().maximum()//2)
+                )
+                QTimer.singleShot(
+                    1, lambda : self.viewPanelScrollArea.verticalScrollBar().setValue(self.viewPanelScrollArea.verticalScrollBar().maximum()//2)
+                )
+        except Exception as e:
+            print(e)
         return
 
     def getTextFromInputLine(self):
@@ -455,7 +461,11 @@ class TextEditorAssembly(QWidget):
 
 if __name__ == '__main__':
     app = QApplication([])
-    textEditor = TextEditorAssembly()
+    textEditor = TextEditorAssembly(
+        Image.open(
+            r"C:\Users\SUJAL KHAN\Downloads\85b4c2ae-9d5b-44f9-95d5-e96210695f98.jpg"
+        )
+    )
     textEditor.show()
     app.exec_()
     
