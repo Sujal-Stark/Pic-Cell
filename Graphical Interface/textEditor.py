@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QFrame, QScrollArea, QListWidget, QLabel, QPushButton, QLineEdit, QSlider, QShortcut
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QFrame, QScrollArea, QListWidget, QLabel, QPushButton, QLineEdit, QSlider, QShortcut, QColorDialog
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QFont, QPixmap, QImage, QKeySequence
+from PyQt5.QtGui import QFont, QPixmap, QImage, QKeySequence, QColor
 from PIL import Image
 import sys, os
 sys.path.append(os.getcwd())
@@ -19,6 +19,7 @@ class TextEditorAssembly(QWidget):
         self.createUI()
         self.constructUI()
         self.addWidgetAttributes()
+        self.createShortCuts()
         self.addStyleSheet()
         self.textEditor = TextEditor(Image.new(mode="RGBA", size = self.inputImage.size, color = (0,0,0,255)))
         return
@@ -26,6 +27,8 @@ class TextEditorAssembly(QWidget):
     def addProperties(self):
         self.comicSansFontLarger = QFont("Comic Sans MS", 16)
         self.comicSansFont = QFont("Comic Sans MS", 10)
+        self.textEditFlag = False # raises flag when text text occur
+        self.textBoxEditFlag = False # raises flag when box edit occur
         return
     
     def createUI(self):
@@ -138,8 +141,10 @@ class TextEditorAssembly(QWidget):
 
         # buttons for text editing options
         self.colorPickerButton = QPushButton("Use Color pallet") # color picker
+        self.colorPickerButton.setObjectName("ColorPickerButton")
         self.colorPickerButton.setFixedSize(250, 30)
         self.colorPickerButton.setFont(self.comicSansFont)
+        self.colorPickerButton.clicked.connect(self.signalListener)
 
         # Finalization tools
         self.confirmButton = QPushButton("Confirm") # selects the edit to use in actual image
@@ -400,6 +405,11 @@ class TextEditorAssembly(QWidget):
         )
 
     # interfacing
+    def createShortCuts(self) -> None:
+        self.goToInputField = QShortcut(QKeySequence(Qt.Key.Key_T), self)
+        self.goToInputField.activated.connect(lambda : self.textInput.setFocus())
+        return
+
     @staticmethod
     def PILToPixmapConverter(pilImage : Image.Image):
         '''Converts a PIL Image object to a pixmap object'''
@@ -441,11 +451,13 @@ class TextEditorAssembly(QWidget):
         # slider action
         if (self.sender().objectName() == self.sizeSlider.objectName()):
             self.textEditor.editText(text = self.textInput.text(),size = signal)
-            self.addImageToViewPanel(self.textEditor.generateFinalEdit())
+            self.textEditFlag = True
         elif (self.sender().objectName() == self.textWidthSlider.objectName()):
-            print(self.sender().objectName(),signal)
+            self.textEditor.editText(text= self.textInput.text(), textWidth = signal)
+            self.textEditFlag = True
         elif (self.sender().objectName() == self.textOpacitySlider.objectName()):
-            print(self.sender().objectName(),signal)
+            self.textEditor.editText(text = self.textInput.text(), textOpacity = signal)
+            self.textEditFlag = True
         elif (self.sender().objectName() == self.boxSizeSlider.objectName()):
             print(signal)
         elif (self.sender().objectName() == self.textBoxOpacitySlider.objectName()):
@@ -456,7 +468,12 @@ class TextEditorAssembly(QWidget):
             pass
         
         # button Action
-
+        if(self.sender().objectName() == self.colorPickerButton.objectName()):
+            self.textEditor.editText(text = self.textInput.text(), color = list(QColorDialog.getColor().getRgb()[:3]))
+            self.textEditFlag = True
+        if self.textEditFlag:
+            self.addImageToViewPanel(self.textEditor.generateFinalEdit())
+            self.textEditFlag = False
     pass
 
 if __name__ == '__main__':
