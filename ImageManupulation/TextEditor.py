@@ -51,7 +51,7 @@ class TextEditor:
     
     def editText(
             self, text : str = None, position : tuple = None, size : int = None, color : list = None, textWidth : int = None, anchor_tag : int = 4,
-            TextOpacity : int = None
+            textOpacity : int = None
     ) -> None:
         self.newLayer = self.baseLayer.copy() # creates a new layer based upon the base layer
         drawObject = ImageDraw.Draw(self.newLayer) # draw object to perform drawing operatation
@@ -68,7 +68,7 @@ class TextEditor:
         
         if(size == None and self.prev_size == None): # size filter
             size = 50
-            self.prev_size = 20
+            self.prev_size = size
         elif(size and self.prev_size == None):
             size = (1 if size <= 0 else size)
             self.prev_size = size
@@ -78,26 +78,26 @@ class TextEditor:
             size = (1 if size <= 0 else size)
             self.prev_size = size
         
-        if(TextOpacity == None and self.prev_textOpacity == None): # text opacity filter
-            textOpacity = 255
+        if(textOpacity == None and self.prev_textOpacity == None): # text opacity filter
+            self.prev_textOpacity, textOpacity = 255, 255
+        elif(textOpacity and self.prev_textOpacity == None):
             self.prev_textOpacity = textOpacity
-        elif(TextOpacity and self.prev_textOpacity == None):
-            self.prev_textOpacity = TextOpacity
-        elif(TextOpacity == None and self.prev_textOpacity):
-            TextOpacity = self.prev_textOpacity
+        elif(textOpacity == None and self.prev_textOpacity):
+            textOpacity = self.prev_textOpacity
         else:
-            self.prev_textOpacity = TextOpacity
+            self.prev_textOpacity = textOpacity
 
         if(color == None and self.prev_color == None): # color filter
-            color = [255, 255, 255, 255]
+            color = [255, 255, 255, textOpacity]
             self.prev_color = color
         elif(color and self.prev_color == None):
-            color = color + [TextOpacity]
+            color = color + [textOpacity]
             self.prev_color = color
         elif(color == None and self.prev_color):
+            self.prev_color[3] = textOpacity
             color = self.prev_color
         else:
-            color = color + [TextOpacity]
+            color = color + [textOpacity]
             self.prev_color = color
         
         if(textWidth == None and self.prev_textWidth == None): # textwidth filter
@@ -126,8 +126,8 @@ class TextEditor:
             drawObject.text(
                 xy = position, text = text, font = font, fill = tuple(color), stroke_width=textWidth, anchor = self.anchorList[anchor_tag]
             )
-        # except TypeError:
-        #     print("Got some typing Problem")
+        except TypeError:
+            print("Got some typing Problem")
         except OSError:
             print("got some problem to find files")
 
@@ -205,7 +205,7 @@ if __name__ == '__main__':
         r"D:\Gallery\PhotoSpace\downloaded pic\Phone WallPaper\e7dc3878-ed3a-4bd4-8bfa-3b5dc874ebec.jfif"
         )
     )
-    textEditor.editText(text = "Sujal Khan", position = None ,size = 100, color = [255,0,255], textWidth=None, anchor_tag = None, TextOpacity = 120)
+    textEditor.editText(text = "Sujal Khan", position = None ,size = 100, color = [255,0,255], textWidth=None, anchor_tag = None, textOpacity = 120)
     textEditor.editTextBox(increment_Factor = 50, outlineColor = [255,255,0,255], fillColor = [0, 255, 255], opacity = 120, lineWidth = 2)
     image = textEditor.generateFinalEdit()
     image.show()
