@@ -1,6 +1,6 @@
 # this module is responsible for doing variaus kind of text editing it takes an image as input to use it's dimentions
 from PIL import Image, ImageDraw, ImageFont
-
+from icecream import ic
 class TextEditor:
     DEFAULT_FONT_STYLE = r"D:\Programming Library\PythonProgramming\Learning\assets\times new roman.ttf"
     # value holders
@@ -19,17 +19,17 @@ class TextEditor:
     prev_opacity : int = None
     prev_lineWidth : int = None
     
-    anchorList : list = [
-        "lt", # index = 0 top left,
-        "mt", # index = 1, top middle
-        "rt", # index = 2, top right
-        "lm",# index = 3, mid left
-        "mm", # index = 4, centre
-        "rm", # index = 5, mid right
-        "lb", # index = 6, left bottom
-        "mb", # index = 7, mid bottom
-        "rb", # index = 8, right bottom
-    ]
+    anchorList : list = {
+        "Top Left" : "lt", # top left,
+        "Top Center" : "mt", # top middle
+        "Top Right" : "rt", # top right
+        "Center Left" : "lm",# mid left
+        "Center" : "mm", # centre
+        "Center Right" : "rm", # mid right
+        "Bottom Left" : "lb", # left bottom
+        "Bottom Center" : "mb", # mid bottom
+        "Bottom Right" : "rb", #right bottom
+    }
     
     # consturctor
     def __init__(self, image : Image.Image)->None:
@@ -50,7 +50,7 @@ class TextEditor:
             return self.newLayer
     
     def editText(
-            self, text : str = None, position : tuple = None, size : int = None, color : list = None, textWidth : int = None, anchor_tag : int = 4,
+            self, text : str = None, position : tuple = None, size : int = None, color : list = None, textWidth : int = None, anchor_tag : str = "Center",
             textOpacity : int = None
     ) -> None:
         self.newLayer = self.baseLayer.copy() # creates a new layer based upon the base layer
@@ -126,6 +126,8 @@ class TextEditor:
             drawObject.text(
                 xy = position, text = text, font = font, fill = tuple(color), stroke_width=textWidth, anchor = self.anchorList[anchor_tag]
             )
+        except KeyError:
+            print("Invalid anchor Tag")
         except TypeError:
             print("Got some typing Problem")
         except OSError:
@@ -139,9 +141,9 @@ class TextEditor:
         
         if(increment_Factor == None and self.prev_incrementFactor == None): # increment factor
             increment_Factor, self.prev_incrementFactor = 0, 0
-        elif(increment_Factor and self.prev_incrementFactor == None):
+        elif(increment_Factor != None and self.prev_incrementFactor == None):
             self.prev_incrementFactor = increment_Factor
-        elif(increment_Factor == None and self.prev_incrementFactor):
+        elif(increment_Factor == None and self.prev_incrementFactor != None):
             increment_Factor = self.prev_incrementFactor
         else:
             self.prev_incrementFactor = increment_Factor
@@ -156,15 +158,19 @@ class TextEditor:
             self.prev_opacity = opacity
         
         if(outlineColor == None and self.prev_outlineColor == None): # outline color
-            outlineColor = [0,0,0,opacity]
+            outlineColor = [255,255,255,opacity]
             self.prev_outlineColor = outlineColor
         elif(outlineColor and self.prev_outlineColor == None):
+            outlineColor = outlineColor + [opacity]
             self.prev_outlineColor = outlineColor
         elif(outlineColor == None and self.prev_outlineColor):
+            self.prev_outlineColor[3] = opacity
             outlineColor = self.prev_outlineColor
         else:
+            outlineColor = outlineColor + [opacity]
             self.prev_outlineColor = outlineColor
 
+        
         if(fillColor == None and self.prev_fillColor == None): # fillcolor
             fillColor = [0,0,0,opacity]
             self.prev_fillColor = fillColor
@@ -172,6 +178,7 @@ class TextEditor:
             fillColor = fillColor+[opacity]
             self.prev_fillColor = fillColor
         elif(fillColor == None and self.prev_fillColor):
+            self.prev_fillColor[3] = opacity
             fillColor = self.prev_fillColor
         else:
             fillColor = fillColor+[opacity]
@@ -184,7 +191,7 @@ class TextEditor:
         elif(lineWidth == None and self.prev_lineWidth):
             lineWidth = self.prev_lineWidth
         else:
-            self.prev_lineWidth = self.prev_lineWidth 
+            self.prev_lineWidth = lineWidth
         
         try:
             bbox = tokenDrawObject.textbbox(
@@ -205,7 +212,7 @@ if __name__ == '__main__':
         r"D:\Gallery\PhotoSpace\downloaded pic\Phone WallPaper\e7dc3878-ed3a-4bd4-8bfa-3b5dc874ebec.jfif"
         )
     )
-    textEditor.editText(text = "Sujal Khan", position = None ,size = 100, color = [255,0,255], textWidth=None, anchor_tag = None, textOpacity = 120)
+    textEditor.editText(text = "Sujal Khan", position = None ,size = 100, color = [255,0,255], textWidth=None, textOpacity = 120)
     textEditor.editTextBox(increment_Factor = 50, outlineColor = [255,255,0,255], fillColor = [0, 255, 255], opacity = 120, lineWidth = 2)
     image = textEditor.generateFinalEdit()
     image.show()
