@@ -9,19 +9,17 @@ sys.path.append(os.getcwd())
 from ImageManupulation.TextEditor import TextEditor
 
 class TextEditorAssembly(QWidget):
-    def __init__(self, img : Image.Image) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Text Editor")
         self.setFixedSize(980,500)
         self.textEditorMasterLayout = QVBoxLayout(self)
-        self.inputImage = img
         self.addProperties()
         self.createUI()
         self.constructUI()
         self.addWidgetAttributes()
         self.createShortCuts()
         self.addStyleSheet()
-        self.textEditor = TextEditor(Image.new(mode="RGBA", size = self.inputImage.size, color = (0,0,0,255)))
         return
     
     def addProperties(self):
@@ -409,6 +407,14 @@ class TextEditorAssembly(QWidget):
         )
 
     # interfacing
+    def getOutput(self):
+        return self.textEditor.generateFinalEdit()
+
+    def getPILImage(self, image : Image.Image):
+        self.textEditor = TextEditor(image.convert(mode = "RGBA"))
+        self.inputImage = image
+        return
+    
     def createShortCuts(self) -> None:
         self.goToInputField = QShortcut(QKeySequence(Qt.Key.Key_T), self)
         self.goToInputField.activated.connect(lambda : self.textInput.setFocus())
@@ -500,11 +506,8 @@ class TextEditorAssembly(QWidget):
 
 if __name__ == '__main__':
     app = QApplication([])
-    textEditor = TextEditorAssembly(
-        Image.open(
-            r"C:\Users\SUJAL KHAN\Downloads\85b4c2ae-9d5b-44f9-95d5-e96210695f98.jpg"
-        )
-    )
+    textEditor = TextEditorAssembly()
+    textEditor.getPILImage(Image.open(r"C:\Users\SUJAL KHAN\Downloads\85b4c2ae-9d5b-44f9-95d5-e96210695f98.jpg"))
     textEditor.show()
     app.exec_()
     
