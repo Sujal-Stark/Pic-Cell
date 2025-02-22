@@ -19,6 +19,7 @@ from ImageManupulation.maskGenerator import Masks
 from imageOperationController import OperationFramework
 from pixmapLinker import PixmapLinker, Node
 from customCropWindow import CustomResizeWindow
+from textEditor import TextEditorAssembly
 
 class EditingActionManager(QWidget):
     def __init__(self) -> None:
@@ -55,6 +56,7 @@ class EditingActionManager(QWidget):
         self.viewOriginal.pressed.connect(self.buttonPressedAction)
         self.viewOriginal.released.connect(self.buttonRealeaseAction)
         self.customResizeWindow.continueButton.clicked.connect(self.showPixmapFromResizeWindow)
+        self.textEditHandler.confirmButton.clicked.connect(self.handleConfirmActionForTextEditHandler)
         return
     
     def addProperties(self):
@@ -98,6 +100,7 @@ class EditingActionManager(QWidget):
         }# stores data for final Edit
         self.colorVal : QColor = None
         self.multivalueOperation = False
+        self.textEditHandler = TextEditorAssembly()
         return
     
     def createLabels(self):
@@ -206,7 +209,7 @@ class EditingActionManager(QWidget):
         self.editingTreeBody.setFixedSize(190,580)
         self.clearEditSpectrum()
         self.editingTreeBody.setHeaderLabel("Editing Body")
-        editSections = ["Adjust", "Filters", "Color Enhance", "Deform Image", "Frames", "Collage"]
+        editSections = ["Adjust", "Filters", "Color Enhance", "Deform Image", "Frames", "Text Editor"]
         for editSection in editSections:
             self.editingTreeBody.addTopLevelItem(QTreeWidgetItem([editSection]))
         return
@@ -277,8 +280,6 @@ class EditingActionManager(QWidget):
             editOptions = ImageDeformer.deformOptions
         elif parsedClass == "Frames":
             editOptions = Masks.frameOptions
-        elif parsedClass == "Collage":
-            pass
         for editOption in editOptions:
             item.addChild(QTreeWidgetItem([editOption]))
         editOptions.clear()
@@ -300,9 +301,18 @@ class EditingActionManager(QWidget):
 
     def treeBodyItemclicked(self, treeItem : QTreeWidgetItem):
         self.clearAdvancementLayer()
-        self.addTreeItems(item = treeItem)
-        self.addSpecialMethodsToGrid(treeItem = treeItem)
-        self.cropRubberBand.close()
+        if treeItem.text(0) == "Text Editor":
+            try:
+                if self.newImageObject == None:
+                    self.newImageObject = self.imageObject
+                self.textEditHandler.getPILImage(self.convertPixMaptoImage(self.newImageObject))
+                self.textEditHandler.show()
+            except Exception as e:
+                return "Unable to Load Text Editor"
+        else:
+            self.addTreeItems(item = treeItem)
+            self.addSpecialMethodsToGrid(treeItem = treeItem)
+            self.cropRubberBand.close()
 
     def clearEditSpectrum(self):
         for _ in range(self.innerEditSpectrumLayout.count()):
@@ -393,6 +403,7 @@ class EditingActionManager(QWidget):
             return
     
     def addSpecialMethodsToGrid(self, treeItem : QTreeWidgetItem):
+        # Adds special methods to grid
         if treeItem.parent():
             self.clearEditSpectrum()
             try:
@@ -473,6 +484,13 @@ class EditingActionManager(QWidget):
             self.innerEditSpectrumLayout.addWidget(QLabel("Editing choice will show up here"), 0, 0, alignment = Qt.AlignmentFlag.AlignCenter)
             return "Closed Successfully"
     
+    def handleConfirmActionForTextEditHandler(self):
+        self.showPixmap(
+            self.overLayPixmapObjects(basePixmap = self.imageObject, overLayPixmap = self.convertImagetoPixMap(self.textEditHandler.getOutput()))
+        )
+        self.textEditHandler.close()
+        return
+
     def saveImageInMachine(self):
         self.filewinowForSave.saveFileByNmae()
         return
@@ -676,7 +694,7 @@ class EditingActionManager(QWidget):
         return
     
     def keepEdit(self):
-        if self.newImageObject != None:
+        if self.newImageObject:
             if self.editingTreeBody.currentItem().text(0) == "Crop":
                 topLeftBand = self.imageForEditLabel.mapTo(self.imageForEditLabel, self.cropRubberBand.geometry().topLeft())
                 rectBand = QRect(topLeftBand, self.cropRubberBand.size())
