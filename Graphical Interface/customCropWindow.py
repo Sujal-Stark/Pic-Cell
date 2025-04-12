@@ -6,6 +6,7 @@ from PIL import Image
 class CustomResizeWindow(QWidget):
     def __init__(self) -> None:
         super().__init__()
+        
         self.setWindowTitle("Resize")
         self.setFixedSize(400,240)
         self.resizeWindowMasterLayout = QVBoxLayout(self)

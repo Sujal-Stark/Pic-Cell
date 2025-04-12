@@ -409,9 +409,13 @@ class TextEditorAssembly(QWidget):
     # interfacing
     def getOutput(self):
         return self.textEditor.generateFinalEdit()
-
+    
+    def getMetaInformation(self):
+        return self.textEditor.meta
+ 
     def getPILImage(self, image : Image.Image):
         self.textEditor = TextEditor(image.convert(mode = "RGBA"))
+        print("Woprking")
         self.inputImage = image
         return
     
@@ -455,7 +459,7 @@ class TextEditorAssembly(QWidget):
             pilImage = self.textEditor.generateFinalEdit()
             self.addImageToViewPanel(pilImage = pilImage)
             return
-
+    
     def signalListener(self, signal):
         if(self.textInput.text() == ""): return
         objectName = self.sender().objectName()

@@ -293,7 +293,7 @@ class EditingActionManager(QWidget):
         else:
             self.finalEditMeta["parent"] = None
             self.finalEditMeta["child"] = self.editingTreeBody.currentItem().text(0)
-        self.finalEditMeta["signalValue"] = self.signalValue
+        self.finalEditMeta["signalValue"] = self.signalValue if self.editingTreeBody.currentItem().text(0) != "Text Editor" else self.textEditHandler.getMetaInformation()
         self.finalEditMeta["color"] = self.colorVal
         self.finalEditMeta["multivalue"] = self.multivalueOperation
         return
@@ -305,7 +305,10 @@ class EditingActionManager(QWidget):
             try:
                 if self.newImageObject == None:
                     self.newImageObject = self.imageObject
-                self.textEditHandler.getPILImage(self.convertPixMaptoImage(self.newImageObject))
+                im = self.convertPixMaptoImage(self.newImageObject)
+                self.operationManager.imageObject = im
+                self.textEditHandler.getPILImage(im)
+                del im
                 self.textEditHandler.show()
             except Exception as e:
                 return "Unable to Load Text Editor"
@@ -703,6 +706,7 @@ class EditingActionManager(QWidget):
                 self.cropRubberBand.close()
                 self.showPixmap(self.newImageObject)
             self.storeMeta()
+            ic(self.finalEditMeta)
             self.IMAGETOSAVE = self.operationManager.editfromParsedData(self.finalEditMeta)
             # self.IMAGETOSAVE.show()
             self.imageObject = self.newImageObject

@@ -5,6 +5,7 @@ from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.imageColorEnhancer import ColorImage
 from ImageManupulation.deformer import ImageDeformer
 from ImageManupulation.maskGenerator import Masks
+from textEditor import TextEditorAssembly
 from icecream import ic
 
 from PIL import Image
@@ -22,6 +23,7 @@ class OperationFramework(QWidget):
         self.imageColoring = ColorImage()
         self.imageDeforming = ImageDeformer()
         self.imageFrames = Masks()
+        self.textEditorAssembly =  TextEditorAssembly()
         return
     
     def signalManager(self, treeChild : QTreeWidgetItem, signalValue : object = None, multivalueOperaion : bool = False):
@@ -47,7 +49,13 @@ class OperationFramework(QWidget):
         color = valueHashList["color"]
         if valueHashList["multivalue"]==False and color is None: # single value operations and no color access
             if signal != None: # signal value 1
-                image = self.performAction(parentItem = parent, subOperation = subEdit, signalValue = signal)
+                if isinstance(signal, dict):
+                    self.textEditorAssembly.getPILImage(self.imageObject)
+                    self.textEditorAssembly.textEditor.setMetaInformation(signal)
+                    image = self.textEditorAssembly.textEditor.generateFinalEdit()
+                    # image.show()
+                else:
+                    image = self.performAction(parentItem = parent, subOperation = subEdit, signalValue = signal)
             elif signal == None: # signal value 0
                 if(parent.text(0) == "Frames"): # if frames are used then use overlay
                     overlayImage = self.singleOperations(parentItem = parent, subOperation = subEdit)

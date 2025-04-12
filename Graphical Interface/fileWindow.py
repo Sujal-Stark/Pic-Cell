@@ -10,6 +10,7 @@ import psutil
 class FileWindow(QDialog):
     def __init__(self) -> None:
         super().__init__()
+        self.setModal(True) # prevent interaction with other window while open
         self.setWindowTitle("File Explorer")
         self.setGeometry(0,0,400,300)
         self.masterLayout = QVBoxLayout(self)
