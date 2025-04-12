@@ -1,12 +1,12 @@
 # import libraries
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QFrame, QLabel, QComboBox, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QFrame, QLabel, QComboBox, QLineEdit, QPushButton
 from PIL import Image
 
-class CustomResizeWindow(QWidget):
+class CustomResizeWindow(QDialog):
     def __init__(self) -> None:
         super().__init__()
-        
+        self.setModal(True)
         self.setWindowTitle("Resize")
         self.setFixedSize(400,240)
         self.resizeWindowMasterLayout = QVBoxLayout(self)

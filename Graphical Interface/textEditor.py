@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QFrame, QScrollArea, QListWidget, QLabel, QPushButton, QLineEdit, QSlider, QShortcut, QColorDialog
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QFrame, QScrollArea, QListWidget, QLabel, QPushButton, QLineEdit, QSlider, QShortcut, QColorDialog
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPixmap, QImage, QKeySequence, QColor
 from PIL import Image
@@ -8,9 +8,10 @@ sys.path.append(os.getcwd())
 # importing custom modules
 from ImageManupulation.TextEditor import TextEditor
 
-class TextEditorAssembly(QWidget):
+class TextEditorAssembly(QDialog):
     def __init__(self) -> None:
         super().__init__()
+        self.setModal(True)
         self.setWindowTitle("Text Editor")
         self.setFixedSize(980,500)
         self.textEditorMasterLayout = QVBoxLayout(self)
@@ -337,7 +338,7 @@ class TextEditorAssembly(QWidget):
     def addStyleSheet(self):
         self.setStyleSheet(
             """
-            QWidget {
+            QDialog {
                 background-color: #18122b;
                 border-radius: 10px;
             }
