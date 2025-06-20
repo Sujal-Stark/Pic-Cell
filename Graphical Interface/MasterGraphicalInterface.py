@@ -4,9 +4,9 @@ QPushButton, QLabel, QFrame, QMenuBar, QMenu, QAction, QShortcut)
 from PyQt5.QtCore import Qt
 from galleryView import GalleryWindow
 from fileWindow import FileWindow
-from threading import Thread
 from editManager import EditingActionManager
 from PyQt5.QtGui import QFont, QIcon
+import Constants
 from icecream import ic
 import os
 
@@ -14,12 +14,12 @@ class MasterWindow(QMainWindow):
     def __init__(self)-> None:
         super().__init__()
         
-        self.setWindowTitle("Pic_Cell")
+        self.setWindowTitle(Constants.APPLICATION_NAME)
         self.setGeometry(0,0,800,600)
         self.mainWidget = QWidget()
         self.setCentralWidget(self.mainWidget)
         self.masterLayout = QVBoxLayout(self.mainWidget)
-        self.setWindowIcon(QIcon("./static/Icon_Pic_Cell.png"))
+        self.setWindowIcon(QIcon(Constants.ICON_PATH))
         self.assignProperties()
         self.LoadUI()
         self.eventManager()
