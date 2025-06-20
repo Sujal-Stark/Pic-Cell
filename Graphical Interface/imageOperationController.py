@@ -30,15 +30,14 @@ class OperationFramework(QWidget):
         self.treeChildItem = treeChild
         parentItem = self.treeChildItem.parent()
         subOperation = self.treeChildItem.text(0)
-        if multivalueOperaion == False:
-            if signalValue != None:
+        if not multivalueOperaion:
+            if signalValue is not None:
                 return self.performAction(parentItem, subOperation, signalValue)
-            elif signalValue == None:
+            elif signalValue is None:
                 return self.singleOperations(parentItem, subOperation)
         elif multivalueOperaion:
             return self.multivalueOperation(parentWidget = parentItem, subOperation=subOperation, signalValue=signalValue)
-        else:
-            return
+        return None
     
     def editfromParsedData(self, valueHashList : dict = None):
         '''perform edits only on original image so that the resolution of the image may become intact'''
@@ -324,3 +323,4 @@ class OperationFramework(QWidget):
             elif methodName == keyMethods[12]:
                 return self.imageFrames.style_eight_mask(chosenColor = customColor)
             return self.imageObject
+        return None
