@@ -1,11 +1,12 @@
 # libraries
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QPushButton, QLabel, QFrame, QMenuBar, QMenu, QAction, QShortcut
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
+QPushButton, QLabel, QFrame, QMenuBar, QMenu, QAction, QShortcut)
 from PyQt5.QtCore import Qt
 from galleryView import GalleryWindow
 from fileWindow import FileWindow
 from threading import Thread
 from editManager import EditingActionManager
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QIcon
 from icecream import ic
 import os
 
@@ -18,6 +19,7 @@ class MasterWindow(QMainWindow):
         self.mainWidget = QWidget()
         self.setCentralWidget(self.mainWidget)
         self.masterLayout = QVBoxLayout(self.mainWidget)
+        self.setWindowIcon(QIcon("./static/Icon_Pic_Cell.png"))
         self.assignProperties()
         self.LoadUI()
         self.eventManager()
