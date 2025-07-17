@@ -1,24 +1,25 @@
 # important Libraries
 from PyQt5.QtGui import QMouseEvent, QPixmap, QImage, QPainter
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider, QRubberBand
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QTreeWidget,
+QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider, QRubberBand)
 from PyQt5.QtCore import Qt, QTimer, QPoint, QRect, QSize
 from PyQt5.QtGui import QColor, QFont
 from icecream import ic
 from PIL import Image
 import sys, os
 
-# adding current path to the system
-sys.path.append(os.getcwd())
+# Custom import
+import Constants
 from fileWindow import FileWindow
 from ImageframeAdjuster import FrameAdjustment
 from deformer import ImageDeformer
-from ImageManupulation.imageColorEnhancer import ColorImage
-from ImageManupulation.imageFiltering import FilterImage
-from ImageManupulation.maskGenerator import Masks
+from imageColorEnhancer import ColorImage
+from imageFiltering import FilterImage
+from maskGenerator import Masks
 from imageOperationController import OperationFramework
 from pixmapLinker import PixmapLinker, Node
 from customCropWindow import CustomResizeWindow
-from textEditor import TextEditorAssembly
+from textEditorUI import TextEditorAssembly
 
 class EditingActionManager(QWidget):
     def __init__(self) -> None:
@@ -28,8 +29,8 @@ class EditingActionManager(QWidget):
         self.loadUi()
         self.addResponse()
         self.performImageOperation()
-        qss = self.filewinowForSave.readQssFile(r"Graphical Interface\editManager.qss")
-        if (qss != ""):
+        qss = self.filewinowForSave.readQssFile(r"static\editManager.qss")
+        if qss != "":
             self.setStyleSheet(qss)
         return
     
@@ -152,13 +153,15 @@ class EditingActionManager(QWidget):
     
     def createFrames(self):
         self.imageViewingFrame = QFrame()
-        self.imageViewingFrame.setFrameShape(QFrame.Shape.Box)
+        self.imageViewingFrame.setFrameShape(QFrame.NoFrame)
+        self.imageViewingFrame.setStyleSheet("border: none;")
 
         self.editOptionFrame = QFrame()
         self.editOptionFrame.setFrameShape(QFrame.Shape.Box)
 
         self.editSpectrumFrame = QFrame()
-        self.editSpectrumFrame.setFrameShape(QFrame.Shape.Box)
+        self.editSpectrumFrame.setFrameShape(QFrame.NoFrame)
+        self.editSpectrumFrame.setStyleSheet("border: none;")
 
         self.advancementframe = QFrame()
         self.advancementframe.setFrameShape(QFrame.Shape.Box)
@@ -185,37 +188,34 @@ class EditingActionManager(QWidget):
         return
 
     def creteScrollAreas(self):
-        self.ScrollEditingBody = QScrollArea()
-        self.ScrollEditingBody.setWidgetResizable(True)
-
         self.editableImageField = QScrollArea()
         self.editableImageField.setWidgetResizable(True)
-        self.editableImageField.setFixedSize(860,600)
-        # self.cropRubberBand.setParent(self)
 
         self.editSpectrumScrollArea = QScrollArea()
         self.editSpectrumScrollArea.setWidgetResizable(True)
-        self.editSpectrumScrollArea.setFixedSize(230,280)
 
         self.innerAdvancementScrollArea = QScrollArea()
         self.innerAdvancementScrollArea.setWidgetResizable(True)
-        self.innerAdvancementScrollArea.setFixedSize(210, 180)
         return
     
     def editingTree(self):
         self.editingTreeBody = QTreeWidget()
         self.editingTreeBody.setFont(self.comicSansFont)
-        self.editingTreeBody.setFixedSize(190,580)
+        # self.editingTreeBody.setFixedSize(190,580)
         self.clearEditSpectrum()
-        self.editingTreeBody.setHeaderLabel("Editing Body")
-        editSections = ["Adjust", "Filters", "Color Enhance", "Deform Image", "Frames", "Text Editor"]
+        self.editingTreeBody.setHeaderLabel("Edit Options")
+        editSections = [
+            Constants.EDIT_OPTION_ADJUST, Constants.EDIT_OPTION_FILTERS,
+            Constants.EDIT_OPTION_COLOR_ENHANCE, Constants.EDIT_OPTION_DEFORM_IMAGE,
+            Constants.EDIT_OPTION_FRAMES, Constants.EDIT_OPTION_TEXT_EDITOR
+        ]
         for editSection in editSections:
             self.editingTreeBody.addTopLevelItem(QTreeWidgetItem([editSection]))
         return
     
     def constructInterface(self):
-        self.editSectionMasterLayout.addLayout(self.editingZoneLayout, 90)
-        self.editSectionMasterLayout.addLayout(self.editControlLayout, 10)
+        self.editSectionMasterLayout.addLayout(self.editingZoneLayout)
+        self.editSectionMasterLayout.addLayout(self.editControlLayout)
 
         self.editingZoneLayout.addLayout(self.editOptionPanel, 0, 0)
         self.editOptionPanel.addWidget(self.editOptionFrame)
@@ -226,12 +226,12 @@ class EditingActionManager(QWidget):
         self.editableImageField.setWidget(self.imageViewingFrame)
         self.imageViewingFrame.setLayout(self.innerImageViewingPanel)
 
-        self.editControlLayout.addLayout(self.editSpectrumLayout, 55)
+        self.editControlLayout.addLayout(self.editSpectrumLayout, 50)
         self.editSpectrumLayout.addWidget(self.editSpectrumScrollArea)
         self.editSpectrumScrollArea.setWidget(self.editSpectrumFrame)
         self.editSpectrumFrame.setLayout(self.innerEditSpectrumLayout)
 
-        self.editControlLayout.addLayout(self.advancementLayout, 45)
+        self.editControlLayout.addLayout(self.advancementLayout, 30)
         self.advancementLayout.addWidget(self.advancementframe)
         self.advancementframe.setLayout(self.innerAdvancementLayout)
         return
@@ -249,6 +249,27 @@ class EditingActionManager(QWidget):
         AdvancementOptionLabel.setFont(self.comicSansFont)
         AdvancementOptionLabel.setStyleSheet(self.imageForEditLabel.styleSheet())
         self.sliderHolderLayout.addWidget(AdvancementOptionLabel,alignment=Qt.AlignmentFlag.AlignCenter)
+        return
+
+    ########################################### INTERFACING #############################################
+    def resizeEvent(self, a0):
+        currWidth, currHeight = self.width(), self.height()
+        self.editableImageField.setFixedWidth(
+            int(currWidth * Constants.EDIT_SECTION_VIEW_PANEL_WIDTH_PERCENTAGE) - 10
+        )
+        self.editOptionFrame.setFixedWidth(
+            int(currWidth * Constants.EDIT_BODY_WIDTH_PERCENTAGE) - 10,
+        )
+        self.editSpectrumScrollArea.setFixedWidth(
+            int(currWidth * Constants.EDIT_SPECTRUM_WIDTH_PERCENTAGE) - 10
+        )
+        self.advancementframe.setFixedWidth(
+            int(currWidth * Constants.EDIT_SPECTRUM_WIDTH_PERCENTAGE) - 10
+        )
+        self.innerAdvancementScrollArea.setFixedHeight(
+            int(currHeight * Constants.ADVANCEMENT_PANEL_HEIGHT_PERCENTAGE - 10)
+        )
+        super().resizeEvent(a0)
         return
 
     def toggleHideLeft(self):
@@ -269,7 +290,7 @@ class EditingActionManager(QWidget):
     def addTreeItems(self, item : QTreeWidgetItem):
         parsedClass = item.text(0)
         editOptions = []
-        if parsedClass == "Adjust":
+        if parsedClass == Constants.EDIT_OPTION_ADJUST:
             editOptions = FrameAdjustment.adjustmentSubEditOption
         elif parsedClass == "Filters":
             editOptions = FilterImage.filteringOption
@@ -336,7 +357,9 @@ class EditingActionManager(QWidget):
             return
 
     def fillInnerAdvanceMentlayout(self, valueparserList : dict):
-        self.innerEditSpectrumLayout.addWidget(QLabel("Editing choice will show up here"), 0, 0, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerEditSpectrumLayout.addWidget(
+            QLabel("Editing choice will show up here"), 0, 0, alignment=Qt.AlignmentFlag.AlignCenter
+        )
         if len(valueparserList) == 0:
             self.performImageOperation()
         else:
@@ -443,7 +466,8 @@ class EditingActionManager(QWidget):
                 return "Loading"
             except KeyError:
                 return "Method access denied"
-    
+        return None
+
     def showPixmap(self, imageObject : QPixmap):
         self.imageForEditLabel.hide()
         self.imageForEditLabel.setFixedSize(imageObject.width(), imageObject.height())
@@ -459,7 +483,7 @@ class EditingActionManager(QWidget):
             self.imageForEditLabel.hide()
             self.imageObject = self.imageObject.scaled(self.imageSize[0], self.imageSize[1], aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
             self.ORIGINALIMAGEOBJECT = self.imageObject
-            self.pixmapConnector.createPixmappixmapHead(self.imageObject, self.IMAGETOSAVE)
+            self.pixmapConnector.createPixmapHead(self.imageObject, self.IMAGETOSAVE)
             self.firstCallFlag = True
             self.imageForEditLabel.setFixedSize(self.imageObject.width(), self.imageObject.height())
             self.imageForEditLabel.setPixmap(self.imageObject)
@@ -483,9 +507,12 @@ class EditingActionManager(QWidget):
             self.editingTreeBody.collapseAll()
             self.imageForEditLabel.show()
             self.cropRubberBand.close()
-            self.innerEditSpectrumLayout.addWidget(QLabel("Editing choice will show up here"), 0, 0, alignment = Qt.AlignmentFlag.AlignCenter)
+            self.innerEditSpectrumLayout.addWidget(
+                QLabel("Editing choice will show up here"), 0, 0, alignment=Qt.AlignmentFlag.AlignCenter
+            )
             return "Closed Successfully"
-    
+        return None
+
     def handleConfirmActionForTextEditHandler(self):
         self.showPixmap(
             self.overLayPixmapObjects(basePixmap = self.imageObject, overLayPixmap = self.convertImagetoPixMap(self.textEditHandler.getOutput()))
@@ -563,17 +590,17 @@ class EditingActionManager(QWidget):
 
     # get's an signal value process it and perform multiple image operations
     def performImageOperation(self, signalValue : object = None):
-        if self.editingTreeBody.currentItem() != None and self.imageObject != None:
-            currentButton1 : QPushButton = self.innerEditSpectrumLayout.sender() # operaional button
+        if self.editingTreeBody.currentItem() is not None and self.imageObject is not None:
+            currentButton1 : QPushButton = self.innerEditSpectrumLayout.sender() # operational button
             self.operationManager.imageObject = self.convertPixMaptoImage(self.imageObject) # passing ImageObject
 
-            # handles if edit occur while itering
-            if self.linker != None:
+            # handles if edit occur while iterating
+            if self.linker is not None:
                 self.linker.previousNode = None
 
-            sender = self.sender() # QButton or QTeeWigetItem or QSlider
+            sender = self.sender() # QButton or QTeeWidgetItem or QSlider
             if isinstance(sender, QPushButton):
-                # invoking operation manager to perform editng
+                # invoking operation manager to perform editing
                 if len(self.valuePackage.keys()) > 0:
                     if self.editingTreeBody.currentItem().text(0) == "Crop":
                         self.getCropDimention(self.valuePackage[currentButton1.text()], sender.text())
@@ -649,9 +676,9 @@ class EditingActionManager(QWidget):
             return # rundo operation can't be done if no image is selected in edit
         if self.linker == None: # no Image is set by keepEdit method
             # copies the real pixmap connectors pixmapHead with the linker
-            if self.pixmapConnector.pixmapHead and self.firstCallFlag: # works if pixmaphead Exists and operating undo
+            if self.pixmapConnector.pixmapHead and self.firstCallFlag: # works if pixMapHead Exists and operating undo
                 if self.pixmapConnector.pixmapHead:
-                    self.linker = self.pixmapConnector.pixmapHead # copying current image object for iterating thorugh LL
+                    self.linker = self.pixmapConnector.pixmapHead # copying current image object for iterating through LL
                     if self.linker.nextNode and self.linker.nextNode.image:
                         self.linker = self.linker.nextNode
                         self.imageObject = self.linker.image
@@ -738,9 +765,9 @@ class EditingActionManager(QWidget):
         self.frameAdjustment = FrameAdjustment()
         self.frameAdjustment.getImageObject(self.convertPixMaptoImage(self.imageObject))
         if text != "Custom":
-            a,b,c,d = self.frameAdjustment.sendCropDimention(signal)
-            self.cropRubberBand.setFixedSize(c-a, d-b)
-            self.cropRubberBand.move(a,b)
+            a,b,c,d = self.frameAdjustment.sendCropDimension(signal)
+            self.cropRubberBand.setFixedSize(int(c-a), int(d-b))
+            self.cropRubberBand.move(int(a),int(b))
             self.cropRubberBand.show()
         else:
             self.cropRubberBand.close()
