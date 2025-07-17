@@ -1,13 +1,17 @@
 # import libraries
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QFrame, QLabel, QComboBox, QLineEdit, QPushButton
+from PyQt5.QtWidgets import (QApplication, QDialog, QVBoxLayout, QHBoxLayout, QFrame, QLabel,
+QComboBox, QLineEdit, QPushButton)
 from PIL import Image
+
+# Custom Import
+import Constants
 
 class CustomResizeWindow(QDialog):
     def __init__(self) -> None:
         super().__init__()
         self.setModal(True)
-        self.setWindowTitle("Resize")
+        self.setWindowTitle("Resize Image")
         self.setFixedSize(400,240)
         self.resizeWindowMasterLayout = QVBoxLayout(self)
         self.imageWidth = 0
@@ -15,7 +19,7 @@ class CustomResizeWindow(QDialog):
         self.image = None
         self.createUI()
         self.createResponse()
-        qss = self.readQssFile(r"static\customCropWindow.qss")
+        qss = self.readQssFile(Constants.CUSTOM_CROP_WINDOW_UI_STYLE_FILE)
         if qss != "":
             self.setStyleSheet(qss)
         return
@@ -27,7 +31,7 @@ class CustomResizeWindow(QDialog):
     def createUI(self):
         self.createLayouts()
         self.createFrames()
-        self.createlabels()
+        self.createLabels()
         self.createInputBox()
         self.createComBoBox()
         self.createButtons()
@@ -63,7 +67,7 @@ class CustomResizeWindow(QDialog):
         self.actionControlInnerLayout = QHBoxLayout()
         return
     
-    def createlabels(self):
+    def createLabels(self):
         self.widthLabel = QLabel("Width value:")
         self.heighLabel = QLabel("Height value:")
         self.widthPixLabel = QLabel("pixels")
