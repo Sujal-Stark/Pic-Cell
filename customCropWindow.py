@@ -15,10 +15,9 @@ class CustomResizeWindow(QDialog):
         self.image = None
         self.createUI()
         self.createResponse()
-        qss = self.readQssFile(r"Graphical Interface\customCropWindow.qss")
+        qss = self.readQssFile(r"static\customCropWindow.qss")
         if qss != "":
             self.setStyleSheet(qss)
-        return
         return
     
     def setWidthHeightOptions(self):
