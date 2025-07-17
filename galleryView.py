@@ -1,26 +1,30 @@
 # important libraries
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QFrame, QScrollArea
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QFrame, QScrollArea,
+                             QTableWidget, QTableWidgetItem, QSizePolicy)
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
 from PyQt5.QtGui import QPixmap, QFont
-from fileWindow import FileWindow
 from icecream import ic
 import os
+
+# custom Import
+from fileWindow import FileWindow
+import Constants
 
 class GalleryWindow(QWidget):
     def __init__(self)-> None:
         super().__init__()
-        self.setGeometry(0,0,600,400)
         self.galleryMasterLayout = QHBoxLayout(self)
         self.galleryWindowProperty()
-        self.loadGalleryUI()
-        qss = self.windowView.readQssFile(r"Graphical Interface\galleryQss.qss")
-        if(qss != ""):
+        qss = self.windowView.readQssFile(r"static/galleryQss.qss")
+        if qss != "":
             self.setStyleSheet(qss)
+        self.loadGalleryUI()
         return
     
     def galleryWindowProperty(self):
         self.windowView = FileWindow()
-        self.imageToShow = ""
+        self.dimention = [self.height(), self.height()]
+        self.imageToShow : str = ""
         self.labelList = []
         self.imagePaths = []
         self.currentImageObjectIndex = -1 # helps to shoe all the image in the directory one by one
@@ -37,10 +41,11 @@ class GalleryWindow(QWidget):
         return
 
     def loadGalleryUI(self):
+        self.createGalleryLabels()
         self.createGalleryLayout()
         self.createGalleryFrames()
+        self.createTableWidget()
         self.createScrollAreaWidgets()
-        self.createGalleryLabels()
         self.constructGalleryInterface()
         return
 
@@ -48,12 +53,16 @@ class GalleryWindow(QWidget):
         # layouts to show the Selected image
         self.galleryImageView = QVBoxLayout()
         self.galleryInnerImageView = QVBoxLayout()
+
         # control panel righ side
         self.galleryControlpanel = QVBoxLayout()
+
         # layout to list other images
         self.gridView = QVBoxLayout()
         self.innerGridView = QVBoxLayout()
-        self.imageGrid = QGridLayout()
+        self.gridScrollHolder = QVBoxLayout()
+        self.imageTableGridHolder = QGridLayout()
+
         # shows the information about the image
         self.imageInformation = QVBoxLayout()
         self.imageInnerInformation = QVBoxLayout()
@@ -61,33 +70,35 @@ class GalleryWindow(QWidget):
 
     def createGalleryFrames(self):
         self.galleryImageViewFrame = QFrame()
-        self.galleryImageViewFrame.setFrameShape(QFrame.Shape.Panel)
+        self.galleryImageViewFrame.setFrameShape(QFrame.NoFrame)
+        self.galleryImageViewFrame.setStyleSheet("border: none;")
 
         self.grid_label_frame = QFrame()
         self.grid_label_frame.setFrameShape(QFrame.Shape.Panel)
-        self.grid_label_frame.setFixedSize(250, 400)
 
         self.imageGridFrame = QFrame()
         self.imageGridFrame.setFrameShape(QFrame.Shape.Panel)
 
+        self.imageGridInnerFrame = QFrame()
+        self.imageGridInnerFrame.setFrameShape(QFrame.NoFrame)
+        self.imageGridInnerFrame.setStyleSheet("border: none;")
+
         self.imageInformationFrame = QFrame()
-        self.imageInformationFrame.setFrameShape(QFrame.Shape.Panel)
+        self.imageInformationFrame.setFrameShape(QFrame.NoFrame)
+        self.imageInformationFrame.setStyleSheet("border: none;")
         return
     
     def createScrollAreaWidgets(self):
         self.imageInformationScrollArea = QScrollArea()
         self.imageInformationScrollArea.setWidgetResizable(True)
-        self.imageInformationScrollArea.setFixedSize(250, 200)
         self.imageInformationScrollArea.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.imageGridScrollArea = QScrollArea()
         self.imageGridScrollArea.setWidgetResizable(True)
-        self.imageGridScrollArea.setFixedSize(225, 330)
         self.imageGridScrollArea.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.imageViewScrollArea = QScrollArea()
         self.imageViewScrollArea.setWidgetResizable(True)
-        self.imageViewScrollArea.setFixedSize(1050,600)
         return
 
     def createGalleryLabels(self):
@@ -97,7 +108,10 @@ class GalleryWindow(QWidget):
         self.galleryImageLabel.setFont(self.comicSansFont)
 
         self.gridViewLabel = QLabel("Other Images")
-        self.gridViewLabel.setFixedSize(220,40)
+        self.gridViewLabel.setFixedSize(
+            int(self.dimention[0]  * Constants.GRID_PANEL_WIDTH_PERCENTAGE),
+            Constants.GRID_VIEW_LABEL_HEIGHT
+        )
         self.gridViewLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.gridViewLabel.setFont(self.comicSansFont)
         self.labelList.append(self.gridViewLabel)
@@ -106,8 +120,17 @@ class GalleryWindow(QWidget):
         self.imageInformationLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.imageInformationLabel.setFont(self.comicSansFont)
         return
-    
-    def constructGalleryInterface(self):
+
+    def createTableWidget(self) -> None:
+        self.imageGrid = QTableWidget()
+        self.imageGrid.setRowCount(0)
+        self.imageGrid.setColumnCount(4)
+        self.imageGrid.verticalHeader().setVisible(False)
+        self.imageGrid.horizontalHeader().setVisible(False)
+        for i in range(4):
+            self.imageGrid.setColumnWidth(i, 80)
+        return
+    def constructGalleryInterface(self) -> None:
         # adding in master layout
         self.galleryMasterLayout.addLayout(self.galleryImageView,80)
         self.galleryMasterLayout.addLayout(self.galleryControlpanel,20)
@@ -117,31 +140,51 @@ class GalleryWindow(QWidget):
         self.imageViewScrollArea.setWidget(self.galleryImageViewFrame)
         self.galleryImageViewFrame.setLayout(self.galleryInnerImageView)
 
-        # adding in gallery control pannel layout
+        # adding in gallery control panel layout
         self.galleryControlpanel.addLayout(self.gridView, 60)
         self.galleryControlpanel.addLayout(self.imageInformation, 40)
 
         self.gridView.addWidget(self.grid_label_frame)
         self.grid_label_frame.setLayout(self.innerGridView)
-        self.innerGridView.addWidget(self.gridViewLabel, alignment = Qt.AlignmentFlag.AlignCenter)
-        self.innerGridView.addWidget(self.imageGridScrollArea, alignment = Qt.AlignmentFlag.AlignCenter)
-        self.imageGridScrollArea.setWidget(self.imageGridFrame)
-        self.imageGridFrame.setLayout(self.imageGrid)
-        # self.imageGridFrame.setLayout()
+        self.innerGridView.addWidget(self.gridViewLabel, 10, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.innerGridView.addLayout(self.gridScrollHolder, 90)
+        self.gridScrollHolder.addWidget(self.imageGridScrollArea, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.imageGridScrollArea.setWidget(self.imageGridInnerFrame)
+        self.imageGridInnerFrame.setLayout(self.imageTableGridHolder)
+        self.imageTableGridHolder.addWidget(self.imageGrid)
 
         self.imageInformation.addWidget(self.imageInformationScrollArea)
         self.imageInformationScrollArea.setWidget(self.imageInformationFrame)
         self.imageInformationFrame.setLayout(self.imageInnerInformation)
 
         self.galleryInnerImageView.addWidget(self.galleryImageLabel, alignment = Qt.AlignmentFlag.AlignCenter)
-        # self.imageGrid.addWidget(self.gridViewLabel, 0, 0, alignment = Qt.AlignmentFlag.AlignCenter)
         self.imageInnerInformation.addWidget(self.imageInformationLabel, alignment= Qt.AlignmentFlag.AlignCenter)
         return
-    
+
+    ############################################# INTERFACING ##########################################
+    def resizeEvent(self, a0):
+        currWidth, currHeight = self.width(), self.height()
+        self.gridViewLabel.setFixedWidth(int(currWidth * Constants.GRID_PANEL_WIDTH_PERCENTAGE))
+
+        self.imageGridScrollArea.setFixedSize(
+            int(currWidth * Constants.GRID_PANEL_WIDTH_PERCENTAGE),
+            int(currHeight * Constants.GRID_PANEL_HEIGHT_PERCENTAGE) - 60
+        )
+
+        self.imageGridInnerFrame.resize(
+            int(currWidth * Constants.GRID_PANEL_WIDTH_PERCENTAGE),
+            int(currHeight * Constants.GRID_PANEL_HEIGHT_PERCENTAGE)
+        )
+        super().resizeEvent(a0)
+        return
+
     def openImageInGallery(self):
         if self.imageToShow != "":
             qImageObject = QPixmap(self.imageToShow)
-            qImageObject = qImageObject.scaled(self.imageNormalSize[0], self.imageNormalSize[1], aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
+            qImageObject = qImageObject.scaled(
+                int(self.imageNormalSize[0]), int(self.imageNormalSize[1]),
+                aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio
+            )
             self.galleryImageLabel.hide()
             self.galleryImageLabel.setFixedSize(qImageObject.width(), qImageObject.height())
             self.galleryImageLabel.setPixmap(qImageObject)
@@ -158,17 +201,8 @@ class GalleryWindow(QWidget):
     def emptyImageGrid(self) -> str:
         if len(self.imageLabelList) != 0:
             try:
-                for i in range(self.imageGrid.count()):
-                    currentItem = self.imageGrid.takeAt(0)
-                    widgetInItem = currentItem.widget()
-                    if isinstance(widgetInItem, QWidget):
-                        widgetInItem.deleteLater()
+                self.imageGrid.setRowCount(0)
                 self.imageGrid.update()
-                # otherImagesLabel = QLabel("Other Images")
-                # otherImagesLabel.setFixedSize(100,40)
-                # otherImagesLabel.setFont(self.comicSansFont)
-                # otherImagesLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                # self.imageGrid.addWidget(otherImagesLabel, 0, 0)
                 return "Succeed"
             except RuntimeError as runTimeError:
                 return f"{runTimeError} -> Unable to empty the Image View"
@@ -184,7 +218,7 @@ class GalleryWindow(QWidget):
                 for imagePath in self.imagePaths:
                     label = ClickableLabel(imagePath)
                     pixmap = QPixmap(imagePath)
-                    pixmap = pixmap.scaled(50,50)
+                    pixmap = pixmap.scaled(80,80)
                     label.setPixmap(pixmap)
                     label.signalGenerator.mouseCLickSignal.connect(self.openImageFromGrid)
                     self.imageLabelList.append(label)
@@ -212,16 +246,18 @@ class GalleryWindow(QWidget):
         else:
             self.emptyImageGrid()
         i, j = 0, 0
+        self.imageGrid.setRowCount((int(len(self.imageLabelList)/4)) + 1)
         for image in self.imageLabelList:
             if j == 4:
                 j = 0
                 i += 1
-            self.imageGrid.addWidget(image, i, j)
+            self.imageGrid.setRowHeight(i, 80)
+            self.imageGrid.setCellWidget(i, j, image)
             j += 1
         return False
     
     def closeImageFromGallery(self):
-        if self.imageToShow != None:
+        if self.imageToShow is not None:
             self.galleryImageLabel.hide()
             self.imageInformationLabel.hide()
 
@@ -232,7 +268,8 @@ class GalleryWindow(QWidget):
             self.galleryImageLabel.show()
             self.imageInformationLabel.show()
             return "Closed Successfully"
-    
+        return None
+
     # shows the next image Object to the screeen
     def showNextImage(self, imageFileList:list):
         if len(imageFileList) == 0 :
@@ -270,7 +307,7 @@ class ClickableLabel(QLabel):
     def __init__(self, text = ""):
         super().__init__()
         self.signalGenerator = AccessCommunication()
-        self.setFixedSize(55,55)
+        self.setFixedSize(80,80)
         self.text = text
         return
     
