@@ -15,7 +15,7 @@ class GalleryWindow(QWidget):
         super().__init__()
         self.galleryMasterLayout = QHBoxLayout(self)
         self.galleryWindowProperty()
-        qss = self.windowView.readQssFile(r"static/galleryQss.qss")
+        qss = self.windowView.readQssFile(Constants.GALLERY_UI_STYLE_FILE)
         if qss != "":
             self.setStyleSheet(qss)
         self.loadGalleryUI()
