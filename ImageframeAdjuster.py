@@ -1,6 +1,6 @@
-#this file is built to manupulate the different aspects of an image. The core idea is to make differnt image processing customise for user
+#this file is built to manipulate the different aspects of an image. The core idea is to make differnt image processing customise for user
 
-#used librarries
+#used libraries
 from PIL import Image, ImageOps, ImageFilter
 
 #classes
@@ -88,52 +88,53 @@ class FrameAdjustment:
         return (reducedWidth,reducedHeight)
     
     #3:4  convention
-    def __get3isto4(self)->tuple:
+    def __get3isto4(self)->tuple[int, int]:
+        actualWidth, actualHeight = 0, 0
         if self.width != 0 and self.height != 0:
             actualWidth , actualHeight = self.width, self.height
-        if ((actualWidth/3)>(actualHeight/4)):
+        if (actualWidth / 3)>(actualHeight / 4):
             reducedWidth,reducedHeight = ((actualWidth-(3*(actualHeight/4)))/2),0
         elif (actualWidth/3)<(actualHeight/4):
             reducedWidth,reducedHeight = 0,((actualHeight-(4*(actualWidth/3)))/2)
         else:
             reducedWidth,reducedHeight = 0,0
-        return (reducedWidth,reducedHeight)
+
+        output = (reducedWidth,reducedHeight)
+        return output
     
     # resize the image
-    def sendCropDimention(self, choice : int)->None:
+    def sendCropDimension(self, choice : int)-> tuple[int, int, int, int]:
+        width, height, width_reduction, height_reduction = 0, 0, 0, 0
         if self.width != 0 and self.height != 0:
             width , height = self.width, self.height
         #for 1 : 1 convention
         if choice == 2:
             _size1isto1 = self.__get1isto1()
             width_reduction,height_reduction = _size1isto1
-            return (width_reduction,height_reduction,width-width_reduction,height - height_reduction)
 
         #for 4 : 3 convention
         elif choice == 3:
             _size4isto3 = self.__get4isto3()
             width_reduction,height_reduction = _size4isto3
-            return (width_reduction,height_reduction,width-width_reduction,height - height_reduction)
             
         # for 3 : 4 convention
         elif choice == 4:
             _size3isto4 = self.__get3isto4()
             width_reduction,height_reduction = _size3isto4
-            return (width_reduction,height_reduction,width-width_reduction,height - height_reduction)
 
-        #for 16:9 convension
+        #for 16:9 convention
         elif choice == 5:
             _size16isto9 = self.__get16isto9()
             width_reduction, height_reduction = _size16isto9
-            return (width_reduction,height_reduction,width-width_reduction,height - height_reduction)
-
             
         #for 9 : 16 convention
         elif choice == 6:
             _size9isto16 = self.__get9isto16()
             width_reduction, height_reduction = _size9isto16
-            return (width_reduction,height_reduction,width-width_reduction,height - height_reduction)
-    
+
+        output = (width_reduction,height_reduction, width - width_reduction, height - height_reduction)
+        return output
+
     def cropImage(self, cropParameter:list):
         if cropParameter[2] <= self.width and cropParameter[3] <= self.height:
             image = self.image
@@ -193,7 +194,8 @@ class FrameAdjustment:
         return self.image
 
     #rotate an image
-    def imageRotate(self, rotationSignal : int = None, rotationAngle : int = None) -> None:
+    def imageRotate(self, rotationSignal : int = None, rotationAngle : int = None)\
+            -> Image.Image|str|None:
         image = self.image
         angleVal = 0
         if rotationSignal:
