@@ -1,9 +1,8 @@
 # important Libraries
 from PyQt5.QtGui import QMouseEvent, QPixmap, QImage, QPainter
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QAction, QShortcut, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider, QRubberBand
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,QFrame, QTreeWidget, QTreeWidgetItem, QScrollArea, QLabel, QColorDialog, QSlider, QRubberBand
 from PyQt5.QtCore import Qt, QTimer, QPoint, QRect, QSize
 from PyQt5.QtGui import QColor, QFont
-from threading import Thread
 from icecream import ic
 from PIL import Image
 import sys, os
@@ -11,8 +10,8 @@ import sys, os
 # adding current path to the system
 sys.path.append(os.getcwd())
 from fileWindow import FileWindow
-from ImageManupulation.ImageframeAdjuster import FrameAdjustment
-from ImageManupulation.deformer import ImageDeformer
+from ImageframeAdjuster import FrameAdjustment
+from deformer import ImageDeformer
 from ImageManupulation.imageColorEnhancer import ColorImage
 from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.maskGenerator import Masks

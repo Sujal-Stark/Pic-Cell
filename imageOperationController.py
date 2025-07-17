@@ -1,9 +1,9 @@
 import sys, os
 sys.path.append(os.getcwd())
-from ImageManupulation.ImageframeAdjuster import FrameAdjustment
+from ImageframeAdjuster import FrameAdjustment
 from ImageManupulation.imageFiltering import FilterImage
 from ImageManupulation.imageColorEnhancer import ColorImage
-from ImageManupulation.deformer import ImageDeformer
+from deformer import ImageDeformer
 from ImageManupulation.maskGenerator import Masks
 from textEditor import TextEditorAssembly
 from icecream import ic
