@@ -29,7 +29,7 @@ class EditingActionManager(QWidget):
         self.loadUi()
         self.addResponse()
         self.performImageOperation()
-        qss = self.filewinowForSave.readQssFile(r"static\editManager.qss")
+        qss = self.filewinowForSave.readQssFile(Constants.EDIT_MANAGER_UI_STYLE_FILE)
         if qss != "":
             self.setStyleSheet(qss)
         return
