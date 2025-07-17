@@ -23,7 +23,7 @@ QFrame:hover {
 QScrollBar:vertical {
         border: none;
         background: #020f17;
-        width: 10px;
+        width: 0px;
         margin: 10px 0 10px 0;
 }
 QScrollBar:horizontal {
