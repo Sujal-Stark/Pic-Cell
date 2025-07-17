@@ -1,8 +1,8 @@
 ###################################### Application Related Constants ##########################################
 APPLICATION_NAME = "Pic-Cell"
 SPLASH_SCREEN_TIME = 2000
-ICON_PATH = "./static/Icon_Pic_Cell.ico"
-SPLASH_SCREEN_PATH = "./static/Splash_Screen_PicCell.png"
+ICON_PATH = "Resources/static/Icon_Pic_Cell.ico"
+SPLASH_SCREEN_PATH = "Resources/static/Splash_Screen_PicCell.png"
 
 
 
@@ -18,6 +18,7 @@ GRID_PANEL_HEIGHT_PERCENTAGE = 0.6
 GRID_VIEW_LABEL_HEIGHT = 40
 INF_PANEL_WIDTH_PERCENTAGE = 20
 INFO_PANEL_HEIGHT_PERCENTAGE = 40
+GALLERY_UI_STYLE_FILE = "Resources/Style/galleryQss.qss"
 
 ############################################## EDIT MANAGER ###############################################
 EDIT_OPTION_ADJUST = "Adjust"
@@ -33,3 +34,7 @@ EDIT_SPECTRUM_WIDTH_PERCENTAGE = 0.2
 EDIT_SPECTRUM_HEIGHT_PERCENTAGE = 0.4
 ADVANCEMENT_PANEL_WIDTH_PERCENTAGE = 0.2
 ADVANCEMENT_PANEL_HEIGHT_PERCENTAGE = 0.3
+EDIT_MANAGER_UI_STYLE_FILE = "Resources/Style/editManager.qss"
+
+######################################## CUSTOM CROP WINDOW #################################################
+CUSTOM_CROP_WINDOW_UI_STYLE_FILE = "Resources/Style/customCropWindow.qss"
