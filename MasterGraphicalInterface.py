@@ -1,21 +1,21 @@
 # libraries
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
-QPushButton, QLabel, QFrame, QMenuBar, QMenu, QAction, QShortcut)
+QLabel, QFrame, QMenuBar, QMenu, QAction, QShortcut)
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont, QIcon
+import os
+
+# Custom Import
 from galleryView import GalleryWindow
 from fileWindow import FileWindow
 from editManager import EditingActionManager
-from PyQt5.QtGui import QFont, QIcon
 import Constants
-from icecream import ic
-import os
 
 class MasterWindow(QMainWindow):
     def __init__(self)-> None:
         super().__init__()
-        
         self.setWindowTitle(Constants.APPLICATION_NAME)
-        self.setGeometry(0,0,800,600)
+        self.setMinimumSize(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT)
         self.mainWidget = QWidget()
         self.setCentralWidget(self.mainWidget)
         self.masterLayout = QVBoxLayout(self.mainWidget)
@@ -44,13 +44,13 @@ class MasterWindow(QMainWindow):
         return
     
     def eventManager(self):
-        self.newFileWindow.fileOpenButton.clicked.connect(self.openImageFromMainWindow)
-        self.openFile.triggered.connect(self.createSeondWindow)
+        self.newFileWindow.fileSelectedSignal.connect(self.openImageFromMainWindow)
+        self.openFile.triggered.connect(self.createSecondWindow)
         self.closeFile.triggered.connect(self.closeImageObject)
         self.loadOtherImages.triggered.connect(self.connectImageGridWithFiles)
         self.saveImage.triggered.connect(self.tab2.saveImageInMachine)
 
-        self.newFileWindow.fileListWidget.currentItemChanged.connect(self.newFileWindow.fileAccess)
+        # self.newFileWindow.fileListWidget.currentItemChanged.connect(self.newFileWindow.fileAccess)
         self.pressKeyToNextImage.activated.connect(self.openNextImageInGallery)
         self.pressKeyToPreviousImage.activated.connect(self.openPreviousImageInGallery)
         self.tab1.signalGenerator.imageReadySignal.connect(self.showGridObjects)
@@ -212,7 +212,6 @@ class MasterWindow(QMainWindow):
     
     def createTabs(self):
         self.tabScreen = QTabWidget()
-
         self.tab1 = GalleryWindow()
         self.tab2 = EditingActionManager()
 
@@ -232,15 +231,12 @@ class MasterWindow(QMainWindow):
         self.innerFooter.addWidget(self.methodInfo, alignment = Qt.AlignmentFlag.AlignCenter)
         return
     
-    def createSeondWindow(self):
+    def createSecondWindow(self):
         if self.tabScreen.currentIndex() == 0:
-            self.newFileWindow.setFixedSize(400,300)
-            self.newFileWindow.removeImageHolderLayout()
-            self.newFileWindow.show()
+            self.newFileWindow.firstAction()
         elif self.tabScreen.currentIndex() == 1:
-            self.newFileWindow.setFixedSize(600,300)
-            self.newFileWindow.addImageHolderLayout()
-            self.newFileWindow.show()
+            # self.newFileWindow.addImageHolderLayout()
+            self.newFileWindow.firstAction()
         return
     
     def openImageFromMainWindow(self):
@@ -257,14 +253,14 @@ class MasterWindow(QMainWindow):
         self.methodInfo.setText(self.outputInfo)
 
     def connectImageGridWithFiles(self):
-        self.tab1.imagePaths = self.newFileWindow.iamgeObjectListPath
+        self.tab1.imagePaths = self.newFileWindow.imageObjectListPath
         self.tab1.currentDirectory = self.newFileWindow.currentPathName
         self.tab1.loadImageToGrid()
         self.tab1.currentDirectory = self.newFileWindow.currentPathName
         return
     
     def showGridObjects(self):
-            if self.tab1.gridBusy == False:
+            if not self.tab1.gridBusy:
                 self.methodInfo.setText("Loading... Please Wait")
                 self.tab1.gridBusy = self.tab1.addImagesToGrid()
                 self.methodInfo.setText("Loaded Successfully")
@@ -273,7 +269,7 @@ class MasterWindow(QMainWindow):
             return
 
     def openGalleryImage(self):
-        self.tab1.imageToShow = self.newFileWindow.iamgeObjectPath
+        self.tab1.imageToShow = self.newFileWindow.imageObjectPath
         if self.tab1.imageToShow != "":
             self.tab1.openImageInGallery()
             self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
@@ -283,7 +279,7 @@ class MasterWindow(QMainWindow):
     def openNextImageInGallery(self):
         if self.tabScreen.currentIndex() == 0:
             self.tab1.imageNormalSize = self.tab1.originalSize
-            self.methodInfo.setText(self.tab1.showNextImage(self.newFileWindow.iamgeObjectListPath))
+            self.methodInfo.setText(self.tab1.showNextImage(self.newFileWindow.imageObjectListPath))
             self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
         elif self.tabScreen.currentIndex() == 1:
             self.methodInfo.setText("Can't Open next image in edit mode")
@@ -292,7 +288,7 @@ class MasterWindow(QMainWindow):
     def openPreviousImageInGallery(self):
         if self.tabScreen.currentIndex() == 0:
             self.tab1.imageNormalSize = self.tab1.originalSize
-            self.methodInfo.setText(self.tab1.showPreviousImage(self.newFileWindow.iamgeObjectListPath))
+            self.methodInfo.setText(self.tab1.showPreviousImage(self.newFileWindow.imageObjectListPath))
             self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
         elif self.tabScreen.currentIndex() == 1:
             self.methodInfo.setText("Can't open previous Image in edit mode")
@@ -320,12 +316,14 @@ class MasterWindow(QMainWindow):
         return
     
     def openEditSectionImage(self):
-        self.tab2.imageToEdit = self.newFileWindow.iamgeObjectPath
-        self.newFileWindow.previewHolderLabel.hide()
-        self.newFileWindow.previewHolderLabel.setText("Preview")
-        self.newFileWindow.previewHolderLabel.show()
-        self.methodInfo.setText(self.tab2.openImageInEditSection())
-        self.newFileWindow.close()
+        self.tab2.imageToEdit = self.newFileWindow.imageObjectPath
+        if self.tab2.imageToEdit != "":
+            self.methodInfo.setText(self.tab2.openImageInEditSection())
+
+        # self.newFileWindow.previewHolderLabel.hide()
+        # self.newFileWindow.previewHolderLabel.setText("Preview")
+        # self.newFileWindow.previewHolderLabel.show()
+        # self.newFileWindow.close()
         return
     
     def addStyledSheet(self):
