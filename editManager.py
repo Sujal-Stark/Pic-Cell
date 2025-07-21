@@ -29,7 +29,7 @@ class EditingActionManager(QWidget):
         self.loadUi()
         self.addResponse()
         self.performImageOperation()
-        qss = self.filewinowForSave.readQssFile(Constants.EDIT_MANAGER_UI_STYLE_FILE)
+        qss = self.readQssFile(Constants.EDIT_MANAGER_UI_STYLE_FILE)
         if qss != "":
             self.setStyleSheet(qss)
         return
@@ -51,7 +51,7 @@ class EditingActionManager(QWidget):
         self.editingTreeBody.itemClicked.connect(self.treeBodyItemclicked)
         self.chooseColorButton.clicked.connect(self.createColorPicker)
         self.setEdit.clicked.connect(self.keepEdit)
-        self.filewinowForSave.fileSaveButton.clicked.connect(self.saveImage)
+        #self.filewinowForSave.fileSaveButton.clicked.connect(self.saveImage)
         self.timeHolder.timeout.connect(self.showOriginal)
         self.viewOriginal.pressed.connect(self.buttonPressedAction)
         self.viewOriginal.released.connect(self.buttonRealeaseAction)
@@ -70,7 +70,7 @@ class EditingActionManager(QWidget):
         self.valuePackage = {} # stores the edit option in edit spectrum and advancement Layout
         self.imageObject : QPixmap = None # Qpixmap object that is used everywhere
         self.ORIGINALIMAGEOBJECT = None # Qpixmap object that holds the original image
-        self.IMAGETOSAVE = None # does real time edit on final image
+        self.IMAGE_TO_SAVE = None # does real time edit on final image
         self.newImageObject : QPixmap = None # shows unsaved edits
         self.operationManager = OperationFramework() # framework that connects edit option with GUI
         self.savingRequired = ["Rotate", "Horizontal Flip", "Vertical Flip"] # edit which needs to save automatically
@@ -250,6 +250,13 @@ class EditingActionManager(QWidget):
         AdvancementOptionLabel.setStyleSheet(self.imageForEditLabel.styleSheet())
         self.sliderHolderLayout.addWidget(AdvancementOptionLabel,alignment=Qt.AlignmentFlag.AlignCenter)
         return
+
+    def readQssFile(self, qssFile):
+        try:
+            with open(qssFile, 'r') as file:
+                return file.read()
+        except Exception:
+            return ""
 
     ########################################### INTERFACING #############################################
     def resizeEvent(self, a0):
@@ -474,23 +481,25 @@ class EditingActionManager(QWidget):
         self.imageForEditLabel.setPixmap(imageObject)
         self.imageForEditLabel.show()
     
-    def openImageInEditSection(self):
+    def openImageInEditSection(self) -> str:
         if self.imageToEdit != "":
-            self.imageSize = self.ORIGINALSIZE
+            self.imageSize = self.ORIGINALSIZE # open image with expected original size
             self.imageObject = QPixmap(self.imageToEdit)
-            self.IMAGETOSAVE = Image.open(self.imageToEdit)
-            self.operationManager.ORIGINALIMAGE = self.IMAGETOSAVE
+
+            self.IMAGE_TO_SAVE = Image.open(self.imageToEdit)
+            self.operationManager.ORIGINAL_IMAGE = self.IMAGE_TO_SAVE
             self.imageForEditLabel.hide()
-            self.imageObject = self.imageObject.scaled(self.imageSize[0], self.imageSize[1], aspectRatioMode = Qt.AspectRatioMode.KeepAspectRatio)
+            self.imageObject = self.imageObject.scaled(
+                self.imageSize[0], self.imageSize[1], aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio
+            )
             self.ORIGINALIMAGEOBJECT = self.imageObject
-            self.pixmapConnector.createPixmapHead(self.imageObject, self.IMAGETOSAVE)
+            self.pixmapConnector.createPixmapHead(self.imageObject, self.IMAGE_TO_SAVE)
             self.firstCallFlag = True
             self.imageForEditLabel.setFixedSize(self.imageObject.width(), self.imageObject.height())
             self.imageForEditLabel.setPixmap(self.imageObject)
             self.imageForEditLabel.show()
-            return "Opened Successfully"
-        else:
-            return "Error occurred"
+            return Constants.IMAGE_OPENED_MESSAGE
+        else: return "Error occurred"
     
     def closeImageInEditSection(self):
         if self.imageToEdit != "":
@@ -515,29 +524,32 @@ class EditingActionManager(QWidget):
 
     def handleConfirmActionForTextEditHandler(self):
         self.showPixmap(
-            self.overLayPixmapObjects(basePixmap = self.imageObject, overLayPixmap = self.convertImagetoPixMap(self.textEditHandler.getOutput()))
+            self.overLayPixmapObjects(
+                basePixmap=self.imageObject,
+                overLayPixmap=self.convertImagetoPixMap(self.textEditHandler.getOutput())
+            )
         )
         self.textEditHandler.close()
         return
 
     def saveImageInMachine(self):
-        self.filewinowForSave.saveFileByNmae()
+        self.filewinowForSave.saveFileByName()
+        self.saveImage()
         return
     
-    def saveImage(self):
-        '''takes input like user selected name and extension and saves it in the machine in the chosen directory'''
-        fileName = self.filewinowForSave.ImageFileNameEditor.text() # new file name set by user
-        extension = self.filewinowForSave.fileExtensionListWidget.currentText() # user chosen extension
-        directory = self.filewinowForSave.currentPathName # routed path to store the image
+    def saveImage(self) -> None:
+        """
+            takes input like user selected name and extension and saves it in the machine in the chosen directory
+        """
+        fileName = self.filewinowForSave.imageSavePath # new file name set by user
+        directory = self.filewinowForSave.currentSavingPathName # routed path to store the image
+        photo_name = fileName.split("/")[-1]
         if directory:
-            if fileName+extension in os.listdir(directory): # if the name name and extension exist before
-                fullPath = os.path.join(directory, (fileName + "_EDITED_" + extension))
-            else:
-                fullPath = os.path.join(directory, (fileName+extension))
-            if self.IMAGETOSAVE: # fina check if the image is not null
-                self.IMAGETOSAVE.convert('RGB').save(fullPath) # image is stores as RGB
-                self.IMAGETOSAVE = None
-                self.filewinowForSave.close() # closing the window
+            # checks if the file exists with same name before or not
+            fullPath = Constants.EDITED_TAG + fileName if photo_name in os.listdir(directory) else fileName
+            if self.IMAGE_TO_SAVE: # fina check if image object is not null
+                self.IMAGE_TO_SAVE.convert('RGB').save(fullPath) # image is stored as RGB
+                self.IMAGE_TO_SAVE = None
         return
     
     def convertPixMaptoImage(self, imageObjectEditable : QPixmap) -> Image.Image:
@@ -548,12 +560,14 @@ class EditingActionManager(QWidget):
                 qImage = qImage.convertToFormat(QImage.Format.Format_RGBA8888)
                 width, height = qImage.width(), qImage.height()
                 imageData = qImage.constBits().asstring(width * height * 4)
-                return Image.frombytes("RGBA", (width, height), imageData, "raw", "RGBA", 0, 1)
+                return Image.frombytes(
+                    "RGBA", (width, height), imageData, "raw", "RGBA", 0, 1
+                )
             except Exception:
                 return None
         return None
     
-    def convertImagetoPixMap(self, pilImage : Image.Image) -> str:
+    def convertImagetoPixMap(self, pilImage : Image.Image) -> str | QPixmap:
         try:
             if pilImage:
                 data = pilImage.convert("RGBA").tobytes("raw", "RGBA")
@@ -571,7 +585,7 @@ class EditingActionManager(QWidget):
         backGround.drawPixmap(0, 0, overLayPixmap)
         return resultPixmap
     
-    # fucntion to create reisizeImage with custom inputs
+    # function to create resizeImage with custom inputs
     def getCustomResized(self):
         if self.imageObject:
             self.customResizeWindow.getImageObject(self.convertPixMaptoImage(self.imageObject))
@@ -580,7 +594,7 @@ class EditingActionManager(QWidget):
 
     # shows the pixmap through showPixmap method after getting resized from rezise window    
     def showPixmapFromResizeWindow(self) -> None:
-        '''Get's a pil image from customResizeWindow and shows after converting it into Pixmap'''
+        """Gets a pil image from customResizeWindow and shows after converting it into Pixmap"""
         if self.imageObject:
             editedPILImage = self.customResizeWindow.continueAction()
             if isinstance(editedPILImage, Image.Image):
@@ -632,7 +646,7 @@ class EditingActionManager(QWidget):
 
             if self.editingTreeBody.currentItem().parent().text(0) == "Frames":
                 self.newImageObject = self.overLayPixmapObjects(self.imageObject, self.newImageObject)
-            elif (self.editingTreeBody.currentItem().text(0) in self.savingRequired):
+            elif self.editingTreeBody.currentItem().text(0) in self.savingRequired:
                 if self.editingTreeBody.currentItem().text(0) != "Rotate" or sender.objectName() != "Custom_Rotation":
                     self.imageObject = self.newImageObject
             self.showPixmap(self.newImageObject)
@@ -671,10 +685,10 @@ class EditingActionManager(QWidget):
         return
     
     def undoOperation(self):
-        if self.imageObject == None:
-            '''Perform Undo Operation and iterate through previously edited version'''
-            return # rundo operation can't be done if no image is selected in edit
-        if self.linker == None: # no Image is set by keepEdit method
+        """Perform Undo Operation and iterate through previously edited version"""
+        if self.imageObject is None:
+            return # undo operation can't be done if no image is selected in edit
+        if self.linker is None: # no Image is set by keepEdit method
             # copies the real pixmap connectors pixmapHead with the linker
             if self.pixmapConnector.pixmapHead and self.firstCallFlag: # works if pixMapHead Exists and operating undo
                 if self.pixmapConnector.pixmapHead:
@@ -683,21 +697,21 @@ class EditingActionManager(QWidget):
                         self.linker = self.linker.nextNode
                         self.imageObject = self.linker.image
                         self.newImageObject = self.linker.image
-                        self.IMAGETOSAVE = self.linker.PILImage
-                        if self.IMAGETOSAVE:
-                            self.IMAGETOSAVE.show()
+                        self.IMAGE_TO_SAVE = self.linker.PILImage
+                        if self.IMAGE_TO_SAVE:
+                            self.IMAGE_TO_SAVE.show()
                         else:
-                            ic(self.IMAGETOSAVE)
+                            ic(self.IMAGE_TO_SAVE)
                     self.showPixmap(self.linker.image)
                     self.firstCallFlag = False
         else:
             if self.linker.nextNode:
                 if self.linker.image:
-                    ic("Nextnode")
+                    ic("Next node")
                     self.linker = self.linker.nextNode
                     self.imageObject = self.linker.image
                     self.newImageObject = self.linker.image
-                    self.IMAGETOSAVE = self.linker.PILImage
+                    self.IMAGE_TO_SAVE = self.linker.PILImage
                     # if self.IMAGETOSAVE:
                     #         self.IMAGETOSAVE.show()
                     # else:
@@ -714,7 +728,7 @@ class EditingActionManager(QWidget):
             if self.linker.previousNode: # works till the last node at oposite direction
                 self.linker : Node = self.linker.previousNode
                 self.imageObject = self.linker.image
-                self.IMAGETOSAVE = self.linker.PILImage
+                self.IMAGE_TO_SAVE = self.linker.PILImage
                 # if(self.IMAGETOSAVE):
                 #     self.IMAGETOSAVE.show()
                 # else:
@@ -733,13 +747,13 @@ class EditingActionManager(QWidget):
                 self.showPixmap(self.newImageObject)
             self.storeMeta()
             ic(self.finalEditMeta)
-            self.IMAGETOSAVE = self.operationManager.editfromParsedData(self.finalEditMeta)
+            self.IMAGE_TO_SAVE = self.operationManager.editfromParsedData(self.finalEditMeta)
             # self.IMAGETOSAVE.show()
             self.imageObject = self.newImageObject
             if self.linker: # saves the copy of current edit in linkedlist
                 self.linker = self.pixmapConnector.addPixmap(self.linker, self.imageObject)
             else:
-                self.pixmapConnector.pixmapHead = self.pixmapConnector.addPixmap(self.pixmapConnector.pixmapHead, self.imageObject, self.IMAGETOSAVE)
+                self.pixmapConnector.pixmapHead = self.pixmapConnector.addPixmap(self.pixmapConnector.pixmapHead, self.imageObject, self.IMAGE_TO_SAVE)
             self.signalValue = None
             self.multivalueOperation = False
             self.colorVal = None

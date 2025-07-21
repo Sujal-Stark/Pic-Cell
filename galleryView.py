@@ -15,9 +15,8 @@ class GalleryWindow(QWidget):
         super().__init__()
         self.galleryMasterLayout = QHBoxLayout(self)
         self.galleryWindowProperty()
-        qss = self.windowView.readQssFile(Constants.GALLERY_UI_STYLE_FILE)
-        if qss != "":
-            self.setStyleSheet(qss)
+        qss = self.readQssFile(Constants.GALLERY_UI_STYLE_FILE)
+        if qss != "": self.setStyleSheet(qss)
         self.loadGalleryUI()
         return
     
@@ -161,6 +160,13 @@ class GalleryWindow(QWidget):
         self.imageInnerInformation.addWidget(self.imageInformationLabel, alignment= Qt.AlignmentFlag.AlignCenter)
         return
 
+    def readQssFile(self, qssFile):
+        try:
+            with open(qssFile, 'r') as file:
+                return file.read()
+        except (PermissionError, FileNotFoundError, MemoryError, InterruptedError):
+            return ""
+
     ############################################# INTERFACING ##########################################
     def resizeEvent(self, a0):
         currWidth, currHeight = self.width(), self.height()
@@ -178,7 +184,7 @@ class GalleryWindow(QWidget):
         super().resizeEvent(a0)
         return
 
-    def openImageInGallery(self):
+    def openImageInGallery(self) -> str | None:
         if self.imageToShow != "":
             qImageObject = QPixmap(self.imageToShow)
             qImageObject = qImageObject.scaled(
@@ -189,8 +195,8 @@ class GalleryWindow(QWidget):
             self.galleryImageLabel.setFixedSize(qImageObject.width(), qImageObject.height())
             self.galleryImageLabel.setPixmap(qImageObject)
             self.galleryImageLabel.show()
-        else:
-            return
+            return Constants.IMAGE_OPENED_MESSAGE
+        else: return None
     
     def openImageFromGrid(self, imagePathFromGrid:str):
         self.imageToShow = os.path.join(self.currentDirectory,imagePathFromGrid)
