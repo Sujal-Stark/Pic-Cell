@@ -34,8 +34,8 @@ class GalleryWindow(QWidget):
         self.imageLabelList = []
         self.imageNormalSize = (1050,600)
         self.originalSize = (1050, 600)
-        self.comicSansFontLarger = QFont("Comic Sans MS", 16)
-        self.comicSansFont = QFont("Comic Sans MS", 12)
+        self.comicSansFontLarger = QFont(Constants.FONT_COMIC_SANS_MS, 16)
+        self.comicSansFont = QFont(Constants.FONT_COMIC_SANS_MS, 12)
         self.gridBusy = False # stops multiple times over loading of grid 
         return
 
