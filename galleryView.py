@@ -1,16 +1,23 @@
 # important libraries
+from operator import truediv
+
+from PIL.ImageChops import constant
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QFrame, QScrollArea,
                              QTableWidget, QTableWidgetItem, QSizePolicy)
-from PyQt5.QtCore import Qt, pyqtSignal, QObject
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot
 from PyQt5.QtGui import QPixmap, QFont
 from icecream import ic
 import os
 
 # custom Import
 from fileWindow import FileWindow
+from ImageFileLoaderClass import ImageFileLoader
 import Constants
 
 class GalleryWindow(QWidget):
+    # Threads
+    imageClassLoaderThread : ImageFileLoader =  None # populate the image grid
+
     def __init__(self)-> None:
         super().__init__()
         self.galleryMasterLayout = QHBoxLayout(self)
@@ -24,14 +31,11 @@ class GalleryWindow(QWidget):
         self.windowView = FileWindow()
         self.dimention = [self.height(), self.height()]
         self.imageToShow : str = ""
-        self.labelList = []
         self.imagePaths = []
         self.currentImageObjectIndex = -1 # helps to shoe all the image in the directory one by one
         self.currentDirectory = ""
         self.bufferDirectory = ""
-        self.isGridEmpty = True
-        self.signalGenerator = AccessCommunication()
-        self.imageLabelList = []
+        self.signalGenerator = AccessCommunication() # contains all pyqtSignal
         self.imageNormalSize = (1050,600)
         self.originalSize = (1050, 600)
         self.comicSansFontLarger = QFont(Constants.FONT_COMIC_SANS_MS, 16)
@@ -53,7 +57,7 @@ class GalleryWindow(QWidget):
         self.galleryImageView = QVBoxLayout()
         self.galleryInnerImageView = QVBoxLayout()
 
-        # control panel righ side
+        # control panel right side
         self.galleryControlpanel = QVBoxLayout()
 
         # layout to list other images
@@ -113,7 +117,6 @@ class GalleryWindow(QWidget):
         )
         self.gridViewLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.gridViewLabel.setFont(self.comicSansFont)
-        self.labelList.append(self.gridViewLabel)
 
         self.imageInformationLabel = QLabel("Picture Information")
         self.imageInformationLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -184,6 +187,12 @@ class GalleryWindow(QWidget):
         super().resizeEvent(a0)
         return
 
+    def setGridBusy(self) -> None:
+        # when ImageFileLoader Thread completes it's action this method is called to set
+        # gridBusy Status to be true
+        self.gridBusy = True # so that no element can occupy the grid
+        return
+
     def openImageInGallery(self) -> str | None:
         if self.imageToShow != "":
             qImageObject = QPixmap(self.imageToShow)
@@ -198,72 +207,84 @@ class GalleryWindow(QWidget):
             return Constants.IMAGE_OPENED_MESSAGE
         else: return None
     
-    def openImageFromGrid(self, imagePathFromGrid:str):
-        self.imageToShow = os.path.join(self.currentDirectory,imagePathFromGrid)
+    def openImageFromGrid(self, imagePathFromGrid:str) -> None:
+        """
+            :param imagePathFromGrid: take the absolute path of the image Given and call
+            openImageGallery() method to open that image in Application
+            :return: -> None
+        """
+        self.imageToShow = imagePathFromGrid
         self.imageNormalSize = self.originalSize
         self.openImageInGallery()
         return
     
     def emptyImageGrid(self) -> str:
-        if len(self.imageLabelList) != 0:
+        """
+            Clear all the table item if there is any, and set the gridBusy Parameter to be True
+            :return: String as operation output
+        """
+        if len(self.imagePaths) != 0:
             try:
-                self.imageGrid.setRowCount(0)
-                self.imageGrid.update()
+                self.imageGrid.setRowCount(0) # grid become empty
+                self.imageGrid.update() # update the change
+                self.gridBusy = False # to Ensure next time images can load
                 return "Succeed"
-            except RuntimeError as runTimeError:
-                return f"{runTimeError} -> Unable to empty the Image View"
-        else:
-            return "Grid is already Empty"
-    
-    def createImageLabel(self):
-        if len(self.imagePaths) == 0:
-            return
-        else:
-            try:
-                self.imageLabelList.clear()
-                for imagePath in self.imagePaths:
-                    label = ClickableLabel(imagePath)
-                    pixmap = QPixmap(imagePath)
-                    pixmap = pixmap.scaled(80,80)
-                    label.setPixmap(pixmap)
-                    label.signalGenerator.mouseCLickSignal.connect(self.openImageFromGrid)
-                    self.imageLabelList.append(label)
-                return
-            except IndexError:
-                return 
-    
-    def loadImageToGrid(self):
-        if self.isGridEmpty:
-            self.createImageLabel()
-            if len(self.imageLabelList) == 0:
-                return "No Image to show"
-            else:
-                self.isGridEmpty = False
-                self.signalGenerator.imageReadySignal.emit()
-            return "Succeed"
-        else:
-            self.isGridEmpty = True
-            return self.emptyImageGrid()
+            except RuntimeError: return "Unable to empty the Image View"
+        else: return "Grid is Empty"
 
-    def addImagesToGrid(self):
-        self.gridBusy = True
-        if self.isGridEmpty:
-            self.createImageLabel()
-        else:
-            self.emptyImageGrid()
-        i, j = 0, 0
-        self.imageGrid.setRowCount((int(len(self.imageLabelList)/4)) + 1)
-        for image in self.imageLabelList:
-            if j == 4:
-                j = 0
-                i += 1
-            self.imageGrid.setRowHeight(i, 80)
-            self.imageGrid.setCellWidget(i, j, image)
-            j += 1
-        return False
+    def createImageLabel(self) -> None:
+        """
+            Starts a Thread to load images in the Grid and set row cound
+            :return: None
+        """
+        if len(self.imagePaths) > 0:
+            try:
+                self.imageGrid.setRowCount((len(self.imagePaths) // 4) + 1) # analyze required Rows
+                self.imageClassLoaderThread = ImageFileLoader(imagePaths=self.imagePaths)
+
+                # signal Connection
+                self.imageClassLoaderThread.imageObjectReady.connect(self.addImagesToGrid)
+                self.imageClassLoaderThread.operationDone.connect(self.setGridBusy)
+                self.imageClassLoaderThread.start() # starting Thread
+                return None
+            except (OSError, RuntimeError, AttributeError): return None
+        else: return None
+
+    # call from MasterGraphicalInterface
+    def loadImageToGrid(self) -> None:
+        """
+            Either populate the ImageGrid or Empty the ImageGrid
+            :return: None
+        """
+        if self.gridBusy: self.emptyImageGrid() # empty
+        else: self.createImageLabel() # populate
+        return None
+
+
+    def addImagesToGrid(self, row : int, col: int, path : str) -> None:
+        """
+            Takes parameter from Thread Signal and populate the Grid with image and Coordinates
+            :param row: Position in Row
+            :param col: Position in column
+            :param path: The absolute Image path
+            :return: None
+        """
+        try:
+            label = ClickableLabel(path)
+            label.setPixmap(
+                QPixmap(path).scaled(Constants.GRID_IMAGE_WIDTH, Constants.GRID_IMAGE_WIDTH)
+            )
+            self.imageGrid.setRowHeight(row, Constants.GRID_IMAGE_WIDTH)
+            self.imageGrid.setCellWidget(row, col, label)
+            self.imageGrid.update()
+            label.show()
+            label.signalGenerator.mouseCLickSignal.connect(self.openImageFromGrid)
+        except (OSError, TypeError, AttributeError, ValueError, FileNotFoundError): print("Error Occurred")
+        return
     
     def closeImageFromGallery(self):
         if self.imageToShow is not None:
+            self.emptyImageGrid() # if grid image is present, empty it
             self.galleryImageLabel.hide()
             self.imageInformationLabel.hide()
 
@@ -276,7 +297,7 @@ class GalleryWindow(QWidget):
             return "Closed Successfully"
         return None
 
-    # shows the next image Object to the screeen
+    # shows the next image Object to the screen
     def showNextImage(self, imageFileList:list):
         if len(imageFileList) == 0 :
             return "No Image in directory"
@@ -292,7 +313,7 @@ class GalleryWindow(QWidget):
             except ValueError:
                 return "Unable to open This Image"
 
-    # shows the previous image Object to the screeen
+    # shows the previous image Object to the screen
     def showPreviousImage(self, imageFileList:list):
         if self.currentImageObjectIndex == 0:
             return "First Image"
@@ -309,24 +330,25 @@ class GalleryWindow(QWidget):
                 return "Unable to open This Image"
     pass
 
+class AccessCommunication(QObject):
+    mouseCLickSignal = pyqtSignal(str)
+    pass
+
+
 class ClickableLabel(QLabel):
-    def __init__(self, text = ""):
+    def __init__(self, text=""):
         super().__init__()
         self.signalGenerator = AccessCommunication()
-        self.setFixedSize(80,80)
+        self.setFixedSize(80, 80)
         self.text = text
         return
-    
+
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
         if event.button() == Qt.MouseButton.LeftButton:
             self.signalGenerator.mouseCLickSignal.emit(self.text)
         return
-    pass
 
-class AccessCommunication(QObject):
-    imageReadySignal = pyqtSignal()
-    mouseCLickSignal = pyqtSignal(str)
     pass
 
 if __name__ == '__main__':
