@@ -252,14 +252,16 @@ class MasterWindow(QMainWindow):
         self.methodInfo.setText(self.outputInfo)
 
     def connectImageGridWithFiles(self):
-        self.tab1.imagePaths = self.newFileWindow.imageObjectListPath
-        self.tab1.currentDirectory = self.newFileWindow.currentPathName
-        self.tab1.loadImageToGrid()
-        self.tab1.currentDirectory = self.newFileWindow.currentPathName
+        if self.tabScreen.currentIndex() == 0:
+            self.tab1.currentDirectory = self.newFileWindow.currentPathName
+            self.tab1.loadImageToGrid()
+            self.tab1.currentDirectory = self.newFileWindow.currentPathName
         return
 
     def openGalleryImage(self):
+        self.tab1.imagePaths = self.newFileWindow.imageObjectListPath
         self.tab1.imageToShow = self.newFileWindow.imageObjectPath
+        self.tab1.image_Count = len(self.tab1.imagePaths)
         if self.tab1.imageToShow != "":
             self.tab1.openImageInGallery()
             self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
@@ -269,7 +271,7 @@ class MasterWindow(QMainWindow):
     def openNextImageInGallery(self):
         if self.tabScreen.currentIndex() == 0:
             self.tab1.imageNormalSize = self.tab1.originalSize
-            self.methodInfo.setText(self.tab1.showNextImage(self.newFileWindow.imageObjectListPath))
+            self.methodInfo.setText(self.tab1.showNextImage())
             self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
         elif self.tabScreen.currentIndex() == 1:
             self.methodInfo.setText("Can't Open next image in edit mode")
@@ -278,7 +280,7 @@ class MasterWindow(QMainWindow):
     def openPreviousImageInGallery(self):
         if self.tabScreen.currentIndex() == 0:
             self.tab1.imageNormalSize = self.tab1.originalSize
-            self.methodInfo.setText(self.tab1.showPreviousImage(self.newFileWindow.imageObjectListPath))
+            self.methodInfo.setText(self.tab1.showPreviousImage())
             self.tab1.imageInformationLabel.setText(self.newFileWindow.createImageInformation(self.tab1.imageToShow))
         elif self.tabScreen.currentIndex() == 1:
             self.methodInfo.setText("Can't open previous Image in edit mode")
