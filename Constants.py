@@ -7,6 +7,14 @@ SPLASH_SCREEN_PATH = "Resources/static/Splash_Screen_PicCell.png"
 
 ########################################### COMMON ####################################################
 IMAGE_OPENED_MESSAGE = "Opened Successfully"
+RGBA = "RGBA"
+RGB = "RGB"
+
+KEY_PARENT = "parent"
+KEY_CHILD = "child"
+KEY_SIGNAL_VALUE = "signalValue"
+KEY_COLOR = "color"
+KEY_MULTIVALUE = "multivalue"
 
 ########################################## MASTER GRAPHICAL INTERFACE ####################################
 WINDOW_WIDTH = 800
@@ -25,6 +33,7 @@ GRID_VIEW_LABEL_HEIGHT = 40
 INF_PANEL_WIDTH_PERCENTAGE = 20
 INFO_PANEL_HEIGHT_PERCENTAGE = 40
 GALLERY_UI_STYLE_FILE = "Resources/Style/galleryQss.qss"
+GRID_IMAGE_WIDTH = 80
 
 ############################################## EDIT MANAGER ###############################################
 EDIT_OPTION_ADJUST = "Adjust"
