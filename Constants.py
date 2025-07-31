@@ -15,6 +15,8 @@ KEY_CHILD = "child"
 KEY_SIGNAL_VALUE = "signalValue"
 KEY_COLOR = "color"
 KEY_MULTIVALUE = "multivalue"
+MESSAGE_SUCCESS = "Succeed"
+MESSAGE_FAILURE = "Failed"
 
 ########################################## MASTER GRAPHICAL INTERFACE ####################################
 WINDOW_WIDTH = 800
@@ -34,6 +36,7 @@ INF_PANEL_WIDTH_PERCENTAGE = 20
 INFO_PANEL_HEIGHT_PERCENTAGE = 40
 GALLERY_UI_STYLE_FILE = "Resources/Style/galleryQss.qss"
 GRID_IMAGE_WIDTH = 80
+NO_IMAGE_OPEN_CODE = -2
 
 ############################################## EDIT MANAGER ###############################################
 EDIT_OPTION_ADJUST = "Adjust"

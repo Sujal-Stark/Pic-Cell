@@ -3,7 +3,7 @@ from operator import truediv
 
 from PIL.ImageChops import constant
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QFrame, QScrollArea,
-                             QTableWidget, QTableWidgetItem, QSizePolicy)
+QTableWidget, QTableWidgetItem, QSizePolicy)
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot
 from PyQt5.QtGui import QPixmap, QFont
 from icecream import ic
@@ -17,6 +17,8 @@ import Constants
 class GalleryWindow(QWidget):
     # Threads
     imageClassLoaderThread : ImageFileLoader =  None # populate the image grid
+    imageIndex : int = Constants.NO_IMAGE_OPEN_CODE # identifies which imagePath is chosen currently
+    image_Count : int = 0 # holds how many images are in the folder
 
     def __init__(self)-> None:
         super().__init__()
@@ -223,7 +225,7 @@ class GalleryWindow(QWidget):
             Clear all the table item if there is any, and set the gridBusy Parameter to be True
             :return: String as operation output
         """
-        if len(self.imagePaths) != 0:
+        if self.image_Count != 0:
             try:
                 self.imageGrid.setRowCount(0) # grid become empty
                 self.imageGrid.update() # update the change
@@ -237,9 +239,9 @@ class GalleryWindow(QWidget):
             Starts a Thread to load images in the Grid and set row cound
             :return: None
         """
-        if len(self.imagePaths) > 0:
+        if self.image_Count > 0:
             try:
-                self.imageGrid.setRowCount((len(self.imagePaths) // 4) + 1) # analyze required Rows
+                self.imageGrid.setRowCount((self.image_Count // 4) + 1) # analyze required Rows
                 self.imageClassLoaderThread = ImageFileLoader(imagePaths=self.imagePaths)
 
                 # signal Connection
@@ -283,10 +285,14 @@ class GalleryWindow(QWidget):
         return
     
     def closeImageFromGallery(self):
+        """
+            Closes the Image from View panel and also remove image information and empty the grid
+        """
         if self.imageToShow is not None:
             self.emptyImageGrid() # if grid image is present, empty it
             self.galleryImageLabel.hide()
             self.imageInformationLabel.hide()
+            self.imageIndex = Constants.NO_IMAGE_OPEN_CODE # to set ImageIndex -2
 
             self.galleryImageLabel.setFixedSize(200,40)
             self.galleryImageLabel.setText("Your Image will show up here")
@@ -298,36 +304,50 @@ class GalleryWindow(QWidget):
         return None
 
     # shows the next image Object to the screen
-    def showNextImage(self, imageFileList:list):
-        if len(imageFileList) == 0 :
-            return "No Image in directory"
-        elif self.currentImageObjectIndex == (len(imageFileList)-1):
-            return "Last image"
-        else:
-            try:
-                self.currentImageObjectIndex = imageFileList.index(self.imageToShow.split("\\")[-1])
-                self.currentImageObjectIndex += 1
-                self.imageToShow = imageFileList[self.currentImageObjectIndex]
-                self.openImageInGallery()
-                return "Succeed"
-            except ValueError:
-                return "Unable to open This Image"
+    def showNextImage(self):
+        """
+            Show next image in folder
+        """
+        try:
+            if self.image_Count > 0: # if image exists in the folder
+                # find out the index of the current image
+                if self.imageIndex == Constants.NO_IMAGE_OPEN_CODE: # ind == -2
+                    for ind in range(self.image_Count):
+                        if self.imagePaths[ind] == self.imageToShow:
+                            self.imageIndex = ind
+                            break
+                    if self.imageIndex < self.image_Count - 1: self.imageIndex += 1
+                # iterate over next image
+                if 0 <= self.imageIndex or self.imageIndex < self.image_Count:
+                    self.imageToShow = self.imagePaths[self.imageIndex]
+                    self.openImageInGallery()
+                    if self.imageIndex < self.image_Count - 1: self.imageIndex += 1
+                    return Constants.MESSAGE_SUCCESS
+        except (IndexError, FileNotFoundError, MemoryError): return Constants.MESSAGE_FAILURE
+        return None
 
     # shows the previous image Object to the screen
-    def showPreviousImage(self, imageFileList:list):
-        if self.currentImageObjectIndex == 0:
-            return "First Image"
-        elif len(imageFileList) == 0:
-            return "No Image in directory"
-        else:
-            try:
-                self.currentImageObjectIndex = imageFileList.index(self.imageToShow.split("\\")[-1])
-                self.currentImageObjectIndex -= 1
-                self.imageToShow = imageFileList[self.currentImageObjectIndex]
-                self.openImageInGallery()
-                return "Succeed"
-            except ValueError:
-                return "Unable to open This Image"
+    def showPreviousImage(self):
+        """
+            Show previous image in folder
+        """
+        try:
+            if self.image_Count > 0:# if image exists in the folder
+                # find out the index of the current image
+                if self.imageIndex == Constants.NO_IMAGE_OPEN_CODE: # ind == -2
+                    for ind in range(self.image_Count):
+                        if self.imagePaths[ind] == self.imageToShow:
+                            self.imageIndex = ind
+                            break
+                    if self.imageIndex > 0: self.imageIndex -= 1
+                # iterate over previous image
+                if 0 <= self.imageIndex or self.imageIndex < self.image_Count:
+                    self.imageToShow = self.imagePaths[self.imageIndex]
+                    self.openImageInGallery()
+                    if self.imageIndex > 0: self.imageIndex -= 1
+                    return Constants.MESSAGE_SUCCESS
+        except (IndexError, FileNotFoundError, MemoryError): return Constants.MESSAGE_FAILURE
+        return None
     pass
 
 class AccessCommunication(QObject):

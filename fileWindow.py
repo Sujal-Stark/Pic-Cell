@@ -29,8 +29,12 @@ class FileWindow(QDialog):
         )
         self.currentPathName = os.path.dirname(self.imageObjectPath)
         if self.currentPathName:
-            self.imageObjectListPath = list(map(lambda path: os.path.join(self.currentPathName, path), os.listdir(
-                self.currentPathName)))
+            self.imageObjectListPath = list(
+                map(
+                    lambda path: os.path.join(self.currentPathName, path).replace("\\", "/"),
+                    os.listdir(self.currentPathName)
+                )
+            )
         self.fileSelectedSignal.emit()
         return
 
