@@ -53,7 +53,6 @@ class MasterWindow(QMainWindow):
         # self.newFileWindow.fileListWidget.currentItemChanged.connect(self.newFileWindow.fileAccess)
         self.pressKeyToNextImage.activated.connect(self.openNextImageInGallery)
         self.pressKeyToPreviousImage.activated.connect(self.openPreviousImageInGallery)
-        self.tab1.signalGenerator.imageReadySignal.connect(self.showGridObjects)
         self.zoomInOption.triggered.connect(self.scaleUPImage)
         self.zoomOutOption.triggered.connect(self.scaleDownImage)
         self.OriginalSize.triggered.connect(self.originalScale)
@@ -258,15 +257,6 @@ class MasterWindow(QMainWindow):
         self.tab1.loadImageToGrid()
         self.tab1.currentDirectory = self.newFileWindow.currentPathName
         return
-    
-    def showGridObjects(self):
-            if not self.tab1.gridBusy:
-                self.methodInfo.setText("Loading... Please Wait")
-                self.tab1.gridBusy = self.tab1.addImagesToGrid()
-                self.methodInfo.setText("Loaded Successfully")
-            else:
-                self.methodInfo.setText("Grid is busy")
-            return
 
     def openGalleryImage(self):
         self.tab1.imageToShow = self.newFileWindow.imageObjectPath
